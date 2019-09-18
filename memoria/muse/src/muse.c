@@ -1,13 +1,3 @@
-/*
- ============================================================================
- Name        : muse.c
- Author      : 
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include "muse.h"
@@ -24,32 +14,33 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
+#include <libreriaComun/libreriaComun.h>
 
 int main(void) {
 	tam_mem = 1000;
 	init_estructuras();
 
-	//aver creamo un segmento xd
-	segmento* seg = malloc(sizeof(segmento));
-	seg->compartido = 0;
-	seg->mmapeado = 0;
-	seg->nombre = string_new();
-	string_append(&seg->nombre,"segmento 1");
-	t_list* paginas = list_create();
-	pagina* pag = malloc(sizeof(pagina));
-	pag->modificado = 0;
-	pag->num_pag = 0;
-	pag->presencia = 1;
-	pag->tamanio_en_uso = 0;
-	pag->pedacito_de_memoria = upcm;
-	list_add(paginas,pag);
-	t_list* heap = list_create();
-	heap_metadata* heap_m = malloc(sizeof(heap_metadata));
-	heap_m->isFree = true;
-	heap_m->size = 100;
-	list_add(heap,heap_m);
-	seg->heap_metadatas = heap;
-	seg->paginas = paginas;
+	//	//aver creamo un segmento xd
+//	segmento* seg = malloc(sizeof(segmento));
+//	seg->compartido = 0;
+//	seg->mmapeado = 0;
+//	seg->nombre = string_new();
+//	string_append(&seg->nombre,"segmento 1");
+//	t_list* paginas = list_create();
+//	pagina* pag = malloc(sizeof(pagina));
+//	pag->modificado = 0;
+//	pag->num_pag = 0;
+//	pag->presencia = 1;
+//	pag->tamanio_en_uso = 0;
+//	pag->pedacito_de_memoria = upcm;
+//	list_add(paginas,pag);
+//	t_list* heap = list_create();
+//	heap_metadata* heap_m = malloc(sizeof(heap_metadata));
+//	heap_m->isFree = true;
+//	heap_m->size = 100;
+//	list_add(heap,heap_m);
+//	seg->heap_metadatas = heap;
+//	seg->paginas = paginas;
 
 	free_final();
 	return EXIT_SUCCESS;
