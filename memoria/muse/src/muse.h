@@ -23,7 +23,8 @@
 #include <stdbool.h>
 
 //VARIABLES GLOBALES
-void* malloc_gigante;
+uint32_t tam_mem;
+void* upcm;
 t_list* tabla_de_segmentos;
 
 
@@ -46,7 +47,7 @@ typedef struct{
 
 typedef struct{
 	uint32_t num_pag;
-	uint32_t tamaño_en_uso;
+	uint32_t tamanio_en_uso;
 	_Bool presencia;
 	_Bool modificado;
 	void* pedacito_de_memoria;
@@ -54,6 +55,8 @@ typedef struct{
 
 
 //FUNCIONES
-
+void init_estructuras();
+void muse_alloc(uint32_t tamanio);
+void free_final();
 
 #endif /* MUSE_H_ */
