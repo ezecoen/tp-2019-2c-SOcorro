@@ -103,5 +103,6 @@ int muse_sync(uint32_t addr, size_t len);
 int muse_unmap(uint32_t dir);
 
 void pruebita();
+int socket_muse;
 
 #endif

@@ -1,0 +1,23 @@
+0: Muse Init
+	char* id
+1: Muse Alloc
+	int tamaño
+2: Muse Free
+	int dir
+3: Muse Get
+	int dir
+	int cant
+4: Muse Cpy
+	int dir
+	int cant
+	void* paquete
+5: Muse Map
+	char *path
+	int cant
+	int flags
+6: Muse Sync
+	int dir
+	int cant
+7: Muse Unmap
+	int dir
+	

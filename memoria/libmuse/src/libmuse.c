@@ -1,4 +1,9 @@
 #include "libmuse.h"
+#include <stdio.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <syscall.h>
+
 /**
  * Inicializa la biblioteca de MUSE.
  * @param id El Process (o Thread) ID para identificar el caller en MUSE.
@@ -9,25 +14,41 @@
  * @note Debido a la naturaleza centralizada de MUSE, esta función deberá definir
  *  el ID del proceso/hilo según "IP-ID".
  */
-int muse_init(int id, char* ip, int puerto);
+int muse_init(int id, char* ip, int puerto){
+	int sock = conectar_socket_a(ip,puerto);
+	if(sock == -1){
+		return -1;
+	}
+	socket_muse = sock;
+	//se manda un msje a muse con codigo 0 y el char* id
+	puts("Hola muse");
+	return 0;
+}
 
 /**
  * Cierra la biblioteca de MUSE.
  */
-void muse_close();
+void muse_close(){
+	close(socket_muse);
+	puts("Chau muse");
+}
 
 /**
  * Reserva una porción de memoria contígua de tamaño `tam`.
  * @param tam La cantidad de bytes a reservar.
  * @return La dirección de la memoria reservada.
  */
-uint32_t muse_alloc(uint32_t tam);
+uint32_t muse_alloc(uint32_t tam){
+	return 0;
+}
 
 /**
  * Libera una porción de memoria reservada.
  * @param dir La dirección de la memoria a reservar.
  */
-void muse_free(uint32_t dir);
+void muse_free(uint32_t dir){
+
+}
 
 /**
  * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
@@ -36,7 +57,9 @@ void muse_free(uint32_t dir);
  * @param n Cantidad de bytes a copiar.
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */
-int muse_get(void* dst, uint32_t src, size_t n);
+int muse_get(void* dst, uint32_t src, size_t n){
+	return 0;
+}
 
 /**
  * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
@@ -45,7 +68,9 @@ int muse_get(void* dst, uint32_t src, size_t n);
  * @param n Cantidad de bytes a copiar.
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */
-int muse_cpy(uint32_t dst, void* src, int n);
+int muse_cpy(uint32_t dst, void* src, int n){
+	return 0;
+}
 
 
 /**
@@ -59,7 +84,9 @@ int muse_cpy(uint32_t dst, void* src, int n);
  * @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
  * @note: muse_free no libera la memoria mappeada. @see muse_unmap
  */
-uint32_t muse_map(char *path, size_t length, int flags);
+uint32_t muse_map(char *path, size_t length, int flags){
+	return 0;
+}
 
 /**
  * Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
@@ -68,7 +95,9 @@ uint32_t muse_map(char *path, size_t length, int flags);
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  * @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
  */
-int muse_sync(uint32_t addr, size_t len);
+int muse_sync(uint32_t addr, size_t len){
+	return 0;
+}
 
 /**
  * Borra el mappeo a un archivo hecho por muse_map.
@@ -78,8 +107,26 @@ int muse_sync(uint32_t addr, size_t len);
  * @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */
-int muse_unmap(uint32_t dir);
+int muse_unmap(uint32_t dir){
+	return 0;
+}
 
 void pruebita(){
-	puts("pruebita uwu");
+	puts("\npruebita uwu\n");
+}
+
+
+uint32_t conectar_socket_a(char* ip, uint32_t puerto){
+	struct sockaddr_in direccionServidor;
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = inet_addr(ip);
+	direccionServidor.sin_port = htons(puerto);
+
+	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
+	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
+	{
+		printf("Error al conectar a ip %s y puerto %d",ip,puerto);
+		return -1;
+	}
+	return cliente;
 }
