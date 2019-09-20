@@ -21,6 +21,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
+#include <libreriaComun/libreriaComun.h>
 
 //VARIABLES GLOBALES
 uint32_t tam_mem;
@@ -53,6 +54,18 @@ typedef struct{
 	void* pedacito_de_memoria;
 }pagina;
 
+typedef enum{
+	MUSE_INIT=0,
+	MUSE_ALLOC=1,
+	MUSE_FREE=2,
+	MUSE_GET=3,
+	MUSE_CPY=4,
+	MUSE_MAP=5,
+	MUSE_SYNC=6,
+	MUSE_UNMAP=7,
+	MUSE_ERROR=8,
+	MUSE_EXITOSO=9
+}t_comando_muse;
 
 //FUNCIONES
 void init_estructuras();

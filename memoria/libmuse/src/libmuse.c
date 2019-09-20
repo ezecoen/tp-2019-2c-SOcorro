@@ -3,6 +3,7 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <syscall.h>
+#include <commons/string.h>
 
 /**
  * Inicializa la biblioteca de MUSE.
@@ -17,12 +18,15 @@
 int muse_init(int id, char* ip, int puerto){
 	int sock = conectar_socket_a(ip,puerto);
 	if(sock == -1){
+		puts("\nNada de muse\n");
 		return -1;
 	}
 	socket_muse = sock;
-	//se manda un msje a muse con codigo 0 y el char* id
-	puts("Hola muse");
-	return 0;
+	//hay que armar bien el muse_id
+	muse_id = string_itoa(id);
+	int iniciado = mandar_muse_init();
+
+	return iniciado;
 }
 
 /**
@@ -30,7 +34,7 @@ int muse_init(int id, char* ip, int puerto){
  */
 void muse_close(){
 	close(socket_muse);
-	puts("Chau muse");
+	puts("\nChau muse\n");
 }
 
 /**
@@ -115,7 +119,6 @@ void pruebita(){
 	puts("\npruebita uwu\n");
 }
 
-
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
@@ -129,4 +132,33 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 		return -1;
 	}
 	return cliente;
+}
+int mandar_muse_init(){
+	if(socket_muse>=0){
+		uint32_t tam = string_length(muse_id)+1;//+1 por \0
+		uint32_t com = MUSE_INIT;
+		uint32_t bytes = tam + sizeof(uint32_t)*2;
+		void* magic = malloc(bytes);
+		uint32_t puntero = 0;
+		memcpy(magic+puntero,&com,4);
+		puntero += 4;
+		memcpy(magic+puntero,&tam,4);
+		puntero += 4;
+		memcpy(magic+puntero,muse_id,tam);
+		puntero += tam;
+		int res = send(socket_muse,magic,bytes,0);
+		free(magic);
+		if(res<0){
+			puts("\nNada de muse\n");
+			return -1;
+		}
+		else{
+			puts("\nHola muse\n");
+			return 0;
+		}
+	}
+	else{
+		puts("\nNada de muse\n");
+		return -1;
+	}
 }

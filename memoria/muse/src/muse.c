@@ -14,7 +14,6 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
-#include <libreriaComun/libreriaComun.h>
 
 int main(void) {
 	tam_mem = 1000;

@@ -5,11 +5,13 @@
 #include <commons/log.h>
 #include <commons/string.h>
 #include "prueba.h"
+#include <unistd.h>
 
 int main(void) {
 	iniciar_log();
 	leer_config();
 	pruebita();
+	muse_init(getpid(),configuracion->ip_muse,configuracion->puerto_muse);
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola
