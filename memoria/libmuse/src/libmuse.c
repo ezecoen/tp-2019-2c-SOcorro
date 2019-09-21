@@ -22,10 +22,8 @@ int muse_init(int id, char* ip, int puerto){
 		return -1;
 	}
 	socket_muse = sock;
-	//hay que armar bien el muse_id
-	muse_id = string_itoa(id);
-	int iniciado = mandar_muse_init();
-
+	int iniciado = handshake_muse(id);
+	//falta cerrar el sock
 	return iniciado;
 }
 
@@ -133,26 +131,30 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	}
 	return cliente;
 }
-int mandar_muse_init(){
+int handshake_muse(int id){
 	if(socket_muse>=0){
-		uint32_t tam = string_length(muse_id)+1;//+1 por \0
 		uint32_t com = MUSE_INIT;
-		uint32_t bytes = tam + sizeof(uint32_t)*2;
+		uint32_t bytes = sizeof(uint32_t)*2;
 		void* magic = malloc(bytes);
 		uint32_t puntero = 0;
 		memcpy(magic+puntero,&com,4);
 		puntero += 4;
-		memcpy(magic+puntero,&tam,4);
+		memcpy(magic+puntero,&id,4);
 		puntero += 4;
-		memcpy(magic+puntero,muse_id,tam);
-		puntero += tam;
-		int res = send(socket_muse,magic,bytes,0);
+		int res = send(socket_muse,magic,bytes,0);//mandamos nuestro pid
 		free(magic);
 		if(res<0){
 			puts("\nNada de muse\n");
 			return -1;
 		}
-		else{
+		else{//recivimos nuestro char* muse_id
+			uint32_t tam;
+			recv(socket_muse,&com,4,0);
+			recv(socket_muse,&tam,4,0);
+			void* paquete = malloc(tam);
+			recv(socket_muse,paquete,tam,0);
+			memcpy(muse_id,paquete,tam);//guardo el muse_id
+			free(paquete);
 			puts("\nHola muse\n");
 			return 0;
 		}
@@ -162,3 +164,5 @@ int mandar_muse_init(){
 		return -1;
 	}
 }
+
+

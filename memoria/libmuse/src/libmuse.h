@@ -21,6 +21,7 @@ typedef enum t_comando_muse{
 //VARIABLES GLOBALES
 int socket_muse;
 char* muse_id;
+
 //FUNCIONES
 /**
 * Inicializa la biblioteca de MUSE.
@@ -105,5 +106,6 @@ int muse_unmap(uint32_t dir);
 
 void pruebita();
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
+int handshake_muse(int id);
 
 #endif
