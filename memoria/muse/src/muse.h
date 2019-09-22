@@ -22,12 +22,23 @@
 #include <semaphore.h>
 #include <stdbool.h>
 #include <libreriaComun/libreriaComun.h>
+#include <commons/config.h>
+#include <commons/log.h>
 
 //VARIABLES GLOBALES
 uint32_t tam_mem;
 void* upcm;
 t_list* tabla_de_segmentos;
 
+typedef struct{
+	uint32_t puerto;
+	uint32_t tam_mem;
+	uint32_t tam_pag;
+	uint32_t tam_swap;
+}s_config;
+s_config* configuracion;
+t_config* g_config;
+t_log* logg;
 
 //SEMAFOROS
 
@@ -63,13 +74,18 @@ typedef enum{
 	MUSE_MAP=5,
 	MUSE_SYNC=6,
 	MUSE_UNMAP=7,
-	MUSE_ERROR=8,
-	MUSE_EXITOSO=9
+	MUSE_CLOSE=8,
+	MUSE_ERROR=9,
+	MUSE_EXITOSO=10
 }t_comando_muse;
 
 //FUNCIONES
 void init_estructuras();
-void muse_alloc(uint32_t tamanio);
 void free_final();
+void iniciar_log();
+s_config* leer_config();
+void muse_alloc(uint32_t tamanio);
+void ocupate_de_esta(int socket);
+void esperar_conexion(uint32_t servidor);
 
 #endif /* MUSE_H_ */

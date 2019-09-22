@@ -5,7 +5,7 @@
 #include <stddef.h>
 
 //ESTRUCTURAS
-typedef enum t_comando_muse{
+typedef enum{
 	MUSE_INIT=0,
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
@@ -14,8 +14,9 @@ typedef enum t_comando_muse{
 	MUSE_MAP=5,
 	MUSE_SYNC=6,
 	MUSE_UNMAP=7,
-	MUSE_ERROR=8,
-	MUSE_EXITOSO=9
+	MUSE_CLOSE=8,
+	MUSE_ERROR=9,
+	MUSE_EXITOSO=10
 }t_comando_muse;
 
 //VARIABLES GLOBALES

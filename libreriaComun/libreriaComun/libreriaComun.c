@@ -8,9 +8,26 @@
 //	void* buffer = malloc(pack_size);
 //	recv(socket,buffer,pack_size,0);
 
-void mandar_char(char* _char, uint32_t _socket){
+uint32_t crear_servidor(uint32_t puerto){
+	/*== creamos el socket ==*/
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = INADDR_ANY;
+	direccionServidor.sin_port = htons(puerto);
+	servidor = socket(AF_INET,SOCK_STREAM,0);
+	/*== socket reusable multiples conexiones==*/
+	uint32_t flag = 1;
+	setsockopt(servidor, SOL_SOCKET,SO_REUSEPORT,&flag,sizeof(flag));
+	/*== inicializamos el socket ==*/
+	if(bind(servidor, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+		perror("Fallo el binde0 del servidor");
+		return 1;
+	}
+	printf("Estoy escuchando en el puerto %d\n",puerto);
+	listen(servidor,SOMAXCONN);
+	return servidor;
+}
+void mandar_char(char* _char, uint32_t _socket,uint32_t com){
 	uint32_t tam = char_length(_char);
-	uint32_t com = CHAR;
 	uint32_t bytes = tam + sizeof(uint32_t)*2;
 	void* magic = malloc(bytes);
 	uint32_t puntero = 0;
@@ -164,21 +181,4 @@ uint64_t timestamp(){
 	return a;
 }
 
-uint32_t crearServidor(uint32_t puerto){
-	/*== creamos el socket ==*/
-	direccionServidor.sin_family = AF_INET;
-	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port = htons(puerto);
-	servidor = socket(AF_INET,SOCK_STREAM,0);
-	/*== socket reusable multiples conexiones==*/
-	uint32_t flag = 1;
-	setsockopt(servidor, SOL_SOCKET,SO_REUSEPORT,&flag,sizeof(flag));
-	/*== inicializamos el socket ==*/
-	if(bind(servidor, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
-		perror("Fallo el binde0 del servidor");
-		return 1;
-	}
-	printf("Estoy escuchando en el puerto %d\n",puerto);
-	listen(servidor,SOMAXCONN);
-	return servidor;
-}
+

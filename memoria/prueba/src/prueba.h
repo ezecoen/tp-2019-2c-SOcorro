@@ -18,7 +18,6 @@ typedef struct{
 
 s_config* configuracion;
 t_config* g_config;
-char* path_de_config;
 t_log* logg;
 
 void iniciar_log();

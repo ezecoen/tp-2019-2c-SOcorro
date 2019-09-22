@@ -14,27 +14,27 @@
 	Muse->libMuse:
 		_Bool resultado
 3: Muse Get
-	libMuse->Muse:
+	libMuse->Muse: (*estructura*)
 		int direccion
 		int tamaño
 	Muse->libMuse:
 		void* resultado
 4: Muse Cpy
-	libMuse->Muse:
+	libMuse->Muse: (*estructura*)
 		int dir
 		int cant
 		void* paquete
 	Muse->libMuse:
 		Bool resultado
 5: Muse Map
-	libMuse->Muse:
+	libMuse->Muse: (*estructura*)
 		char* path
 		int cant
 		int flag
 	Muse->libMuse:
 		int direccion
 6: Muse Sync
-	libMuse->Muse:
+	libMuse->Muse: (*estructura*)
 		int direccion
 		int cant
 	Muse->libMuse:

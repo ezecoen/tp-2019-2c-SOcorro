@@ -22,7 +22,7 @@ int muse_init(int id, char* ip, int puerto){
 		return -1;
 	}
 	socket_muse = sock;
-	int iniciado = handshake_muse(id);
+	int iniciado = handshake_muse(id);//aca se setea muse_id
 	//falta cerrar el sock
 	return iniciado;
 }
@@ -145,6 +145,7 @@ int handshake_muse(int id){
 		free(magic);
 		if(res<0){
 			puts("\nNada de muse\n");
+			free(magic);
 			return -1;
 		}
 		else{//recivimos nuestro char* muse_id
@@ -156,6 +157,7 @@ int handshake_muse(int id){
 			memcpy(muse_id,paquete,tam);//guardo el muse_id
 			free(paquete);
 			puts("\nHola muse\n");
+			free(magic);
 			return 0;
 		}
 	}
