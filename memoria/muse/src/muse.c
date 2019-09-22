@@ -16,12 +16,12 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-int main(void) {
+int main(int argc, char **argv) {
 //	INICIANDO
-	tam_mem = 1000;
+	path_de_config = string_duplicate(argv[1]);
+	iniciar_log(path_de_config);
+	leer_config(path_de_config);
 	init_estructuras();
-	iniciar_log();
-	leer_config();
 
 //	//aver creamo un segmento xd
 //	segmento* seg = malloc(sizeof(segmento));
@@ -55,33 +55,35 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 void init_estructuras(){
-	upcm = malloc(tam_mem);
+	upcm = malloc(configuracion->tam_mem);
 	tabla_de_segmentos = list_create();
 }
 void free_final(){
 	free(upcm);
+	free(path_de_config);
 	//free tabla de segmentos
 }
-void iniciar_log(){//0 es archivo, 1 es consola
+void iniciar_log(char* path){//0 es archivo, 1 es consola
 	char* nombre = string_new();
-	string_append(&nombre,"muse.log");
-	logg = log_create(nombre,"muse",1,LOG_LEVEL_TRACE);
+	string_append(&nombre,path);
+	string_append(&nombre,".log");
+	logg = log_create(nombre,"muse",0,LOG_LEVEL_TRACE);
 	free(nombre);
 }
-s_config* leer_config(){
-	g_config = config_create("/home/utnso/tp-2019-2c-SOcorro/memoria/muse/Debug/muse.config");
-	s_config* configuracion = malloc(sizeof(s_config));
+s_config* leer_config(char* path){
+	g_config = config_create(path);
+	configuracion = malloc(sizeof(s_config));
 
 	configuracion->puerto = config_get_int_value(g_config,"LISTEN_PORT");
-	log_info(logg,"PUERTO_FS: %d",configuracion->puerto);
+	log_info(logg,"LISTEN_PORT: %d",configuracion->puerto);
 
 	configuracion->tam_mem = config_get_int_value(g_config,"MEMORY_SIZE");
 	log_info(logg,"MEMORY_SIZE: %d",configuracion->tam_mem);
 
-	configuracion->tam_pag = config_get_int_value(g_config,"PAGE_SIZE​");
+	configuracion->tam_pag = config_get_int_value(g_config,"PAGE_SIZE");
 	log_info(logg,"	PAGE_SIZE​: %d",configuracion->tam_pag);
 
-	configuracion->tam_swap = config_get_int_value(g_config,"SWAP_SIZE​");
+	configuracion->tam_swap = config_get_int_value(g_config,"SWAP_SIZE");
 	log_info(logg,"SWAP_SIZE​: %d",configuracion->tam_swap);
 
 	config_destroy(g_config);
@@ -96,6 +98,7 @@ void muse_alloc(uint32_t tamanio){
 void esperar_conexion(uint32_t servidor){
 	uint32_t socket = aceptar_cliente(servidor);
 	pthread_t cliente;
+	puts("creo hilo");
 	pthread_create(&cliente,NULL,(void*)ocupate_de_esta,(void*)socket);
 	pthread_detach(cliente);
 }
@@ -112,7 +115,8 @@ void ocupate_de_esta(int socket){
 			//hay q conseguir la ip de el cliente xd
 			char* id = string_new();
 			struct sockaddr_in addr;
-			getpeername(socket, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+			uint32_t addrlen = sizeof(addr);
+			getpeername(socket, (struct sockaddr *)&addr, &addrlen);
 			char* ip = inet_ntoa(addr.sin_addr);
 			string_append(&id,ip);
 			string_append(&id,"-");

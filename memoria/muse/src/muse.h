@@ -25,24 +25,6 @@
 #include <commons/config.h>
 #include <commons/log.h>
 
-//VARIABLES GLOBALES
-uint32_t tam_mem;
-void* upcm;
-t_list* tabla_de_segmentos;
-
-typedef struct{
-	uint32_t puerto;
-	uint32_t tam_mem;
-	uint32_t tam_pag;
-	uint32_t tam_swap;
-}s_config;
-s_config* configuracion;
-t_config* g_config;
-t_log* logg;
-
-//SEMAFOROS
-
-
 //ESTRUCTURAS
 typedef struct{
 	char* nombre;
@@ -65,6 +47,13 @@ typedef struct{
 	void* pedacito_de_memoria;
 }pagina;
 
+typedef struct{
+	uint32_t puerto;
+	uint32_t tam_mem;
+	uint32_t tam_pag;
+	uint32_t tam_swap;
+}s_config;
+
 typedef enum{
 	MUSE_INIT=0,
 	MUSE_ALLOC=1,
@@ -79,11 +68,23 @@ typedef enum{
 	MUSE_EXITOSO=10
 }t_comando_muse;
 
+//VARIABLES GLOBALES
+char* path_de_config;
+void* upcm;
+t_list* tabla_de_segmentos;
+
+s_config* configuracion;
+t_config* g_config;
+t_log* logg;
+
+//SEMAFOROS
+
+
 //FUNCIONES
 void init_estructuras();
 void free_final();
-void iniciar_log();
-s_config* leer_config();
+void iniciar_log(char* path);
+s_config* leer_config(char* path);
 void muse_alloc(uint32_t tamanio);
 void ocupate_de_esta(int socket);
 void esperar_conexion(uint32_t servidor);

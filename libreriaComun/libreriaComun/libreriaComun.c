@@ -170,7 +170,7 @@ uint32_t aceptar_cliente(uint32_t servidor){
 	uint32_t tamanio_direccion = sizeof(struct sockaddr_in);
 	uint32_t cliente;
 	cliente = accept(servidor,(void*) &direccion_cliente,&tamanio_direccion);
-//	log_info(logg,"conexion recibida de %d!!!!!!!!", cliente);
+	puts("conexion recibida!");
 	return cliente;
 }
 uint64_t timestamp(){

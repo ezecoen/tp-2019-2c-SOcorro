@@ -4,6 +4,9 @@
 #include <arpa/inet.h>
 #include <syscall.h>
 #include <commons/string.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 /**
  * Inicializa la biblioteca de MUSE.
@@ -16,12 +19,16 @@
  *  el ID del proceso/hilo según "IP-ID".
  */
 int muse_init(int id, char* ip, int puerto){
+	puts("muse_initeano");
 	int sock = conectar_socket_a(ip,puerto);
+	puts("conecta2");
 	if(sock == -1){
 		puts("\nNada de muse\n");
 		return -1;
 	}
+	puts("xd?");
 	socket_muse = sock;
+	printf("socket_muse: %d",socket_muse);
 	int iniciado = handshake_muse(id);//aca se setea muse_id
 	//falta cerrar el sock
 	return iniciado;
@@ -133,6 +140,7 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 }
 int handshake_muse(int id){
 	if(socket_muse>=0){
+		puts("creo magic");
 		uint32_t com = MUSE_INIT;
 		uint32_t bytes = sizeof(uint32_t)*2;
 		void* magic = malloc(bytes);
@@ -141,6 +149,7 @@ int handshake_muse(int id){
 		puntero += 4;
 		memcpy(magic+puntero,&id,4);
 		puntero += 4;
+		puts("hago send");
 		int res = send(socket_muse,magic,bytes,0);//mandamos nuestro pid
 		free(magic);
 		if(res<0){
@@ -149,6 +158,7 @@ int handshake_muse(int id){
 			return -1;
 		}
 		else{//recivimos nuestro char* muse_id
+			puts("empiezo a recibir");
 			uint32_t tam;
 			recv(socket_muse,&com,4,0);
 			recv(socket_muse,&tam,4,0);

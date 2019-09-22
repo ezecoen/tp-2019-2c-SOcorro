@@ -11,7 +11,9 @@ int main(void) {
 	iniciar_log();
 	leer_config();
 	pruebita();
-	muse_init(getpid(),configuracion->ip_muse,configuracion->puerto_muse);
+	int pid = (int)getpid();
+	printf("\npid: %d\n",pid);
+	muse_init(pid,configuracion->ip_muse,configuracion->puerto_muse);
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola
@@ -22,7 +24,7 @@ void iniciar_log(){//0 es archivo, 1 es consola
 }
 s_config* leer_config(){
 	g_config = config_create("/home/utnso/tp-2019-2c-SOcorro/memoria/prueba/Debug/prueba.config");
-	s_config* configuracion = malloc(sizeof(s_config));
+	configuracion = malloc(sizeof(s_config));
 
 	configuracion->ip_propia = string_duplicate(config_get_string_value(g_config,"IP_PROPIA"));
 	log_info(logg,"IP_PROPIA: %s",configuracion->ip_propia);
