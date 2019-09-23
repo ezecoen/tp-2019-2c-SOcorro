@@ -5,43 +5,55 @@
 		char* _id
 1: Muse Alloc
 	libMuse->Muse:
+		char* _id
 		int tamaño
 	Muse->libMuse:
 		int direccion
 2: Muse Free
 	libMuse->Muse:
+		char* _id
 		int direccion
 	Muse->libMuse:
 		_Bool resultado
 3: Muse Get
-	libMuse->Muse: (*estructura*)
+	libMuse->Muse:  
+		char* _id
 		int direccion
 		int tamaño
 	Muse->libMuse:
 		void* resultado
 4: Muse Cpy
-	libMuse->Muse: (*estructura*)
+	libMuse->Muse:  
+		char* _id
 		int dir
-		int cant
+		int tamaño
 		void* paquete
 	Muse->libMuse:
 		Bool resultado
 5: Muse Map
-	libMuse->Muse: (*estructura*)
+	libMuse->Muse:  
+		char* _id
 		char* path
 		int cant
 		int flag
 	Muse->libMuse:
 		int direccion
 6: Muse Sync
-	libMuse->Muse: (*estructura*)
+	libMuse->Muse:  
+		char* _id
 		int direccion
 		int cant
 	Muse->libMuse:
 		_Bool resultado
 7: Muse Unmap
 	libMuse->Muse:
+		char* _id
 		int direccion
 	Muse->libMuse:
 		_Bool resultado
+8: Muse Close:
+	libMuse->Muse:
+		char* _id
+	Muse->libMuse:
+		ok :´(
 	

@@ -5,6 +5,55 @@
 #include <stddef.h>
 
 //ESTRUCTURAS
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t tamanio;
+}muse_alloc_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_free_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_get_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t size_paquete;
+	void* paquete;
+}muse_cpy_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t size_path;
+	char* path;
+	uint32_t tamanio;
+	uint32_t flag;
+}muse_map_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_sync_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_unmap_t;
+
 typedef enum{
 	MUSE_INIT=0,
 	MUSE_ALLOC=1,

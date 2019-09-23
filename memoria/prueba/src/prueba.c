@@ -11,9 +11,8 @@ int main(void) {
 	iniciar_log();
 	leer_config();
 	pruebita();
-	int pid = (int)getpid();
-	printf("\npid: %d\n",pid);
-	muse_init(pid,configuracion->ip_muse,configuracion->puerto_muse);
+	muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
+	muse_alloc(1000);
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola

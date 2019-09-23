@@ -19,16 +19,13 @@
  *  el ID del proceso/hilo según "IP-ID".
  */
 int muse_init(int id, char* ip, int puerto){
-	puts("muse_initeano");
 	int sock = conectar_socket_a(ip,puerto);
-	puts("conecta2");
 	if(sock == -1){
-		puts("\nNada de muse\n");
+		puts("Nada de muse :(");
 		return -1;
 	}
-	puts("xd?");
 	socket_muse = sock;
-	printf("socket_muse: %d",socket_muse);
+	muse_id = string_new();
 	int iniciado = handshake_muse(id);//aca se setea muse_id
 	//falta cerrar el sock
 	return iniciado;
@@ -39,7 +36,7 @@ int muse_init(int id, char* ip, int puerto){
  */
 void muse_close(){
 	close(socket_muse);
-	puts("\nChau muse\n");
+	puts("Chau muse  :´(");
 }
 
 /**
@@ -48,7 +45,15 @@ void muse_close(){
  * @return La dirección de la memoria reservada.
  */
 uint32_t muse_alloc(uint32_t tam){
-	return 0;
+	muse_alloc_t* mat = crear_muse_alloc(tam);
+	void* magic = serializar_muse_alloc(mat);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t direccion;
+	recv(socket_muse,&direccion,4,0);
+	printf("direccion recibida: %d\n",direccion);
+	return direccion;
 }
 
 /**
@@ -121,7 +126,7 @@ int muse_unmap(uint32_t dir){
 }
 
 void pruebita(){
-	puts("\npruebita uwu\n");
+	puts("pruebita uwu");
 }
 
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){
@@ -133,14 +138,13 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
 	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
 	{
-		printf("Error al conectar a ip %s y puerto %d",ip,puerto);
+		printf("Error al conectar a ip %s y puerto %d\n",ip,puerto);
 		return -1;
 	}
 	return cliente;
 }
 int handshake_muse(int id){
 	if(socket_muse>=0){
-		puts("creo magic");
 		uint32_t com = MUSE_INIT;
 		uint32_t bytes = sizeof(uint32_t)*2;
 		void* magic = malloc(bytes);
@@ -149,16 +153,14 @@ int handshake_muse(int id){
 		puntero += 4;
 		memcpy(magic+puntero,&id,4);
 		puntero += 4;
-		puts("hago send");
 		int res = send(socket_muse,magic,bytes,0);//mandamos nuestro pid
 		free(magic);
 		if(res<0){
-			puts("\nNada de muse\n");
+			puts("Nada de muse :(");
 			free(magic);
 			return -1;
 		}
 		else{//recivimos nuestro char* muse_id
-			puts("empiezo a recibir");
 			uint32_t tam;
 			recv(socket_muse,&com,4,0);
 			recv(socket_muse,&tam,4,0);
@@ -166,13 +168,12 @@ int handshake_muse(int id){
 			recv(socket_muse,paquete,tam,0);
 			memcpy(muse_id,paquete,tam);//guardo el muse_id
 			free(paquete);
-			puts("\nHola muse\n");
-			free(magic);
+			printf("Hola muse n.n\nmuse_id: %s\n",muse_id);
 			return 0;
 		}
 	}
 	else{
-		puts("\nNada de muse\n");
+		puts("Nada de muse :(");
 		return -1;
 	}
 }

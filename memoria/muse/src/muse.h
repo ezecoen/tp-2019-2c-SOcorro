@@ -1,10 +1,3 @@
-/*
- * muse.h
- *
- *  Created on: 16 sep. 2019
- *      Author: utnso
- */
-
 #ifndef MUSE_H_
 #define MUSE_H_
 #include <commons/collections/list.h>
@@ -48,6 +41,55 @@ typedef struct{
 }pagina;
 
 typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t tamanio;
+}muse_alloc_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_free_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_get_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t size_paquete;
+	void* paquete;
+}muse_cpy_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t size_path;
+	char* path;
+	uint32_t tamanio;
+	uint32_t flag;
+}muse_map_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_sync_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_unmap_t;
+
+typedef struct{
 	uint32_t puerto;
 	uint32_t tam_mem;
 	uint32_t tam_pag;
@@ -71,6 +113,7 @@ typedef enum{
 //VARIABLES GLOBALES
 char* path_de_config;
 void* upcm;
+uint32_t lugar_disponible;
 t_list* tabla_de_segmentos;
 
 s_config* configuracion;
@@ -85,8 +128,18 @@ void init_estructuras();
 void free_final();
 void iniciar_log(char* path);
 s_config* leer_config(char* path);
-void muse_alloc(uint32_t tamanio);
-void ocupate_de_esta(int socket);
+int muse_alloc(muse_alloc_t* datos);
+segmento* buscar_segmento_por_id(char* id);
+t_list* metadata_nuevo(uint32_t cantidad_de_paginas);
+uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
+t_list* reservar_paginas(uint32_t cantidad_de_paginas);
+int muse_free(muse_free_t* datos);
+int muse_get(muse_get_t* datos);
+int muse_cpy(muse_cpy_t* datos);
+int muse_map(muse_map_t* datos);
+int muse_sync(muse_sync_t* datos);
+int muse_unmap(muse_unmap_t* datos);
+void ocupate_de_este(int socket);
 void esperar_conexion(uint32_t servidor);
 
 #endif /* MUSE_H_ */
