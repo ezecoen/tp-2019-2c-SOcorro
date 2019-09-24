@@ -157,5 +157,9 @@ int muse_unmap(uint32_t dir);
 void pruebita();
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
 int handshake_muse(int id);
+muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
+void muse_alloc_destroy(muse_alloc_t* mat);
+void* serializar_muse_alloc(muse_alloc_t* mat);
+muse_alloc_t* deserializar_muse_alloc(void* magic);
 
 #endif

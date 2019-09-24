@@ -7,12 +7,15 @@
 #include "prueba.h"
 #include <unistd.h>
 
+int BIT = 14;
+
 int main(void) {
 	iniciar_log();
 	leer_config();
-	pruebita();
-	muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
-	muse_alloc(1000);
+//	pruebita();
+//	muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
+//	muse_alloc(1000);
+
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola

@@ -45,7 +45,7 @@ void muse_close(){
  * @return La dirección de la memoria reservada.
  */
 uint32_t muse_alloc(uint32_t tam){
-	muse_alloc_t* mat = crear_muse_alloc(tam);
+	muse_alloc_t* mat = crear_muse_alloc(tam,muse_id);
 	void* magic = serializar_muse_alloc(mat);
 	uint32_t tamanio_magic;
 	memcpy(&tamanio_magic,magic+4,4);
@@ -178,4 +178,44 @@ int handshake_muse(int id){
 	}
 }
 
-
+muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
+	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
+	mat->id = string_duplicate(id);
+	mat->size_id = strlen(id)+1;
+	mat->tamanio = tamanio;
+	return mat;
+}
+void muse_alloc_destroy(muse_alloc_t* mat){
+	free(mat->id);
+	free(mat);
+}
+void* serializar_muse_alloc(muse_alloc_t* mat){
+	int bytes = sizeof(uint32_t)*2+ mat->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de mat y 2 int de comando y tamaño
+	int comando = MUSE_ALLOC;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&mat->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,mat->id,mat->size_id);
+	puntero += mat->size_id;
+	memcpy(magic+puntero,&mat->tamanio,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	return magic;
+}
+muse_alloc_t* deserializar_muse_alloc(void* magic){
+	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
+	uint32_t puntero = 0;
+	memcpy(&mat->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mat->id = malloc(mat->size_id);
+	memcpy(mat->id,magic+puntero,mat->size_id);
+	puntero+=mat->size_id;
+	memcpy(&mat->tamanio,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	return mat;
+}
