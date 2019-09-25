@@ -39,16 +39,41 @@ int main(int argc, char **argv) {
 	muse_alloc_t* mat1 = crear_muse_alloc(1000,"asdasd1");
 	int result1 = muse_alloc(mat1);
 	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
-	//	prueba creo segmento 3
+//	prueba creo segmento 3
 	muse_alloc_t* mat2 = crear_muse_alloc(500,"asdasd2");
 	int result2 = muse_alloc(mat2);
 	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
-	//	prueba creo segmento 4
+//	prueba creo segmento 4
 	muse_alloc_t* mat3 = crear_muse_alloc(500,"asdasd3");
 	int result3 = muse_alloc(mat3);
 	printf("\nDireccion virtual de %d|%d|%d: %d",3,0,0,result3);
+//	prueba log_2
+	int testeo = 0;
+	for(int i = 1024;i<16383;i++){
+		if(1024<i&&i<=2048){
+			if(log_2((double)i)!=11){
+				testeo++;
+			}
+		}
+		if(2048<i&&i<=4096){
+			if(log_2((double)i)!=12){
+				testeo++;
+			}
+		}
+		if(4096<i&&i<=8192){
+			if(log_2((double)i)!=13){
+				testeo++;
+			}
+		}
+		if(8192<i&&i<=16384){
+			if(log_2((double)i)!=14){
+				testeo++;
+			}
+		}
+	}
+	printf("\nTESTEO = %d",testeo);
 
-	goto end;
+	goto end;//jasdjaja
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(1){
@@ -62,10 +87,20 @@ void init_estructuras(){
 	upcm = malloc(configuracion->tam_mem);
 	tabla_de_segmentos = list_create();
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
-	DIR_TAM_DIRECCION = 16;
-	DIR_TAM_DESPLAZAMIENTO = 4;
-	DIR_TAM_PAGINA = 6;
+	DIR_TAM_DESPLAZAMIENTO = redondear_double_arriba(log_2((double)configuracion->tam_pag));
+	DIR_TAM_PAGINA = redondear_double_arriba(log_2((double)(configuracion->tam_mem+configuracion->tam_swap)));
+	DIR_TAM_DIRECCION = DIR_TAM_PAGINA*2+DIR_TAM_DESPLAZAMIENTO;
+	printf("SEG:%d|PAG:%d|OFF:%d=%d",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
+//	0000000000000|0000000000000|00000
 }
+int log_2(double n){
+     int logValue = 0;
+     while (n>1) {
+         logValue++;
+         n /= 2;
+     }
+     return logValue;
+ }
 void free_final(){
 	free(upcm);
 	free(path_de_config);
@@ -122,6 +157,14 @@ int bin_a_dec(char* binario){
 
   return (int)r;
 }
+int redondear_double_arriba(double d){
+	if(d-(int)d!=0){
+		return (int)d + 1;
+	}
+	else{
+		return (int)d;
+	}
+}
 int muse_alloc(muse_alloc_t* datos){
 	//me fijo si hay lugar disponible
 	if(lugar_disponible>=datos->tamanio){
@@ -134,7 +177,6 @@ int muse_alloc(muse_alloc_t* datos){
 			segmento_nuevo->compartido = false;
 			segmento_nuevo->mmapeado = false;
 			segmento_nuevo->nombre = string_duplicate(datos->id);
-			segmento_nuevo->heap_metadatas = metadata_nuevo(cantidad_de_paginas);
 			segmento_nuevo->paginas = reservar_paginas(cantidad_de_paginas);
 			if(segmento_nuevo->paginas == NULL){
 				return 0;
@@ -159,14 +201,6 @@ segmento* buscar_segmento_por_id(char* id){
 	}
 	return list_find(tabla_de_segmentos,(void*)segmento_igual);
 }
-t_list* metadata_nuevo(uint32_t cantidad_de_paginas){
-	t_list* retorno = list_create();
-	heap_metadata* heap = malloc(sizeof(heap_metadata));
-	heap->isFree=true;
-	heap->size = cantidad_de_paginas;
-	list_add(retorno,heap);
-	return retorno;
-}
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	uint32_t pags = tamanio/configuracion->tam_pag;
 	if(tamanio%configuracion->tam_pag>0){
@@ -185,7 +219,7 @@ t_list* reservar_paginas(uint32_t cantidad_de_paginas){
 			pag->modificado = false;
 			pag->num_pagina = i;
 			pag->tamanio_en_uso = 0;
-			pag->pedacito_de_memoria=NULL;
+			pag->datos=NULL;//hay q pensar esto??
 			list_add(paginas,pag);
 		}
 		return paginas;
@@ -194,6 +228,14 @@ t_list* reservar_paginas(uint32_t cantidad_de_paginas){
 		//se pudre to2 xd?
 		return NULL;
 	}
+}
+t_list* metadata_nuevo(uint32_t cantidad_de_paginas){
+	t_list* retorno = list_create();
+	heap_metadata* heap = malloc(sizeof(heap_metadata));
+	heap->isFree=true;
+	heap->size = cantidad_de_paginas;
+	list_add(retorno,heap);
+	return retorno;
 }
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//num_seg-num_pag-offset-\0
@@ -205,12 +247,8 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 	dec_a_bin(char_pagina,num_pagina,DIR_TAM_PAGINA);
 	dec_a_bin(char_offset,offset,DIR_TAM_DESPLAZAMIENTO);
 	resultado[DIR_TAM_DIRECCION]='\0';//xq string termina con \0
-	//pongo todos los bits en 0
-//	for(int a = 0;a<DIR_TAM_DIRECCION;a++){
-//		resultado[a]='0';
-//	}
-	int j=1;
 
+	int j=1;
 //	EJEMPLO:
 //	  SEG     PAG   OFF
 //	   2   |   5   | 0

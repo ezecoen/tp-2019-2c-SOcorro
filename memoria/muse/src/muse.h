@@ -24,22 +24,21 @@ typedef struct{
 	_Bool mmapeado;
 	_Bool compartido;
 	uint32_t num_segmento;
-	t_list* heap_metadatas;
 	t_list* paginas;
 }segmento;
-
-typedef struct{
-	uint32_t size;
-	_Bool isFree;
-}heap_metadata;
 
 typedef struct{
 	uint32_t num_pagina;
 	uint32_t tamanio_en_uso;
 	_Bool presencia;
 	_Bool modificado;
-	void* pedacito_de_memoria;
+	void* datos;
 }pagina;
+
+typedef struct{
+	uint32_t size;
+	_Bool isFree;
+}heap_metadata;
 
 typedef struct{
 	uint32_t size_id;
@@ -134,6 +133,8 @@ void iniciar_log(char* path);
 s_config* leer_config(char* path);
 void dec_a_bin(char destino[],int decimal, int tam);
 int bin_a_dec(char* binario);
+int redondear_double_arriba(double d);
+int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
 segmento* buscar_segmento_por_id(char* id);
 t_list* metadata_nuevo(uint32_t cantidad_de_paginas);
