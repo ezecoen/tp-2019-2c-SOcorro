@@ -20,3 +20,7 @@
 ## Para recordar el usuario en el repo:
 
     git config credential.helper store
+
+## Para que funcione la shared library:
+
+    export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/tp-2019-2c-SOcorro/libreriaComun/Debug/

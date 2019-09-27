@@ -4,6 +4,9 @@
 #include <arpa/inet.h>
 #include <syscall.h>
 #include <commons/string.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 /**
  * Inicializa la biblioteca de MUSE.
@@ -18,14 +21,13 @@
 int muse_init(int id, char* ip, int puerto){
 	int sock = conectar_socket_a(ip,puerto);
 	if(sock == -1){
-		puts("\nNada de muse\n");
+		puts("Nada de muse :(");
 		return -1;
 	}
 	socket_muse = sock;
-	//hay que armar bien el muse_id
-	muse_id = string_itoa(id);
-	int iniciado = mandar_muse_init();
-
+	muse_id = string_new();
+	int iniciado = handshake_muse(id);//aca se setea muse_id
+	//falta cerrar el sock
 	return iniciado;
 }
 
@@ -34,7 +36,7 @@ int muse_init(int id, char* ip, int puerto){
  */
 void muse_close(){
 	close(socket_muse);
-	puts("\nChau muse\n");
+	puts("Chau muse  :´(");
 }
 
 /**
@@ -43,7 +45,15 @@ void muse_close(){
  * @return La dirección de la memoria reservada.
  */
 uint32_t muse_alloc(uint32_t tam){
-	return 0;
+	muse_alloc_t* mat = crear_muse_alloc(tam,muse_id);
+	void* magic = serializar_muse_alloc(mat);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t direccion;
+	recv(socket_muse,&direccion,4,0);
+	printf("direccion recibida: %d\n",direccion);
+	return direccion;
 }
 
 /**
@@ -116,7 +126,7 @@ int muse_unmap(uint32_t dir){
 }
 
 void pruebita(){
-	puts("\npruebita uwu\n");
+	puts("pruebita uwu");
 }
 
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){
@@ -128,37 +138,84 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
 	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
 	{
-		printf("Error al conectar a ip %s y puerto %d",ip,puerto);
+		printf("Error al conectar a ip %s y puerto %d\n",ip,puerto);
 		return -1;
 	}
 	return cliente;
 }
-int mandar_muse_init(){
+int handshake_muse(int id){
 	if(socket_muse>=0){
-		uint32_t tam = string_length(muse_id)+1;//+1 por \0
 		uint32_t com = MUSE_INIT;
-		uint32_t bytes = tam + sizeof(uint32_t)*2;
+		uint32_t bytes = sizeof(uint32_t)*2;
 		void* magic = malloc(bytes);
 		uint32_t puntero = 0;
 		memcpy(magic+puntero,&com,4);
 		puntero += 4;
-		memcpy(magic+puntero,&tam,4);
+		memcpy(magic+puntero,&id,4);
 		puntero += 4;
-		memcpy(magic+puntero,muse_id,tam);
-		puntero += tam;
-		int res = send(socket_muse,magic,bytes,0);
+		int res = send(socket_muse,magic,bytes,0);//mandamos nuestro pid
 		free(magic);
 		if(res<0){
-			puts("\nNada de muse\n");
+			puts("Nada de muse :(");
+			free(magic);
 			return -1;
 		}
-		else{
-			puts("\nHola muse\n");
+		else{//recivimos nuestro char* muse_id
+			uint32_t tam;
+			recv(socket_muse,&com,4,0);
+			recv(socket_muse,&tam,4,0);
+			void* paquete = malloc(tam);
+			recv(socket_muse,paquete,tam,0);
+			memcpy(muse_id,paquete,tam);//guardo el muse_id
+			free(paquete);
+			printf("Hola muse n.n\nmuse_id: %s\n",muse_id);
 			return 0;
 		}
 	}
 	else{
-		puts("\nNada de muse\n");
+		puts("Nada de muse :(");
 		return -1;
 	}
+}
+
+muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
+	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
+	mat->id = string_duplicate(id);
+	mat->size_id = strlen(id)+1;
+	mat->tamanio = tamanio;
+	return mat;
+}
+void muse_alloc_destroy(muse_alloc_t* mat){
+	free(mat->id);
+	free(mat);
+}
+void* serializar_muse_alloc(muse_alloc_t* mat){
+	int bytes = sizeof(uint32_t)*2+ mat->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de mat y 2 int de comando y tamaño
+	int comando = MUSE_ALLOC;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&mat->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,mat->id,mat->size_id);
+	puntero += mat->size_id;
+	memcpy(magic+puntero,&mat->tamanio,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	return magic;
+}
+muse_alloc_t* deserializar_muse_alloc(void* magic){
+	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
+	uint32_t puntero = 0;
+	memcpy(&mat->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mat->id = malloc(mat->size_id);
+	memcpy(mat->id,magic+puntero,mat->size_id);
+	puntero+=mat->size_id;
+	memcpy(&mat->tamanio,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	return mat;
 }

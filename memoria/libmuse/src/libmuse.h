@@ -5,7 +5,56 @@
 #include <stddef.h>
 
 //ESTRUCTURAS
-typedef enum t_comando_muse{
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t tamanio;
+}muse_alloc_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_free_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_get_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t size_paquete;
+	void* paquete;
+}muse_cpy_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t size_path;
+	char* path;
+	uint32_t tamanio;
+	uint32_t flag;
+}muse_map_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+	uint32_t tamanio;
+}muse_sync_t;
+
+typedef struct{
+	uint32_t size_id;
+	char* id;
+	uint32_t direccion;
+}muse_unmap_t;
+
+typedef enum{
 	MUSE_INIT=0,
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
@@ -14,13 +63,15 @@ typedef enum t_comando_muse{
 	MUSE_MAP=5,
 	MUSE_SYNC=6,
 	MUSE_UNMAP=7,
-	MUSE_ERROR=8,
-	MUSE_EXITOSO=9
+	MUSE_CLOSE=8,
+	MUSE_ERROR=9,
+	MUSE_EXITOSO=10
 }t_comando_muse;
 
 //VARIABLES GLOBALES
 int socket_muse;
 char* muse_id;
+
 //FUNCIONES
 /**
 * Inicializa la biblioteca de MUSE.
@@ -105,5 +156,10 @@ int muse_unmap(uint32_t dir);
 
 void pruebita();
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
+int handshake_muse(int id);
+muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
+void muse_alloc_destroy(muse_alloc_t* mat);
+void* serializar_muse_alloc(muse_alloc_t* mat);
+muse_alloc_t* deserializar_muse_alloc(void* magic);
 
 #endif
