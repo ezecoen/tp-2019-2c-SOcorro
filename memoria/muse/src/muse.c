@@ -58,3 +58,31 @@ void muse_alloc(uint32_t tamanio){
 	//si no existe creo el segmento
 	//agrego las paginas necesarias
 }
+
+// Sobre asignacion de memoria
+// crear un segmento:
+// Leer metadata -> saber si esta vacio o cuanto tamano tiene
+// verificar si puede agrandar su tamano
+// cambiar el tamano de un segmento a una cantidad de paginas determinada
+//o achicarse si libero memoria
+// si no pudiera extenderse mas, deberia crear un nuevo segmento
+// definir disposicion de segmentos en memoria
+//
+// Memoria virtual
+// El algoritmo de reemplazo será de asignación variable,
+// alcance global, utilizando clock modificado
+// ver si la pagina esta cargada en memoria
+// si no esta, page fault y buscar la pagina
+// area de swap -> archivo de swap ,
+// muse debe saber siempre cuales pags estan en memoria y cuales en swap
+// swap va a estar dividida en paginas para ser indexada
+//
+// Memoria compartida
+// Al tener porciones de memoria compartida mapeada a un archivo diferente
+//al de swap, es necesario poder distinguirlas a nivel metadatos.
+//Es por eso, que existirán 2 tipos de segmentos en la tabla de segmentos,
+//los comunes (o dinámicos) y los compartidos (o “mappeados”):
+// segmentos que comparten las mismas paginas IPC
+// separar logicamente el arcihvo en paginas
+// cambiar bit de presencia
+//
