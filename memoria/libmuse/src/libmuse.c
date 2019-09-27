@@ -61,8 +61,25 @@ uint32_t muse_alloc(uint32_t tam){
  * @param dir La dirección de la memoria a reservar.
  */
 void muse_free(uint32_t dir){
+		muse_free_t* mft = crear_muse_free(muse_id,dir);
+		void* magic = serializar_muse_free(mft);
+		uint32_t tamanio_magic;
+		memcpy(&tamanio_magic,magic+4,4);
+		send(socket_muse,magic,tamanio_magic,0);
+		_Bool resultado;
+		recv(socket_muse,&resultado,4,0);
+		// !! si recv = -1 que pasa con resultado? ??
+		if (resultado)
+			{
+			printf("free realizado para: %d\n",dir);
+
+			}else
+			{
+			printf("error al realizar el free para: %d\n",dir);
+			}
 
 }
+
 
 /**
  * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
@@ -72,6 +89,21 @@ void muse_free(uint32_t dir){
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */
 int muse_get(void* dst, uint32_t src, size_t n){
+
+		muse_get_t* mat = crear_muse_get(n,muse_id,src);
+		void* magic = serializar_muse_get(mat);
+		uint32_t tamanio_magic;
+		memcpy(&tamanio_magic,magic+4,4);
+		send(socket_muse,magic,tamanio_magic,0);
+		uint32_t resultado;
+		if(recv(socket_muse,&resultado,4,0) == 0)
+		{
+			printf("get hecho para : %d\n",src);
+		} else {
+			printf("error en get para : %d\n",src);
+			return -1;
+		}
+
 	return 0;
 }
 
@@ -185,9 +217,36 @@ muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	mat->tamanio = tamanio;
 	return mat;
 }
+
+muse_free_t* crear_muse_free(char* id,uint32_t direccion){
+	muse_free_t* mft = malloc(sizeof(muse_free_t));
+	mft -> id = string_duplicate(id);
+	mft->direccion = direccion;
+	mft->size_id = strlen(id)+1;
+	return mft;
+}
+
+muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion){
+	muse_get_t* mgt = malloc(sizeof(muse_get_t));
+	mgt -> id= string_duplicate(id);
+	mgt->direccion = direccion;
+	mgt->size_id = strlen(id)+1;
+	mgt->tamanio = tamanio;
+	return mgt;
+}
+
+
 void muse_alloc_destroy(muse_alloc_t* mat){
 	free(mat->id);
 	free(mat);
+}
+void muse_free_destroy(muse_free_t* mfr){
+	free(mfr->id);
+	free(mfr);
+}
+void muse_get_destroy(muse_get_t* mgt){
+	free(mgt->id);
+	free(mgt);
 }
 void* serializar_muse_alloc(muse_alloc_t* mat){
 	int bytes = sizeof(uint32_t)*2+ mat->size_id + sizeof(uint32_t)*2;
@@ -207,6 +266,49 @@ void* serializar_muse_alloc(muse_alloc_t* mat){
 	puntero += sizeof(uint32_t);
 	return magic;
 }
+
+
+void* serializar_muse_free(muse_free_t* mft){
+	int bytes = sizeof(uint32_t)*2+ mft->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de mat y 2 int de comando y tamaño
+	int comando = MUSE_FREE;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&mft->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,mft->id,mft->size_id);
+	puntero += mft->size_id;
+	memcpy(magic+puntero,&mft->direccion,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	return magic;
+}
+
+void* serializar_muse_get(muse_get_t* mgt){
+	int bytes = sizeof(uint32_t)*3+ mgt->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de mat y 2 int de comando y tamaño
+	int comando = MUSE_GET;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&mgt->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,mgt->id,mgt->size_id);
+	puntero += mgt->size_id;
+	memcpy(magic+puntero,&mgt->direccion,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&mgt->tamanio,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	return magic;
+}
+
+
 muse_alloc_t* deserializar_muse_alloc(void* magic){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
 	uint32_t puntero = 0;
@@ -218,4 +320,32 @@ muse_alloc_t* deserializar_muse_alloc(void* magic){
 	memcpy(&mat->tamanio,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
 	return mat;
+}
+
+muse_free_t* deserializar_muse_free(void* magic){
+	muse_free_t* mft = malloc(sizeof(muse_free_t));
+	uint32_t puntero = 0;
+	memcpy(&mft->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mft->id = malloc(mft->size_id);
+	memcpy(mft->id,magic+puntero,mft->size_id);
+	puntero+=mft->size_id;
+	memcpy(&mft->direccion,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	return mft;
+}
+
+muse_get_t* deserializar_muse_get(void* magic){
+	muse_get_t* mgt = malloc(sizeof(muse_get_t));
+	uint32_t puntero = 0;
+	memcpy(&mgt->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mgt->id = malloc(mgt->size_id);
+	memcpy(mgt->id,magic+puntero,mgt->size_id);
+	puntero+=mgt->size_id;
+	memcpy(&mgt->direccion,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(&mgt->tamanio,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	return mgt;
 }
