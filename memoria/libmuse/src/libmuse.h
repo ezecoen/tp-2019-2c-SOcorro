@@ -161,5 +161,13 @@ muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);
 muse_alloc_t* deserializar_muse_alloc(void* magic);
+muse_free_t* crear_muse_free(char* id,uint32_t direccion);
+void muse_free_destroy(muse_free_t* mfr);
+void* serializar_muse_free(muse_free_t* mft);
+muse_free_t* deserializar_muse_free(void* magic);
+muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion);
+void muse_get_destroy(muse_get_t* mgt);
+void* serializar_muse_get(muse_get_t* mgt);
+muse_get_t* deserializar_muse_get(void* magic);
 
 #endif

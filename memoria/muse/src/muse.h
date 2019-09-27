@@ -19,7 +19,7 @@
 #include <commons/log.h>
 
 //ESTRUCTURAS
-typedef struct{
+typedef struct segmento{
 	char* nombre;
 	_Bool mmapeado;
 	_Bool compartido;
@@ -27,39 +27,39 @@ typedef struct{
 	t_list* paginas;
 }segmento;
 
-typedef struct{
+typedef struct pagina{
 	uint32_t num_pagina;
-	uint32_t tamanio_en_uso;
+	int ultimo_heap_metadata_libre;
 	_Bool presencia;
 	_Bool modificado;
 	void* datos;
 }pagina;
 
-typedef struct{
+typedef struct heap_metadata{
 	uint32_t size;
 	_Bool isFree;
 }heap_metadata;
 
-typedef struct{
+typedef struct muse_alloc_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t tamanio;
 }muse_alloc_t;
 
-typedef struct{
+typedef struct muse_free_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t direccion;
 }muse_free_t;
 
-typedef struct{
+typedef struct muse_get_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t direccion;
 	uint32_t tamanio;
 }muse_get_t;
 
-typedef struct{
+typedef struct muse_cpy_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t direccion;
@@ -67,7 +67,7 @@ typedef struct{
 	void* paquete;
 }muse_cpy_t;
 
-typedef struct{
+typedef struct muse_map_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t size_path;
@@ -76,20 +76,20 @@ typedef struct{
 	uint32_t flag;
 }muse_map_t;
 
-typedef struct{
+typedef struct muse_sync_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t direccion;
 	uint32_t tamanio;
 }muse_sync_t;
 
-typedef struct{
+typedef struct muse_unmap_t{
 	uint32_t size_id;
 	char* id;
 	uint32_t direccion;
 }muse_unmap_t;
 
-typedef struct{
+typedef struct s_config{
 	uint32_t puerto;
 	uint32_t tam_mem;
 	uint32_t tam_pag;
@@ -137,9 +137,10 @@ int redondear_double_arriba(double d);
 int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
 segmento* buscar_segmento_por_id(char* id);
-t_list* metadata_nuevo(uint32_t cantidad_de_paginas);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 t_list* reservar_paginas(uint32_t cantidad_de_paginas);
+int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
+void* asignar_marco_nuevo();
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
 int muse_free(muse_free_t* datos);
 int muse_get(muse_get_t* datos);

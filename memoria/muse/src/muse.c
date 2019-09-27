@@ -185,8 +185,10 @@ int muse_alloc(muse_alloc_t* datos){
 			list_add(tabla_de_segmentos,segmento_nuevo);
 			direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,0);
 		}
-		else{//se encontro un segmento que pertenece a ese id...
-
+		else{//=>se encontro un segmento que pertenece a ese id...
+			//primero me fijo si el muse_alloc entra en el lugar libre del segmento
+			int reserva = reservar_lugar_en_segmento(segmento_buscado,datos->tamanio);
+			//terminar xd!!
 		}
 		//retorno la direccion de memoria (virtual) que le asigne
 		return direccion_return;
@@ -218,8 +220,8 @@ t_list* reservar_paginas(uint32_t cantidad_de_paginas){
 			pag->presencia = false;
 			pag->modificado = false;
 			pag->num_pagina = i;
-			pag->tamanio_en_uso = 0;
-			pag->datos=NULL;//hay q pensar esto??
+			pag->ultimo_heap_metadata_libre = 0;
+			pag->datos=asignar_marco_nuevo();
 			list_add(paginas,pag);
 		}
 		return paginas;
@@ -229,13 +231,80 @@ t_list* reservar_paginas(uint32_t cantidad_de_paginas){
 		return NULL;
 	}
 }
-t_list* metadata_nuevo(uint32_t cantidad_de_paginas){
-	t_list* retorno = list_create();
-	heap_metadata* heap = malloc(sizeof(heap_metadata));
-	heap->isFree=true;
-	heap->size = cantidad_de_paginas;
-	list_add(retorno,heap);
-	return retorno;
+int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){//hay q marcar la pag como modificada???
+	int direccion_return;
+	_Bool ultima_pagina(pagina* pag){
+		return pag->ultimo_heap_metadata_libre!=-1;
+		//si es != -1 entonces es la ultima pagina del segmento
+	}
+	pagina* pagina_buscada = list_find(seg->paginas,(void*)ultima_pagina);
+	heap_metadata* ultimo_heap = pagina_buscada->datos+pagina_buscada->ultimo_heap_metadata_libre;
+	if(ultimo_heap->size >= tamanio+sizeof(heap_metadata)){//=>entra en este segmento
+		heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
+		heap_nuevo->isFree = true;
+		heap_nuevo->size = ultimo_heap->size-tamanio;
+		memcpy(pagina_buscada->datos + pagina_buscada->ultimo_heap_metadata_libre + tamanio,
+				heap_nuevo,sizeof(heap_metadata));
+		ultimo_heap->isFree = false;
+		ultimo_heap->size = tamanio;
+		int offset = configuracion->tam_pag-heap_nuevo->size-sizeof(heap_metadata)-tamanio;
+		direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,offset);
+	}
+	else{//=>hay que agrandar el segmento
+		uint32_t lugar_extra_necesario = tamanio-ultimo_heap->size-sizeof(heap_metadata);
+		uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(lugar_extra_necesario);
+		uint32_t tamanio_paginas_necesarias = paginas_necesarias*configuracion->tam_pag;
+		if(lugar_disponible >= tamanio_paginas_necesarias){//=>hay lugar, reservo las nuevas pags
+			lugar_disponible -= tamanio_paginas_necesarias;
+			//agrego las pagas a la lista del segmento
+			int espacio_libre_ultima_pag = tamanio_paginas_necesarias-tamanio-ultimo_heap->size;
+			heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
+			heap_nuevo->isFree = true;
+			heap_nuevo->size = espacio_libre_ultima_pag;
+			_Bool agarrar_direccion_de_primera_pag_agregada = false;
+			if(ultimo_heap->size==0){
+				agarrar_direccion_de_primera_pag_agregada = true;
+			}
+			for(int i = 0;i<paginas_necesarias;i++){
+				pagina* pagina_nueva = malloc(sizeof(pagina*));
+				pagina_nueva->presencia = false;
+				pagina_nueva->modificado = false;
+				pagina_nueva->num_pagina = pagina_buscada->num_pagina+i;
+				pagina_nueva->datos = asignar_marco_nuevo();
+				if(i==paginas_necesarias-1){
+					//es la ultima pag
+					pagina_nueva->ultimo_heap_metadata_libre =
+							configuracion->tam_pag - espacio_libre_ultima_pag;
+					memcpy(pagina_nueva->datos+pagina_nueva->ultimo_heap_metadata_libre,
+							heap_nuevo,sizeof(heap_metadata));
+				}
+				else{
+					pagina_nueva->ultimo_heap_metadata_libre = -1;
+					//porque la pag va a estar llena
+				}
+				list_add(seg->paginas,pagina_nueva);
+				if(agarrar_direccion_de_primera_pag_agregada){
+					if(i==0){
+						direccion_return = obtener_direccion_virtual(
+								seg->num_segmento,pagina_nueva->num_pagina,0);
+					}
+				}
+			}
+			if(!agarrar_direccion_de_primera_pag_agregada){//=>tengo que llenar direccion_return
+				direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,
+						pagina_buscada->ultimo_heap_metadata_libre+sizeof(heap_metadata));
+			}
+			ultimo_heap->isFree = false;
+			ultimo_heap->size = tamanio;
+		}
+		else{//=>no hay lugar
+			return -1;
+		}
+	}
+	return direccion_return;
+}
+void* asignar_marco_nuevo(){
+	//hay que codear esto!!
 }
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//num_seg-num_pag-offset-\0
