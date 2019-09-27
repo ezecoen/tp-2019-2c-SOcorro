@@ -169,5 +169,22 @@ muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion);
 void muse_get_destroy(muse_get_t* mgt);
 void* serializar_muse_get(muse_get_t* mgt);
 muse_get_t* deserializar_muse_get(void* magic);
+muse_cpy_t* crear_muse_cpy(uint32_t tamanio, char* id,uint32_t direccion, void* paquete);
+void muse_cpy_destroy(muse_cpy_t* mct);
+void* serializar_muse_cpy(muse_cpy_t* mct);
+muse_cpy_t* deserializar_muse_cpy(void* magic);
+uint32_t muse_map(char *path, size_t length, int flags);
+muse_map_t* crear_muse_map(uint32_t tamanio, char* id, uint32_t flag, char* path);
+void muse_map_destroy(muse_map_t* mmt);
+void* serializar_muse_map(muse_map_t* mmt);
+muse_map_t* deserializar_muse_map(void* magic);
+muse_sync_t* crear_muse_sync(uint32_t tamanio, char* id, uint32_t direccion);
+void muse_sync_destroy(muse_sync_t* mst);
+void* serializar_muse_sync(muse_sync_t* mst);
+muse_unmap_t* crear_muse_unmap(char* id, uint32_t direccion);
+void muse_unmap_destroy(muse_unmap_t* mut);
+void* serializar_muse_unmap(muse_unmap_t* mut);
+muse_unmap_t* deserializar_muse_unmap(void* magic);
+
 
 #endif
