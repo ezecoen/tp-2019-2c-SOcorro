@@ -1,20 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "muse.h"
-#include <commons/collections/list.h>
-#include <commons/string.h>
-#include <commons/log.h>
-#include <commons/string.h>
-#include <commons/config.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <arpa/inet.h>
-#include <math.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <stdbool.h>
-#include <pthread.h>
 
 int main(int argc, char **argv) {
 //	INICIANDO
@@ -23,18 +7,11 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras();
 
-//	prueba de dec a bin
-	int x=9000;
-	char arr[DIR_TAM_DIRECCION+1];
-	dec_a_bin(arr, x,DIR_TAM_DIRECCION);
-	printf("\nBIN: %s\n", arr);
-//	prueba bin a dec
-	int res = bin_a_dec(arr);
-	printf("DEC: %d",res);
 //	prueba creo segmento 1
 	muse_alloc_t* mat = crear_muse_alloc(1000,"asdasd");
 	int result = muse_alloc(mat);
 	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
+	fflush(stdout);
 //	prueba creo segmento 2
 	muse_alloc_t* mat1 = crear_muse_alloc(1000,"asdasd1");
 	int result1 = muse_alloc(mat1);
@@ -43,35 +20,9 @@ int main(int argc, char **argv) {
 	muse_alloc_t* mat2 = crear_muse_alloc(500,"asdasd2");
 	int result2 = muse_alloc(mat2);
 	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
-//	prueba creo segmento 4
-	muse_alloc_t* mat3 = crear_muse_alloc(500,"asdasd3");
-	int result3 = muse_alloc(mat3);
-	printf("\nDireccion virtual de %d|%d|%d: %d",3,0,0,result3);
-//	prueba log_2
-	int testeo = 0;
-	for(int i = 1024;i<16383;i++){
-		if(1024<i&&i<=2048){
-			if(log_2((double)i)!=11){
-				testeo++;
-			}
-		}
-		if(2048<i&&i<=4096){
-			if(log_2((double)i)!=12){
-				testeo++;
-			}
-		}
-		if(4096<i&&i<=8192){
-			if(log_2((double)i)!=13){
-				testeo++;
-			}
-		}
-		if(8192<i&&i<=16384){
-			if(log_2((double)i)!=14){
-				testeo++;
-			}
-		}
-	}
-	printf("\nTESTEO = %d",testeo);
+//	prueba uso segmento 3
+	int result3 = muse_alloc(mat2);
+	printf("\nDireccion virtual de %d|%d|%d: %d",2,18,0,result3);
 
 	goto end;//jasdjaja
 //	SERVIDOR
@@ -85,15 +36,24 @@ int main(int argc, char **argv) {
 }
 void init_estructuras(){
 	upcm = malloc(configuracion->tam_mem);
+	swap = malloc(configuracion->tam_swap);//provisorio
 	tabla_de_segmentos = list_create();
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
-	DIR_TAM_DESPLAZAMIENTO = redondear_double_arriba(log_2((double)configuracion->tam_pag));
-	DIR_TAM_PAGINA = redondear_double_arriba(log_2((double)(configuracion->tam_mem+configuracion->tam_swap)));
+
+	CANT_PAGINAS_MEMORIA = redondear_double_arriba((double)configuracion->tam_mem/
+			(double)configuracion->tam_pag);
+	CANT_PAGINAS_MEMORIA_VIRTUAL = redondear_double_arriba((double)configuracion->tam_swap/
+			(double)configuracion->tam_pag);
+
+	DIR_TAM_DESPLAZAMIENTO = log_2((double)configuracion->tam_pag);
+	DIR_TAM_PAGINA = log_2((double)(configuracion->tam_mem+configuracion->tam_swap));
 	DIR_TAM_DIRECCION = DIR_TAM_PAGINA*2+DIR_TAM_DESPLAZAMIENTO;
 	printf("SEG:%d|PAG:%d|OFF:%d=%d",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
-//	0000000000000|0000000000000|00000
+
+	init_bitarray();
 }
 int log_2(double n){
+	//redondea el valor hacia arriba y funciona siempre bien con los bits
      int logValue = 0;
      while (n>1) {
          logValue++;
@@ -104,6 +64,7 @@ int log_2(double n){
 void free_final(){
 	free(upcm);
 	free(path_de_config);
+	destroy_bitarray();
 	//free tabla de segmentos
 }
 void iniciar_log(char* path){//0 es archivo, 1 es consola
@@ -167,28 +128,57 @@ int redondear_double_arriba(double d){
 }
 int muse_alloc(muse_alloc_t* datos){
 	//me fijo si hay lugar disponible
-	if(lugar_disponible>=datos->tamanio){
+	if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 		//busco si ya existe un segmento del que me pidio memoria
 		segmento* segmento_buscado = buscar_segmento_por_id(datos->id);
 		uint32_t direccion_return = 0;
 		if(segmento_buscado==NULL){//hay q crear el segmento
-			uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio);
+			uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(
+					datos->tamanio+sizeof(heap_metadata)*2);
 			segmento* segmento_nuevo = malloc(sizeof(segmento));
 			segmento_nuevo->compartido = false;
 			segmento_nuevo->mmapeado = false;
 			segmento_nuevo->nombre = string_duplicate(datos->id);
-			segmento_nuevo->paginas = reservar_paginas(cantidad_de_paginas);
-			if(segmento_nuevo->paginas == NULL){
+
+			int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-
+					datos->tamanio-sizeof(heap_metadata)*2;
+			t_list* paginas = list_create();
+			if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
+				lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
+				for(int i = 0;i<cantidad_de_paginas;i++){
+					pagina* pag = malloc(sizeof(pagina));
+					pag->modificado = false;
+					pag->num_pagina = i;
+					pag->ultimo_heap_metadata_libre = -1;//todas menos la ultima
+					pag->presencia = asignar_marco_nuevo(&pag->datos);
+					list_add(paginas,pag);
+					if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
+						heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
+						heap_nuevo->isFree = false;
+						heap_nuevo->size = datos->tamanio;
+						memcpy(pag->datos,heap_nuevo,sizeof(heap_metadata));
+					}
+					if(i == cantidad_de_paginas-1){//se agrega el heap siguiente al final
+						heap_metadata* heap_siguiente = malloc(sizeof(heap_metadata));
+						heap_siguiente->isFree = true;
+						heap_siguiente->size = espacio_libre_ultima_pag;
+						memcpy(pag->datos+configuracion->tam_pag-
+								espacio_libre_ultima_pag,heap_siguiente,sizeof(heap_metadata));
+						pag->ultimo_heap_metadata_libre=configuracion->tam_pag-espacio_libre_ultima_pag;
+					}
+				}
+				segmento_nuevo->paginas = paginas;
+				segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
+				list_add(tabla_de_segmentos,segmento_nuevo);
+				direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,8);//tamaño heap
+			}
+			else{
+				//se pudre to2 xd
 				return 0;
 			}
-			segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
-			list_add(tabla_de_segmentos,segmento_nuevo);
-			direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,0);
 		}
 		else{//=>se encontro un segmento que pertenece a ese id...
-			//primero me fijo si el muse_alloc entra en el lugar libre del segmento
-			int reserva = reservar_lugar_en_segmento(segmento_buscado,datos->tamanio);
-			//terminar xd!!
+			direccion_return = reservar_lugar_en_segmento(segmento_buscado,datos->tamanio);
 		}
 		//retorno la direccion de memoria (virtual) que le asigne
 		return direccion_return;
@@ -210,54 +200,36 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	}
 	return pags;
 }
-t_list* reservar_paginas(uint32_t cantidad_de_paginas){
-	t_list* paginas = list_create();
-	if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
-		lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
-		//solo resto el tamaño, total las paginas solo se cargan en memoria cuando se necesiten
-		for(int i = 0;i<cantidad_de_paginas;i++){
-			pagina* pag = malloc(sizeof(pagina));
-			pag->presencia = false;
-			pag->modificado = false;
-			pag->num_pagina = i;
-			pag->ultimo_heap_metadata_libre = 0;
-			pag->datos=asignar_marco_nuevo();
-			list_add(paginas,pag);
-		}
-		return paginas;
-	}
-	else{
-		//se pudre to2 xd?
-		return NULL;
-	}
-}
-int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){//hay q marcar la pag como modificada???
+int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 	int direccion_return;
 	_Bool ultima_pagina(pagina* pag){
 		return pag->ultimo_heap_metadata_libre!=-1;
 		//si es != -1 entonces es la ultima pagina del segmento
 	}
 	pagina* pagina_buscada = list_find(seg->paginas,(void*)ultima_pagina);
+	//hay q marcar la pag como modificada??!! i think yes
 	heap_metadata* ultimo_heap = pagina_buscada->datos+pagina_buscada->ultimo_heap_metadata_libre;
-	if(ultimo_heap->size >= tamanio+sizeof(heap_metadata)){//=>entra en este segmento
+	if(ultimo_heap->size >= tamanio+sizeof(heap_metadata)){//=>entra en esta pagina
 		heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 		heap_nuevo->isFree = true;
-		heap_nuevo->size = ultimo_heap->size-tamanio;
-		memcpy(pagina_buscada->datos + pagina_buscada->ultimo_heap_metadata_libre + tamanio,
-				heap_nuevo,sizeof(heap_metadata));
+		heap_nuevo->size = ultimo_heap->size-tamanio-sizeof(heap_metadata);
+		memcpy(pagina_buscada->datos+pagina_buscada->ultimo_heap_metadata_libre+sizeof(heap_metadata)
+				+tamanio,heap_nuevo,sizeof(heap_metadata));
 		ultimo_heap->isFree = false;
 		ultimo_heap->size = tamanio;
-		int offset = configuracion->tam_pag-heap_nuevo->size-sizeof(heap_metadata)-tamanio;
-		direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,offset);
+		int offset_pagina = configuracion->tam_pag-heap_nuevo->size-sizeof(heap_metadata)-tamanio;
+		pagina_buscada->ultimo_heap_metadata_libre += sizeof(heap_metadata)+tamanio;
+		direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,offset_pagina);
 	}
 	else{//=>hay que agrandar el segmento
-		uint32_t lugar_extra_necesario = tamanio-ultimo_heap->size-sizeof(heap_metadata);
+		uint32_t lugar_extra_necesario = tamanio-ultimo_heap->size+sizeof(heap_metadata);
 		uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(lugar_extra_necesario);
 		uint32_t tamanio_paginas_necesarias = paginas_necesarias*configuracion->tam_pag;
 		if(lugar_disponible >= tamanio_paginas_necesarias){//=>hay lugar, reservo las nuevas pags
 			lugar_disponible -= tamanio_paginas_necesarias;
 			//agrego las pagas a la lista del segmento
-			int espacio_libre_ultima_pag = tamanio_paginas_necesarias-tamanio-ultimo_heap->size;
+			int espacio_libre_ultima_pag = tamanio_paginas_necesarias+configuracion->tam_pag
+					-tamanio-sizeof(heap_metadata)*2-pagina_buscada->ultimo_heap_metadata_libre;//guarda!!
 			heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 			heap_nuevo->isFree = true;
 			heap_nuevo->size = espacio_libre_ultima_pag;
@@ -267,14 +239,12 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){//hay q marcar la
 			}
 			for(int i = 0;i<paginas_necesarias;i++){
 				pagina* pagina_nueva = malloc(sizeof(pagina*));
-				pagina_nueva->presencia = false;
 				pagina_nueva->modificado = false;
-				pagina_nueva->num_pagina = pagina_buscada->num_pagina+i;
-				pagina_nueva->datos = asignar_marco_nuevo();
-				if(i==paginas_necesarias-1){
-					//es la ultima pag
+				pagina_nueva->num_pagina = pagina_buscada->num_pagina+1+i;
+				pagina_nueva->presencia = asignar_marco_nuevo(&pagina_nueva->datos);
+				if(i==paginas_necesarias-1){//=>es la ultima pag
 					pagina_nueva->ultimo_heap_metadata_libre =
-							configuracion->tam_pag - espacio_libre_ultima_pag;
+							configuracion->tam_pag-espacio_libre_ultima_pag-sizeof(heap_metadata);
 					memcpy(pagina_nueva->datos+pagina_nueva->ultimo_heap_metadata_libre,
 							heap_nuevo,sizeof(heap_metadata));
 				}
@@ -283,8 +253,8 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){//hay q marcar la
 					//porque la pag va a estar llena
 				}
 				list_add(seg->paginas,pagina_nueva);
-				if(agarrar_direccion_de_primera_pag_agregada){
-					if(i==0){
+				if(i==0){
+					if(agarrar_direccion_de_primera_pag_agregada){
 						direccion_return = obtener_direccion_virtual(
 								seg->num_segmento,pagina_nueva->num_pagina,0);
 					}
@@ -303,8 +273,26 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){//hay q marcar la
 	}
 	return direccion_return;
 }
-void* asignar_marco_nuevo(){
-	//hay que codear esto!!
+_Bool asignar_marco_nuevo(void** destino){
+//	asigno un marco nuevo y lo pongo en @destino
+//	retorno true si esta en upcm y false si esta en swap
+	t_bit* bit_libre = bit_libre_memoria_virtual();
+	if(bit_libre!=NULL){//hay lugar en swap
+		bit_libre->bit_usado = true;
+		*destino = swap + bit_libre->bit_position * configuracion->tam_pag;
+		return false;
+	}
+	else{//destino esta en upcm
+		bit_libre = bit_libre_memoria();
+		if(bit_libre!=NULL){
+			bit_libre->bit_usado = true;
+			*destino = upcm + bit_libre->bit_position * configuracion->tam_pag;
+			return true;
+		}
+		else{
+			return asignar_marco_nuevo(destino);
+		}
+	}
 }
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//num_seg-num_pag-offset-\0
@@ -419,10 +407,43 @@ void ocupate_de_este(int socket){
 				exit_loop = true;
 				break;
 			default:
-				//xd?
+				//xd
 				break;
 		}
 	}
+}
+void init_bitarray(){
+	bitarray = malloc(sizeof(bitarray_nuestro));
+	bitarray->size_memoria = CANT_PAGINAS_MEMORIA;
+	bitarray->bitarray_memoria = list_create();
+	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA; i++){
+		t_bit* bit = malloc(sizeof(t_bit));
+		bit->bit_position = i;
+		bit->bit_usado = false;
+		list_add(bitarray->bitarray_memoria,bit);
+	}
+	bitarray->size_memoria_virtual = CANT_PAGINAS_MEMORIA_VIRTUAL;
+	bitarray->bitarray_memoria_virtual = list_create();
+	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA_VIRTUAL; i++){
+		t_bit* bit = malloc(sizeof(t_bit));
+		bit->bit_position = i;
+		bit->bit_usado = false;
+		list_add(bitarray->bitarray_memoria_virtual,bit);
+	}
+}
+void destroy_bitarray(){
+	list_destroy_and_destroy_elements(bitarray->bitarray_memoria,free);
+	list_destroy_and_destroy_elements(bitarray->bitarray_memoria_virtual,free);
+	free(bitarray);
+}
+t_bit* bit_libre_memoria_virtual(){
+	return list_find(bitarray->bitarray_memoria_virtual,(void*)bit_libre);
+}
+t_bit* bit_libre_memoria(){
+	return list_find(bitarray->bitarray_memoria,(void*)bit_libre);
+}
+_Bool bit_libre(t_bit* bit){
+	return !bit->bit_usado;
 }
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));

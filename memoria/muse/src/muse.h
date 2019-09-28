@@ -40,6 +40,18 @@ typedef struct heap_metadata{
 	_Bool isFree;
 }heap_metadata;
 
+typedef struct {
+	t_list* bitarray_memoria;
+	uint32_t size_memoria;
+	t_list* bitarray_memoria_virtual;
+	uint32_t size_memoria_virtual;
+}bitarray_nuestro;
+
+typedef struct t_bit{
+	bool bit_usado;
+	uint32_t bit_position;
+}t_bit;
+
 typedef struct muse_alloc_t{
 	uint32_t size_id;
 	char* id;
@@ -113,11 +125,16 @@ typedef enum{
 //VARIABLES GLOBALES
 char* path_de_config;
 void* upcm;
+void* swap;
 uint32_t lugar_disponible;
 t_list* tabla_de_segmentos;
 int DIR_TAM_DIRECCION;
 int DIR_TAM_DESPLAZAMIENTO;
 int DIR_TAM_PAGINA;
+int CANT_PAGINAS_MEMORIA;
+int CANT_PAGINAS_MEMORIA_VIRTUAL;
+
+bitarray_nuestro* bitarray;
 
 s_config* configuracion;
 t_config* g_config;
@@ -138,9 +155,8 @@ int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
 segmento* buscar_segmento_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
-t_list* reservar_paginas(uint32_t cantidad_de_paginas);
 int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
-void* asignar_marco_nuevo();
+_Bool asignar_marco_nuevo(void** destino);
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
 int muse_free(muse_free_t* datos);
 int muse_get(muse_get_t* datos);
@@ -150,6 +166,11 @@ int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
 void ocupate_de_este(int socket);
 void esperar_conexion(uint32_t servidor);
+void init_bitarray();
+void destroy_bitarray();
+t_bit* bit_libre_memoria();
+t_bit* bit_libre_memoria_virtual();
+_Bool bit_libre(t_bit* bit);
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);
