@@ -568,6 +568,8 @@ muse_unmap_t* deserializar_muse_unmap(void* magic){
 
 void pruebita(){
 	puts("pruebita uwu");
+//	raise(11); -> asi se manda un segm fault
+//	puts("no llegue?");
 }
 
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){

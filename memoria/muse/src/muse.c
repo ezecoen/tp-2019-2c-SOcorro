@@ -374,7 +374,25 @@ int muse_unmap(muse_unmap_t* datos){
 	return 0;
 }
 _Bool direccion_valida_cliente(int direccion,char* id_cliente){
-
+	int seg,pag,off;
+	abrir_direccion_virtual(direccion,&seg,&pag,&off);
+	if(off >= configuracion->tam_pag){
+		return false;
+	}
+	_Bool numero_de_segmento(segmento* segmento){
+		return segmento->num_segmento == seg;
+	}
+	segmento* segmento_encontrado = list_find(tabla_de_segmentos,(void*)numero_de_segmento);
+	if(segmento_encontrado == NULL){
+		return false;
+	}
+	if(!string_equals_ignore_case(segmento_encontrado->nombre,id_cliente)){
+		return false;
+	}
+	if(list_size(segmento_encontrado->paginas) < pag){
+		return false;
+	}
+	return true;
 }
 uint32_t crear_servidor(uint32_t puerto){
 	/*== creamos el socket ==*/
