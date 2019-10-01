@@ -185,7 +185,6 @@ muse_unmap_t* crear_muse_unmap(char* id, uint32_t direccion);
 void muse_unmap_destroy(muse_unmap_t* mut);
 void* serializar_muse_unmap(muse_unmap_t* mut);
 muse_unmap_t* deserializar_muse_unmap(void* magic);
-void matar_muse(char* ip, int puerto);
 
 
 #endif
