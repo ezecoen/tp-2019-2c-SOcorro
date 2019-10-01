@@ -35,8 +35,6 @@ int muse_init(int id, char* ip, int puerto){
  * Cierra la biblioteca de MUSE.
  */
 void muse_close(){
-	int operacion = MUSE_CLOSE;
-	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
 	puts("Chau muse  :´(");
 }
@@ -48,15 +46,13 @@ void muse_close(){
  */
 uint32_t muse_alloc(uint32_t tam){
 	muse_alloc_t* mat = crear_muse_alloc(tam,muse_id);
-	void* magic = serializar_muse_alloc(mat);
+	void* magic = serializar_muse_alloc(mat); // todos estos hay que liberarlos
 	uint32_t tamanio_magic;
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t direccion;
 	recv(socket_muse,&direccion,4,0);
-	printf("Direccion recibida en libmuse: %d\n",direccion);
-	free(magic);
-	muse_alloc_destroy(mat);
+	printf("direccion recibida: %d\n",direccion);
 	return direccion;
 }
 
@@ -102,13 +98,12 @@ muse_alloc_t* deserializar_muse_alloc(void* magic){
 	puntero+=mat->size_id;
 	memcpy(&mat->tamanio,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
-	free(magic);
 	return mat;
 }
 
 /**
  * Libera una porción de memoria reservada.
- * @param dir La dirección de la memoria a reservar.
+ * @param dir La dirección de la memoria a reservar. // liberar ??
  */
 
 void muse_free(uint32_t dir){
@@ -118,14 +113,12 @@ void muse_free(uint32_t dir){
 		memcpy(&tamanio_magic,magic+4,4);
 		send(socket_muse,magic,tamanio_magic,0);
 		_Bool resultado;
-		recv(socket_muse,&resultado,4,0);
-		// !! si recv = -1 que pasa con resultado? ??
-		if (resultado){
-			printf("free realizado para: %d\n",dir);
+		if (recv(socket_muse,&resultado,4,0) == -1){
+			printf("error al realizar el free para: %d\n",dir);
 
 		}
 		else{
-			printf("error al realizar el free para: %d\n",dir);
+			printf("free realizado para: %d\n",dir);
 		}
 
 }
@@ -173,7 +166,6 @@ muse_free_t* deserializar_muse_free(void* magic){
 	puntero+=mft->size_id;
 	memcpy(&mft->direccion,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
-	free(magic);
 	return mft;
 }
 
@@ -186,20 +178,18 @@ muse_free_t* deserializar_muse_free(void* magic){
  */
 
 int muse_get(void* dst, uint32_t src, size_t n){
-	muse_get_t* mgt = crear_muse_get(n,muse_id,src);
-	void* magic = serializar_muse_get(mgt);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0) == 0){
-		printf("get hecho para : %d\n",src);
-	}
-	else{
-		printf("error en get para : %d\n",src);
-		return -1;
-	}
-
+		muse_get_t* mgt = crear_muse_get(n,muse_id,src);
+		void* magic = serializar_muse_get(mgt);
+		uint32_t tamanio_magic;
+		memcpy(&tamanio_magic,magic+4,4);
+		send(socket_muse,magic,tamanio_magic,0);
+		uint32_t resultado;
+		if(recv(socket_muse,&resultado,4,0) == -1)
+		{
+			printf("error en get para : %d\n",src);
+			return -1;
+		}
+	printf("get hecho para : %d\n",src);
 	return 0;
 }
 
@@ -250,7 +240,6 @@ muse_get_t* deserializar_muse_get(void* magic){
 	puntero+=sizeof(uint32_t);
 	memcpy(&mgt->tamanio,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
-	free(magic);
 	return mgt;
 }
 
@@ -269,16 +258,13 @@ int muse_cpy(uint32_t dst, void* src, int n){
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0) == 0){
-		printf("cpy hecho para : %i\n",resultado);
-	}
-	else{
-		printf("error en cpy para : %i\n",resultado);
+	if(recv(socket_muse,&resultado,4,0) == -1){
+		printf("error en cpy para : %i y %i\n",dst, src);
 		return -1;
 	}
+	printf("cpy hecho para : %i y %i\n",dst, src);
 
 	return 0;
-
 }
 
 muse_cpy_t* crear_muse_cpy(uint32_t tamanio, char* id,uint32_t direccion, void* paquete){
@@ -286,8 +272,10 @@ muse_cpy_t* crear_muse_cpy(uint32_t tamanio, char* id,uint32_t direccion, void* 
 	mct -> id= string_duplicate(id);
 	mct->direccion = direccion;
 	mct->size_id = strlen(id)+1;
-	mct->size_paquete = sizeof(paquete);
-	mct->paquete = paquete;
+	mct->size_paquete = tamanio;
+	void* paquete2 = malloc(mct->size_paquete);
+	memcpy(paquete2,paquete,mct->size_paquete);
+	mct->paquete = paquete2;
 	return mct;
 }
 
@@ -296,7 +284,6 @@ void muse_cpy_destroy(muse_cpy_t* mct){
 	free(mct->paquete);
 	free(mct);
 }
-
 
 void* serializar_muse_cpy(muse_cpy_t* mct){
 	int bytes = sizeof(uint32_t)*3+ mct->size_id + mct->size_paquete + sizeof(uint32_t)*2;
@@ -316,7 +303,7 @@ void* serializar_muse_cpy(muse_cpy_t* mct){
 	puntero += sizeof(uint32_t);
 	memcpy(magic+puntero,&mct->size_paquete,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-	memcpy(magic+puntero,&mct->paquete,mct->size_paquete);
+	memcpy(magic+puntero,mct->paquete,mct->size_paquete);
 	puntero += mct->size_paquete;
 	return magic;
 }
@@ -324,7 +311,6 @@ void* serializar_muse_cpy(muse_cpy_t* mct){
 muse_cpy_t* deserializar_muse_cpy(void* magic){
 	muse_cpy_t* mct = malloc(sizeof(muse_cpy_t));
 	uint32_t puntero = 0;
-	//puntero+=sizeof(uint32_t)*2;
 	memcpy(&mct->size_id,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
 	mct->id = malloc(mct->size_id);
@@ -335,7 +321,7 @@ muse_cpy_t* deserializar_muse_cpy(void* magic){
 	memcpy(&mct->size_paquete,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
 	mct->paquete = malloc(mct->size_paquete); // ?? leaks
-	memcpy(&mct->paquete,magic+puntero,mct->size_paquete);
+	memcpy(mct->paquete,magic+puntero,mct->size_paquete);
 	puntero+=mct->size_paquete;
 	return mct;
 }
@@ -359,16 +345,20 @@ uint32_t muse_map(char *path, size_t length, int flags){
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t posicion_memoria_mapeada;
-	recv(socket_muse,&posicion_memoria_mapeada,4,0);
-
+	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1)
+		{
+		printf("error en map para : %s\n",path);
+		return posicion_memoria_mapeada = 0; // ??
+		};
+	printf("map hecho para : %s\n",path);
 	return posicion_memoria_mapeada;
 }
 
 muse_map_t* crear_muse_map(uint32_t tamanio, char* id, uint32_t flag, char* path){
 	muse_map_t* mmt = malloc(sizeof(muse_map_t));
-	mmt -> id= string_duplicate(id);
+	mmt->id= string_duplicate(id);
 	mmt->size_id = strlen(id)+1;
-	mmt->path = path;
+	mmt->path = string_duplicate(path);
 	mmt->size_path = strlen(path)+1;
 	mmt->tamanio = tamanio;
 	mmt->flag = flag;
@@ -421,7 +411,7 @@ muse_map_t* deserializar_muse_map(void* magic){
 	puntero+=sizeof(uint32_t);
 	memcpy(&mmt->size_path,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
-	mmt->path = malloc(mmt->size_path); // ?? Leaks
+	mmt->path = malloc(mmt->size_path);
 	memcpy(mmt->path,magic+puntero,mmt->size_path);
 	puntero+=mmt->size_path;
 	return mmt;
@@ -441,9 +431,13 @@ int muse_sync(uint32_t addr, size_t len){ // size_t ?? es un int? wtf
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t resultado;
-	recv(socket_muse,&resultado,4,0);
-	// si error -> resultado =-1
-	return resultado;
+	if(recv(socket_muse,&resultado,4,0)==-1)
+		{
+		printf("error en sync\n");
+		return -1;
+
+		}
+	printf("sync realizado\n");
 	return 0;
 }
 
@@ -480,7 +474,6 @@ void* serializar_muse_sync(muse_sync_t* mst){
 	puntero += sizeof(uint32_t);
 	memcpy(magic+puntero,&mst->direccion,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-
 	return magic;
 }
 
@@ -514,9 +507,11 @@ int muse_unmap(uint32_t dir){
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t resultado;
-	recv(socket_muse,&resultado,4,0);
-	// si error -> resultado =-1
-	return resultado;
+	if(recv(socket_muse,&resultado,4,0)==-1) {
+		printf("error en unmap para %i\n",dir);
+		return -1;
+		}
+	printf("unmap realizado para %i\n",dir);
 	return 0;
 }
 
@@ -534,7 +529,7 @@ void muse_unmap_destroy(muse_unmap_t* mut){
 }
 
 void* serializar_muse_unmap(muse_unmap_t* mut){
-	int bytes = sizeof(uint32_t)*2+ mut->size_id + sizeof(uint32_t)*2;
+	int bytes = sizeof(uint32_t)*2 + mut->size_id + sizeof(uint32_t)*2;
 	//2 int de adentro de mat y 2 int de comando y tamaño
 	int comando = MUSE_UNMAP;
 	int puntero = 0;
@@ -549,7 +544,6 @@ void* serializar_muse_unmap(muse_unmap_t* mut){
 	puntero += mut->size_id;
 	memcpy(magic+puntero,&mut->direccion,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-
 	return magic;
 }
 
@@ -577,7 +571,8 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	direccionServidor.sin_port = htons(puerto);
 
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
-	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
+	{
 		printf("Error al conectar a ip %s y puerto %d\n",ip,puerto);
 		return -1;
 	}
@@ -616,11 +611,5 @@ int handshake_muse(int id){
 		puts("Nada de muse :(");
 		return -1;
 	}
-}
-void matar_muse(char* ip, int puerto){
-	int sock = conectar_socket_a(ip,puerto);
-	int lucifer = 666;
-	send(sock,&lucifer,4,0);
-	close(sock);
 }
 
