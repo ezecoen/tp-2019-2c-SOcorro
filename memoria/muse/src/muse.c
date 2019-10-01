@@ -150,7 +150,8 @@ int muse_alloc(muse_alloc_t* datos){
 					pag->modificado = false;
 					pag->num_pagina = i;
 					pag->ultimo_heap_metadata_libre = -1;//todas menos la ultima
-					pag->presencia = asignar_marco_nuevo(&pag->datos);
+					pag->presencia = true;
+					pag->datos = asignar_marco_nuevo();
 					list_add(paginas,pag);
 					if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 						heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
@@ -220,6 +221,7 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 		int offset_pagina = configuracion->tam_pag-heap_nuevo->size-sizeof(heap_metadata)-tamanio;
 		pagina_buscada->ultimo_heap_metadata_libre += sizeof(heap_metadata)+tamanio;
 		direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,offset_pagina);
+		pagina_buscada->modificado = true;
 	}
 	else{//=>hay que agrandar el segmento
 		uint32_t lugar_extra_necesario = tamanio-ultimo_heap->size+sizeof(heap_metadata);
@@ -239,9 +241,10 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 			}
 			for(int i = 0;i<paginas_necesarias;i++){
 				pagina* pagina_nueva = malloc(sizeof(pagina*));
-				pagina_nueva->modificado = false;
+				pagina_nueva->modificado = true;//esta bien??
 				pagina_nueva->num_pagina = pagina_buscada->num_pagina+1+i;
-				pagina_nueva->presencia = asignar_marco_nuevo(&pagina_nueva->datos);
+				pagina_nueva->presencia = true;
+				pagina_nueva->datos = asignar_marco_nuevo();
 				if(i==paginas_necesarias-1){//=>es la ultima pag
 					pagina_nueva->ultimo_heap_metadata_libre =
 							configuracion->tam_pag-espacio_libre_ultima_pag-sizeof(heap_metadata);
@@ -266,6 +269,7 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 			}
 			ultimo_heap->isFree = false;
 			ultimo_heap->size = tamanio;
+			pagina_buscada->modificado = true;//esta bien??
 		}
 		else{//=>no hay lugar
 			return -1;
@@ -273,26 +277,18 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 	}
 	return direccion_return;
 }
-_Bool asignar_marco_nuevo(void** destino){
-//	asigno un marco nuevo y lo pongo en @destino
-//	retorno true si esta en upcm y false si esta en swap
-	t_bit* bit_libre = bit_libre_memoria_virtual();
-	if(bit_libre!=NULL){//hay lugar en swap
-		bit_libre->bit_usado = true;
-		*destino = swap + bit_libre->bit_position * configuracion->tam_pag;
-		return false;
+void* asignar_marco_nuevo(){
+//	retorno un marco nuevo en memoria
+	t_bit* bit_libre = bit_libre_memoria();
+	if(bit_libre == NULL){
+		//no se encontro=>ejecutar algoritmo clock
+		bit_libre = ejecutar_clock_modificado();
 	}
-	else{//destino esta en upcm
-		bit_libre = bit_libre_memoria();
-		if(bit_libre!=NULL){
-			bit_libre->bit_usado = true;
-			*destino = upcm + bit_libre->bit_position * configuracion->tam_pag;
-			return true;
-		}
-		else{
-			return asignar_marco_nuevo(destino);
-		}
-	}
+	return bit_libre;
+}
+t_bit* ejecutar_clock_modificado(){
+	t_bit* bit_return = NULL;
+	return bit_return;
 }
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//num_seg-num_pag-offset-\0
@@ -342,6 +338,46 @@ int muse_sync(muse_sync_t* datos){
 }
 int muse_unmap(muse_unmap_t* datos){
 	return 0;
+}
+uint32_t crear_servidor(uint32_t puerto){
+	/*== creamos el socket ==*/
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = INADDR_ANY;
+	direccionServidor.sin_port = htons(puerto);
+	servidor = socket(AF_INET,SOCK_STREAM,0);
+	/*== socket reusable multiples conexiones==*/
+	uint32_t flag = 1;
+	setsockopt(servidor, SOL_SOCKET,SO_REUSEPORT,&flag,sizeof(flag));
+	/*== inicializamos el socket ==*/
+	if(bind(servidor, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+		perror("Fallo el binde0 del servidor");
+		return 1;
+	}
+	printf("Estoy escuchando en el puerto %d\n",puerto);
+	listen(servidor,SOMAXCONN);
+	return servidor;
+}
+void mandar_char(char* _char, uint32_t _socket,uint32_t com){
+	uint32_t tam = strlen(_char)+1;
+	uint32_t bytes = tam + sizeof(uint32_t)*2;
+	void* magic = malloc(bytes);
+	uint32_t puntero = 0;
+	memcpy(magic+puntero,&com,4);
+	puntero += 4;
+	memcpy(magic+puntero,&tam,4);
+	puntero += 4;
+	memcpy(magic+puntero,_char,tam);
+	puntero += tam;
+	send(_socket,magic,bytes,0);
+	free(magic);
+}
+uint32_t aceptar_cliente(uint32_t servidor){
+	struct sockaddr_in direccion_cliente;
+	uint32_t tamanio_direccion = sizeof(struct sockaddr_in);
+	uint32_t cliente;
+	cliente = accept(servidor,(void*) &direccion_cliente,&tamanio_direccion);
+	puts("conexion recibida!");
+	return cliente;
 }
 void esperar_conexion(uint32_t servidor){
 	uint32_t socket = aceptar_cliente(servidor);
@@ -440,7 +476,12 @@ t_bit* bit_libre_memoria_virtual(){
 	return list_find(bitarray->bitarray_memoria_virtual,(void*)bit_libre);
 }
 t_bit* bit_libre_memoria(){
-	return list_find(bitarray->bitarray_memoria,(void*)bit_libre);
+	//si encuentro uno, ya le pongo como que esta usado
+	t_bit* bit_asignado = list_find(bitarray->bitarray_memoria,(void*)bit_libre);
+	if(bit_asignado!=NULL){
+		bit_asignado->bit_usado = true;
+	}
+	return bit_asignado;
 }
 _Bool bit_libre(t_bit* bit){
 	return !bit->bit_usado;

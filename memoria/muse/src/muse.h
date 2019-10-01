@@ -14,9 +14,9 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
-#include <libreriaComun/libreriaComun.h>
 #include <commons/config.h>
 #include <commons/log.h>
+#include <string.h>
 
 //ESTRUCTURAS
 typedef struct segmento{
@@ -136,6 +136,9 @@ int CANT_PAGINAS_MEMORIA_VIRTUAL;
 
 bitarray_nuestro* bitarray;
 
+struct sockaddr_in direccionServidor;
+uint32_t servidor;
+
 s_config* configuracion;
 t_config* g_config;
 t_log* logg;
@@ -156,7 +159,8 @@ int muse_alloc(muse_alloc_t* datos);
 segmento* buscar_segmento_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
-_Bool asignar_marco_nuevo(void** destino);
+void* asignar_marco_nuevo();
+t_bit* ejecutar_clock_modificado();
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
 int muse_free(muse_free_t* datos);
 int muse_get(muse_get_t* datos);
@@ -164,8 +168,11 @@ int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
-void ocupate_de_este(int socket);
+uint32_t crear_servidor(uint32_t puerto);
+void mandar_char(char* _char, uint32_t _socket,uint32_t com);
+uint32_t aceptar_cliente(uint32_t servidor);
 void esperar_conexion(uint32_t servidor);
+void ocupate_de_este(int socket);
 void init_bitarray();
 void destroy_bitarray();
 t_bit* bit_libre_memoria();
