@@ -35,6 +35,8 @@ int muse_init(int id, char* ip, int puerto){
  * Cierra la biblioteca de MUSE.
  */
 void muse_close(){
+	int operacion = MUSE_CLOSE;
+	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
 	puts("Chau muse  :´(");
 }
@@ -52,7 +54,9 @@ uint32_t muse_alloc(uint32_t tam){
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t direccion;
 	recv(socket_muse,&direccion,4,0);
-	printf("direccion recibida: %d\n",direccion);
+	printf("Direccion recibida en libmuse: %d\n",direccion);
+	free(magic);
+	muse_alloc_destroy(mat);
 	return direccion;
 }
 
@@ -107,19 +111,19 @@ muse_alloc_t* deserializar_muse_alloc(void* magic){
  */
 
 void muse_free(uint32_t dir){
-		muse_free_t* mft = crear_muse_free(muse_id,dir);
-		void* magic = serializar_muse_free(mft);
-		uint32_t tamanio_magic;
-		memcpy(&tamanio_magic,magic+4,4);
-		send(socket_muse,magic,tamanio_magic,0);
-		_Bool resultado;
-		if (recv(socket_muse,&resultado,4,0) == -1){
-			printf("error al realizar el free para: %d\n",dir);
+	muse_free_t* mft = crear_muse_free(muse_id,dir);
+	void* magic = serializar_muse_free(mft);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	_Bool resultado;
+	if (recv(socket_muse,&resultado,4,0) == -1){
+		printf("error al realizar el free para: %d\n",dir);
 
-		}
-		else{
-			printf("free realizado para: %d\n",dir);
-		}
+	}
+	else{
+		printf("free realizado para: %d\n",dir);
+	}
 
 }
 
@@ -178,17 +182,16 @@ muse_free_t* deserializar_muse_free(void* magic){
  */
 
 int muse_get(void* dst, uint32_t src, size_t n){
-		muse_get_t* mgt = crear_muse_get(n,muse_id,src);
-		void* magic = serializar_muse_get(mgt);
-		uint32_t tamanio_magic;
-		memcpy(&tamanio_magic,magic+4,4);
-		send(socket_muse,magic,tamanio_magic,0);
-		uint32_t resultado;
-		if(recv(socket_muse,&resultado,4,0) == -1)
-		{
-			printf("error en get para : %d\n",src);
-			return -1;
-		}
+	muse_get_t* mgt = crear_muse_get(n,muse_id,src);
+	void* magic = serializar_muse_get(mgt);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t resultado;
+	if(recv(socket_muse,&resultado,4,0) == -1){
+		printf("error en get para : %d\n",src);
+		return -1;
+	}
 	printf("get hecho para : %d\n",src);
 	return 0;
 }
@@ -345,11 +348,10 @@ uint32_t muse_map(char *path, size_t length, int flags){
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t posicion_memoria_mapeada;
-	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1)
-		{
+	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
 		printf("error en map para : %s\n",path);
 		return posicion_memoria_mapeada = 0; // ??
-		};
+	}
 	printf("map hecho para : %s\n",path);
 	return posicion_memoria_mapeada;
 }
@@ -431,12 +433,11 @@ int muse_sync(uint32_t addr, size_t len){ // size_t ?? es un int? wtf
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0)==-1)
-		{
+	if(recv(socket_muse,&resultado,4,0)==-1){
 		printf("error en sync\n");
 		return -1;
 
-		}
+	}
 	printf("sync realizado\n");
 	return 0;
 }
@@ -510,7 +511,7 @@ int muse_unmap(uint32_t dir){
 	if(recv(socket_muse,&resultado,4,0)==-1) {
 		printf("error en unmap para %i\n",dir);
 		return -1;
-		}
+	}
 	printf("unmap realizado para %i\n",dir);
 	return 0;
 }
@@ -573,8 +574,7 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	direccionServidor.sin_port = htons(puerto);
 
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
-	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
-	{
+	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0){
 		printf("Error al conectar a ip %s y puerto %d\n",ip,puerto);
 		return -1;
 	}
