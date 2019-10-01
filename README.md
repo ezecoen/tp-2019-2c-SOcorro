@@ -10,11 +10,11 @@
   
   Ejemplo:
   
-    valgrind --show-leak-kinds=all --leak-check=full -v --log-file="memoria.txt" ./memoria
+    valgrind --show-leak-kinds=all --leak-check=full -v --log-file="muse.txt" ./muse muse.config
 
   Helgrind:
   
-    valgrind --tool="helgrind" --log-file="memoriahelgrind.txt" -v ./memoria memoria.config
+    valgrind --tool="helgrind" --log-file="musehelgrind.txt" -v ./muse muse.config
 
 
 ## Para recordar el usuario en el repo:
