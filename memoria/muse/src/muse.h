@@ -106,6 +106,7 @@ typedef struct s_config{
 	uint32_t tam_mem;
 	uint32_t tam_pag;
 	uint32_t tam_swap;
+	char* ip;
 }s_config;
 
 typedef enum{
@@ -138,7 +139,7 @@ bitarray_nuestro* bitarray;
 
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
-
+_Bool staying_alive;//bit para terminar el programa
 s_config* configuracion;
 t_config* g_config;
 t_log* logg;
@@ -162,6 +163,7 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
 void* asignar_marco_nuevo();
 t_bit* ejecutar_clock_modificado();
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
+void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset);
 int muse_free(muse_free_t* datos);
 int muse_get(muse_get_t* datos);
 int muse_cpy(muse_cpy_t* datos);

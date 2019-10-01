@@ -7,30 +7,30 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras();
 
-//	prueba creo segmento 1
-	muse_alloc_t* mat = crear_muse_alloc(1000,"asdasd");
-	int result = muse_alloc(mat);
-	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
-	fflush(stdout);
-//	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(1000,"asdasd1");
-	int result1 = muse_alloc(mat1);
-	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
-//	prueba creo segmento 3
-	muse_alloc_t* mat2 = crear_muse_alloc(500,"asdasd2");
-	int result2 = muse_alloc(mat2);
-	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
-//	prueba uso segmento 3
-	int result3 = muse_alloc(mat2);
-	printf("\nDireccion virtual de %d|%d|%d: %d",2,18,0,result3);
-
-	goto end;//jasdjaja
+////	prueba creo segmento 1
+//	muse_alloc_t* mat = crear_muse_alloc(1000,"asdasd");
+//	int result = muse_alloc(mat);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
+//	fflush(stdout);
+////	prueba creo segmento 2
+//	muse_alloc_t* mat1 = crear_muse_alloc(1000,"asdasd1");
+//	int result1 = muse_alloc(mat1);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
+////	prueba creo segmento 3
+//	muse_alloc_t* mat2 = crear_muse_alloc(500,"asdasd2");
+//	int result2 = muse_alloc(mat2);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
+////	prueba uso segmento 3
+//	int result3 = muse_alloc(mat2);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",2,18,0,result3);
+//
+//	goto end;//jasdjaja
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
-	while(1){
+	while(staying_alive){
 		esperar_conexion(servidor);
 	}
-	end:
+//	end:
 	free_final();
 	return EXIT_SUCCESS;
 }
@@ -48,11 +48,13 @@ void init_estructuras(){
 	DIR_TAM_DESPLAZAMIENTO = log_2((double)configuracion->tam_pag);
 	DIR_TAM_PAGINA = log_2((double)(configuracion->tam_mem+configuracion->tam_swap));
 	DIR_TAM_DIRECCION = DIR_TAM_PAGINA*2+DIR_TAM_DESPLAZAMIENTO;
-	printf("SEG:%d|PAG:%d|OFF:%d=%d",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
+	printf("SEG:%d|PAG:%d|OFF:%d=%d\n",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
 
 	init_bitarray();
+	staying_alive = true;
 }
 int log_2(double n){
+	//testea2
 	//redondea el valor hacia arriba y funciona siempre bien con los bits
      int logValue = 0;
      while (n>1) {
@@ -63,6 +65,7 @@ int log_2(double n){
  }
 void free_final(){
 	free(upcm);
+	free(swap);
 	free(path_de_config);
 	destroy_bitarray();
 	//free tabla de segmentos
@@ -90,11 +93,15 @@ s_config* leer_config(char* path){
 	configuracion->tam_swap = config_get_int_value(g_config,"SWAP_SIZE");
 	log_info(logg,"SWAP_SIZE​: %d",configuracion->tam_swap);
 
+	configuracion->ip = string_duplicate(config_get_string_value(g_config,"IP"));
+	log_info(logg,"IP: %s",configuracion->ip);
+
 	config_destroy(g_config);
 	return configuracion;
 }
 void dec_a_bin(char destino[],int dec,int tam){
-	if (dec >= 0 && dec <= 65535){
+	//testea2
+	if (dec >= 0 && dec <= 2147483647){
 		for(int i = tam-1; i >= 0; i--){
 			if (dec % 2 == 0){
 				destino[i] = '0';
@@ -108,17 +115,18 @@ void dec_a_bin(char destino[],int dec,int tam){
 	destino[tam] = '\0';
 }
 int bin_a_dec(char* binario){
-  char *p = binario;
-  int   r = 0;
+	//testea2
+	char *p = binario;
+	int   r = 0;
 
-  while (p && *p ) {
-    r <<= 1;
-    r += (unsigned int)((*p++) & 0x01);
-  }
-
-  return (int)r;
+	while (p && *p ) {
+		r <<= 1;
+		r += (unsigned int)((*p++) & 0x01);
+	}
+	return (int)r;
 }
 int redondear_double_arriba(double d){
+	//testea2
 	if(d-(int)d!=0){
 		return (int)d + 1;
 	}
@@ -158,6 +166,7 @@ int muse_alloc(muse_alloc_t* datos){
 						heap_nuevo->isFree = false;
 						heap_nuevo->size = datos->tamanio;
 						memcpy(pag->datos,heap_nuevo,sizeof(heap_metadata));
+						free(heap_nuevo);
 					}
 					if(i == cantidad_de_paginas-1){//se agrega el heap siguiente al final
 						heap_metadata* heap_siguiente = malloc(sizeof(heap_metadata));
@@ -166,6 +175,7 @@ int muse_alloc(muse_alloc_t* datos){
 						memcpy(pag->datos+configuracion->tam_pag-
 								espacio_libre_ultima_pag,heap_siguiente,sizeof(heap_metadata));
 						pag->ultimo_heap_metadata_libre=configuracion->tam_pag-espacio_libre_ultima_pag;
+						free(heap_siguiente);
 					}
 				}
 				segmento_nuevo->paginas = paginas;
@@ -284,13 +294,14 @@ void* asignar_marco_nuevo(){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
-	return bit_libre;
+	return upcm + bit_libre->bit_position * configuracion->tam_pag;
 }
 t_bit* ejecutar_clock_modificado(){
 	t_bit* bit_return = NULL;
 	return bit_return;
 }
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
+	//testea2
 	//num_seg-num_pag-offset-\0
 	char resultado[DIR_TAM_DIRECCION+1];
 	char char_segmento[DIR_TAM_PAGINA+1];
@@ -323,7 +334,30 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 int muse_free(muse_free_t* datos){
 	return 0;
 }
-
+void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset){
+	//testea2
+	char binario[DIR_TAM_DIRECCION+1];
+	dec_a_bin(binario,direccion,DIR_TAM_DIRECCION+1);
+	char char_segmento[DIR_TAM_PAGINA+1];
+	char char_pagina[DIR_TAM_PAGINA+1];
+	char char_offset[DIR_TAM_DESPLAZAMIENTO+1];
+	char_segmento[DIR_TAM_PAGINA]='\0';
+	char_pagina[DIR_TAM_PAGINA]='\0';
+	char_offset[DIR_TAM_DESPLAZAMIENTO]='\0';
+	int j = 1;
+	for(int i = 0;i<DIR_TAM_PAGINA;i++,j++){
+		char_segmento[i]=binario[j];
+	}
+	for(int i = 0;i<DIR_TAM_PAGINA;i++,j++){
+		char_pagina[i]=binario[j];
+	}
+	for(int i = 0;i<DIR_TAM_DESPLAZAMIENTO;i++,j++){
+		char_offset[i]=binario[j];
+	}
+	*destino_offset = bin_a_dec(char_offset);
+	*destino_pagina = bin_a_dec(char_pagina);
+	*destino_segmento = bin_a_dec(char_segmento);
+}
 int muse_get(muse_get_t* datos){
 	return 0;
 }
@@ -338,6 +372,9 @@ int muse_sync(muse_sync_t* datos){
 }
 int muse_unmap(muse_unmap_t* datos){
 	return 0;
+}
+_Bool direccion_valida_cliente(int direccion,char* id_cliente){
+
 }
 uint32_t crear_servidor(uint32_t puerto){
 	/*== creamos el socket ==*/
@@ -356,6 +393,18 @@ uint32_t crear_servidor(uint32_t puerto){
 	printf("Estoy escuchando en el puerto %d\n",puerto);
 	listen(servidor,SOMAXCONN);
 	return servidor;
+}
+uint32_t conectar_socket_a(char* ip, uint32_t puerto){
+	struct sockaddr_in direccionServidor;
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = inet_addr(ip);
+	direccionServidor.sin_port = htons(puerto);
+
+	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
+	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+		return -1;
+	}
+	return cliente;
 }
 void mandar_char(char* _char, uint32_t _socket,uint32_t com){
 	uint32_t tam = strlen(_char)+1;
@@ -390,6 +439,7 @@ void ocupate_de_este(int socket){
 	_Bool exit_loop = false;
 	uint32_t operacion;
 	while(recv(socket,&operacion,4,MSG_WAITALL)!=-1 && exit_loop==false){
+		printf("Nuevo pedido de %d\n",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
 				//recibo int pid, crep el char* id y se lo mando
@@ -417,11 +467,13 @@ void ocupate_de_este(int socket){
 				void* vmat = malloc(tam);
 				recv(socket,vmat,tam,0);
 				muse_alloc_t* datos = deserializar_muse_alloc(vmat);
-				uint32_t resultado = muse_alloc(datos);
+				int resultado = muse_alloc(datos);
 				send(socket,&resultado,4,0);
+				printf("mando direccion virtual a %d: %d\n",socket,resultado);
+				muse_alloc_destroy(datos);
+				free(vmat);
 				break;
 			case MUSE_FREE:
-
 				break;
 			case MUSE_GET:
 
@@ -439,7 +491,13 @@ void ocupate_de_este(int socket){
 
 				break;
 			case MUSE_CLOSE:
-				//somethin
+//				si no se libera algun muse_alloc-> es un memory leak
+				printf("Se fue %d\n",socket);
+				exit_loop = true;
+				break;
+			case 666:
+				staying_alive = false;
+				conectar_socket_a(configuracion->ip,configuracion->puerto);
 				exit_loop = true;
 				break;
 			default:
@@ -447,6 +505,7 @@ void ocupate_de_este(int socket){
 				break;
 		}
 	}
+	close(socket);
 }
 void init_bitarray(){
 	bitarray = malloc(sizeof(bitarray_nuestro));

@@ -35,6 +35,8 @@ int muse_init(int id, char* ip, int puerto){
  * Cierra la biblioteca de MUSE.
  */
 void muse_close(){
+	int operacion = MUSE_CLOSE;
+	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
 	puts("Chau muse  :´(");
 }
@@ -52,7 +54,9 @@ uint32_t muse_alloc(uint32_t tam){
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t direccion;
 	recv(socket_muse,&direccion,4,0);
-	printf("direccion recibida: %d\n",direccion);
+	printf("Direccion recibida en libmuse: %d\n",direccion);
+	free(magic);
+	muse_alloc_destroy(mat);
 	return direccion;
 }
 
@@ -612,5 +616,11 @@ int handshake_muse(int id){
 		puts("Nada de muse :(");
 		return -1;
 	}
+}
+void matar_muse(char* ip, int puerto){
+	int sock = conectar_socket_a(ip,puerto);
+	int lucifer = 666;
+	send(sock,&lucifer,4,0);
+	close(sock);
 }
 
