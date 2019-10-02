@@ -332,6 +332,9 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 	return resultado_decimal;
 }
 int muse_free(muse_free_t* datos){
+	if(direccion_valida_cliente(datos->direccion,0,datos->id)){
+//		liberar_direccion_cliente(datos->direccion,datos->id);
+	}
 	return 0;
 }
 void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset){
@@ -373,7 +376,9 @@ int muse_sync(muse_sync_t* datos){
 int muse_unmap(muse_unmap_t* datos){
 	return 0;
 }
-_Bool direccion_valida_cliente(int direccion,char* id_cliente){
+_Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente){
+	//para ver si me paso con los bits/no existe el segmento => segment fault
+	//si no se usa el tamaño => se le pasa 0. testear fuerchi
 	int seg,pag,off;
 	abrir_direccion_virtual(direccion,&seg,&pag,&off);
 	if(off >= configuracion->tam_pag){
@@ -390,6 +395,9 @@ _Bool direccion_valida_cliente(int direccion,char* id_cliente){
 		return false;
 	}
 	if(list_size(segmento_encontrado->paginas) < pag){
+		return false;
+	}
+	if((list_size(segmento_encontrado->paginas)-pag)*configuracion->tam_pag < tamanio+off){
 		return false;
 	}
 	return true;
@@ -603,6 +611,77 @@ muse_alloc_t* deserializar_muse_alloc(void* magic){
 	memcpy(&mat->tamanio,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
 	return mat;
+}
+muse_char* crear_muse_char(char* mensaje, uint32_t size_mensaje){
+	muse_char* mc = malloc(sizeof(muse_char));
+	mc->mensaje = string_duplicate(mensaje);
+	mc->size_mensaje = size_mensaje;
+	return mc;
+}
+void muse_char_destroy(muse_char* mc){
+	free(mc->mensaje);
+	free(mc);
+}
+void* serializar_muse_char(muse_char* mc){
+	int bytes = mc->size_mensaje + sizeof(uint32_t)*3;
+	int comando = MUSE_CHAR;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,&mc->size_mensaje,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,mc->mensaje,mc->size_mensaje,0);
+	puntero += mc->size_mensaje;
+	return magic;
+}
+muse_char* deserializar_muse_char(void* magic){
+	muse_char* mc = malloc(sizeof(muse_char));
+	uint32_t puntero = 0;
+	memcpy(&mc->size_mensaje,magic+puntero,4);
+	puntero += 4;
+	mc->mensaje = malloc(mc->size_mensaje);
+	memcpy(mc->mensaje,magic+puntero,mc->size_mensaje);
+	puntero += mc->size_mensaje;
+	return mc;
+}
+muse_char* crear_muse_void(void* paquete, uint32_t size_paquete){
+	muse_void* mv = malloc(sizeof(muse_void));
+	mv->size_paquete = size_paquete;
+	mv->paquete = malloc(size_paquete);
+	memcpy(mv->paquete,paquete,size_paquete);
+	return mv;
+}
+void muse_void_destroy(muse_void* mv){
+	free(mv->paquete);
+	free(mv);
+}
+void* serializar_muse_void(muse_void* mv){
+	int bytes = mv->size_paquete + sizeof(uint32_t)*3;
+	int comando = MUSE_VOID;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,&mv->size_paquete,4,0);
+	puntero += 4;
+	memcpy(magic+puntero,mv->paquete,mv->size_paquete,0);
+	puntero += mv->size_paquete;
+	return magic;
+}
+muse_void* deserializar_muse_void(void* magic){
+	muse_void* mv = malloc(sizeof(muse_void));
+	uint32_t puntero = 0;
+	memcpy(&mv->size_paquete,magic+puntero,4);
+	puntero += 4;
+	mv->paquete = malloc(mv->size_paquete);
+	memcpy(mv->paquete,magic+puntero,mv->size_paquete);
+	puntero += mv->size_paquete;
+	return mv;
 }
 
 // Sobre asignacion de memoria

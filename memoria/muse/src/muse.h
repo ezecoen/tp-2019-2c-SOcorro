@@ -101,6 +101,16 @@ typedef struct muse_unmap_t{
 	uint32_t direccion;
 }muse_unmap_t;
 
+typedef struct{
+	uint32_t size_mensaje;
+	char* mensaje;
+}muse_char;
+
+typedef struct{
+	uint32_t size_paquete;
+	void* paquete;
+}muse_void;
+
 typedef struct s_config{
 	uint32_t puerto;
 	uint32_t tam_mem;
@@ -110,7 +120,7 @@ typedef struct s_config{
 }s_config;
 
 typedef enum{
-	MUSE_INIT=0,
+	MUSE_INIT=0,//no tiene crear/serializar/etc
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
 	MUSE_GET=3,
@@ -118,9 +128,12 @@ typedef enum{
 	MUSE_MAP=5,
 	MUSE_SYNC=6,
 	MUSE_UNMAP=7,
-	MUSE_CLOSE=8,
-	MUSE_ERROR=9,
-	MUSE_EXITOSO=10
+	MUSE_CLOSE=8,//no tiene crear/serializar/etc
+	MUSE_ERROR=9,//falta
+	MUSE_EXITOSO=10,//falta
+	MUSE_CHAR=11,
+	MUSE_INT=12,//no tiene crear/serializar/etc xq es solo un int de 4bytes
+	MUSE_VOID=13
 }t_comando_muse;
 
 //VARIABLES GLOBALES
@@ -170,6 +183,7 @@ int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
+_Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
 void mandar_char(char* _char, uint32_t _socket,uint32_t com);
 uint32_t aceptar_cliente(uint32_t servidor);
@@ -184,6 +198,38 @@ muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);
 muse_alloc_t* deserializar_muse_alloc(void* magic);
+muse_free_t* crear_muse_free(char* id,uint32_t direccion);
+void muse_free_destroy(muse_free_t* mfr);
+void* serializar_muse_free(muse_free_t* mft);
+muse_free_t* deserializar_muse_free(void* magic);
+muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion);
+void muse_get_destroy(muse_get_t* mgt);
+void* serializar_muse_get(muse_get_t* mgt);
+muse_get_t* deserializar_muse_get(void* magic);
+muse_cpy_t* crear_muse_cpy(uint32_t tamanio, char* id,uint32_t direccion, void* paquete);
+void muse_cpy_destroy(muse_cpy_t* mct);
+void* serializar_muse_cpy(muse_cpy_t* mct);
+muse_cpy_t* deserializar_muse_cpy(void* magic);
+uint32_t muse_map(char *path, size_t length, int flags);
+muse_map_t* crear_muse_map(uint32_t tamanio, char* id, uint32_t flag, char* path);
+void muse_map_destroy(muse_map_t* mmt);
+void* serializar_muse_map(muse_map_t* mmt);
+muse_map_t* deserializar_muse_map(void* magic);
+muse_sync_t* crear_muse_sync(uint32_t tamanio, char* id, uint32_t direccion);
+void muse_sync_destroy(muse_sync_t* mst);
+void* serializar_muse_sync(muse_sync_t* mst);
+muse_unmap_t* crear_muse_unmap(char* id, uint32_t direccion);
+void muse_unmap_destroy(muse_unmap_t* mut);
+void* serializar_muse_unmap(muse_unmap_t* mut);
+muse_unmap_t* deserializar_muse_unmap(void* magic);
+muse_char* crear_muse_char(char* mensaje, uint32_t size_mensaje);
+void muse_char_destroy(muse_char* mc);
+void* serializar_muse_char(muse_char* mc);
+muse_char* deserializar_muse_char(void* magic);
+muse_char* crear_muse_void(void* paquete, uint32_t size_paquete);
+void muse_void_destroy(muse_void* mv);
+void* serializar_muse_void(muse_void* mv);
+muse_void* deserializar_muse_void(void* magic);
 
 
 #endif /* MUSE_H_ */

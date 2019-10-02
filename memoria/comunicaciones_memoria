@@ -14,7 +14,7 @@
 		char* _id
 		int direccion
 	Muse->libMuse:
-		_Bool resultado
+		int resultado
 3: Muse Get
 	libMuse->Muse:  
 		char* _id
@@ -29,7 +29,7 @@
 		int tamaño
 		void* paquete
 	Muse->libMuse:
-		Bool resultado
+		int resultado
 5: Muse Map
 	libMuse->Muse:  
 		char* _id
@@ -50,7 +50,7 @@
 		char* _id
 		int direccion
 	Muse->libMuse:
-		_Bool resultado
+		int resultado
 8: Muse Close:
 	libMuse->Muse:
 		char* _id

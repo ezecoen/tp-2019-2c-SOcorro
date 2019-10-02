@@ -54,8 +54,19 @@ typedef struct{
 	uint32_t direccion;
 }muse_unmap_t;
 
+typedef struct{
+	uint32_t size_mensaje;
+	char* mensaje;
+}muse_char;
+
+typedef struct{
+	uint32_t size_paquete;
+	void* paquete;
+}muse_void;
+
+
 typedef enum{
-	MUSE_INIT=0,
+	MUSE_INIT=0,//no tiene crear/serializar/etc
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
 	MUSE_GET=3,
@@ -63,9 +74,12 @@ typedef enum{
 	MUSE_MAP=5,
 	MUSE_SYNC=6,
 	MUSE_UNMAP=7,
-	MUSE_CLOSE=8,
-	MUSE_ERROR=9,
-	MUSE_EXITOSO=10
+	MUSE_CLOSE=8,//no tiene crear/serializar/etc
+	MUSE_ERROR=9,//falta
+	MUSE_EXITOSO=10,//falta
+	MUSE_CHAR=11,
+	MUSE_INT=12,//no tiene crear/serializar/etc xq es solo un int de 4bytes
+	MUSE_VOID=13
 }t_comando_muse;
 
 //VARIABLES GLOBALES
@@ -185,6 +199,15 @@ muse_unmap_t* crear_muse_unmap(char* id, uint32_t direccion);
 void muse_unmap_destroy(muse_unmap_t* mut);
 void* serializar_muse_unmap(muse_unmap_t* mut);
 muse_unmap_t* deserializar_muse_unmap(void* magic);
+muse_char* crear_muse_char(char* mensaje, uint32_t size_mensaje);
+void muse_char_destroy(muse_char* mc);
+void* serializar_muse_char(muse_char* mc);
+muse_char* deserializar_muse_char(void* magic);
+muse_char* crear_muse_void(void* paquete, uint32_t size_paquete);
+void muse_void_destroy(muse_void* mv);
+void* serializar_muse_void(muse_void* mv);
+muse_void* deserializar_muse_void(void* magic);
+
 
 
 #endif
