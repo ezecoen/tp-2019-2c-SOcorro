@@ -262,10 +262,10 @@ int muse_cpy(uint32_t dst, void* src, int n){
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t resultado;
 	if(recv(socket_muse,&resultado,4,0) == -1){
-		printf("error en cpy para : %i y %i\n",dst, src);
+		printf("error en cpy para : %d y %p\n",dst, src);
 		return -1;
 	}
-	printf("cpy hecho para : %i y %i\n",dst, src);
+	printf("cpy hecho para : %d y %p\n",dst, src);
 
 	return 0;
 }
@@ -575,13 +575,13 @@ void* serializar_muse_char(muse_char* mc){
 	int comando = MUSE_CHAR;
 	int puntero = 0;
 	void* magic = malloc(bytes);
-	memcpy(magic+puntero,&comando,4,0);
+	memcpy(magic+puntero,&comando,4);
 	puntero += 4;
-	memcpy(magic+puntero,&bytes,4,0);
+	memcpy(magic+puntero,&bytes,4);
 	puntero += 4;
-	memcpy(magic+puntero,&mc->size_mensaje,4,0);
+	memcpy(magic+puntero,&mc->size_mensaje,4);
 	puntero += 4;
-	memcpy(magic+puntero,mc->mensaje,mc->size_mensaje,0);
+	memcpy(magic+puntero,mc->mensaje,mc->size_mensaje);
 	puntero += mc->size_mensaje;
 	return magic;
 }
@@ -595,7 +595,7 @@ muse_char* deserializar_muse_char(void* magic){
 	puntero += mc->size_mensaje;
 	return mc;
 }
-muse_char* crear_muse_void(void* paquete, uint32_t size_paquete){
+muse_void* crear_muse_void(void* paquete, uint32_t size_paquete){
 	muse_void* mv = malloc(sizeof(muse_void));
 	mv->size_paquete = size_paquete;
 	mv->paquete = malloc(size_paquete);
@@ -611,13 +611,13 @@ void* serializar_muse_void(muse_void* mv){
 	int comando = MUSE_VOID;
 	int puntero = 0;
 	void* magic = malloc(bytes);
-	memcpy(magic+puntero,&comando,4,0);
+	memcpy(magic+puntero,&comando,4);
 	puntero += 4;
-	memcpy(magic+puntero,&bytes,4,0);
+	memcpy(magic+puntero,&bytes,4);
 	puntero += 4;
-	memcpy(magic+puntero,&mv->size_paquete,4,0);
+	memcpy(magic+puntero,&mv->size_paquete,4);
 	puntero += 4;
-	memcpy(magic+puntero,mv->paquete,mv->size_paquete,0);
+	memcpy(magic+puntero,mv->paquete,mv->size_paquete);
 	puntero += mv->size_paquete;
 	return magic;
 }
