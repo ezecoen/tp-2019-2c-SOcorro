@@ -23,15 +23,13 @@ int main(int argc, char **argv) {
 ////	prueba uso segmento 3
 //	int result3 = muse_alloc(mat2);
 //	printf("\nDireccion virtual de %d|%d|%d: %d",2,18,0,result3);
-//
-	goto end;//jasdjaja
+
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
-	while(staying_alive){
+	while(true){
 		esperar_conexion(servidor);
 	}
-	end:
-	free_final();
+
 	return EXIT_SUCCESS;
 }
 void init_estructuras(){
@@ -51,7 +49,6 @@ void init_estructuras(){
 	printf("SEG:%d|PAG:%d|OFF:%d=%d\n",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
 
 	init_bitarray();
-	staying_alive = true;
 }
 int log_2(double n){
 	//testea2
@@ -64,11 +61,11 @@ int log_2(double n){
      return logValue;
  }
 void free_final(){
-	free(upcm);
-	free(swap);
-	free(path_de_config);
-	destroy_bitarray();
-	//free tabla de segmentos
+//	free(upcm);
+//	free(swap);
+//	free(path_de_config);
+//	destroy_bitarray();
+//	free tabla de segmentos
 }
 void iniciar_log(char* path){//0 es archivo, 1 es consola
 	char* nombre = string_new();
@@ -519,11 +516,6 @@ void ocupate_de_este(int socket){
 			case MUSE_CLOSE:
 //				si no se libera algun muse_alloc-> es un memory leak
 				printf("Se fue %d\n",socket);
-				exit_loop = true;
-				break;
-			case 666://matar programa xd
-				staying_alive = false;
-				conectar_socket_a(configuracion->ip,configuracion->puerto);
 				exit_loop = true;
 				break;
 			default:
