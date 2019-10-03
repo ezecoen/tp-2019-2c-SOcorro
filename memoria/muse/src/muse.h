@@ -182,6 +182,7 @@ int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
+int muse_close(char* id_cliente);
 _Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
 void mandar_char(char* _char, uint32_t _socket,uint32_t com);
