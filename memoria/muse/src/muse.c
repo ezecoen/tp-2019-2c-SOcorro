@@ -362,9 +362,10 @@ void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pa
 	*destino_segmento = bin_a_dec(char_segmento);
 }
 void* muse_get(muse_get_t* datos){
-	return 0;
+	return NULL;
 }
 int muse_cpy(muse_cpy_t* datos){
+//	devuelve 0 si falla
 	return 0;
 }
 int muse_map(muse_map_t* datos){
@@ -552,13 +553,25 @@ void ocupate_de_este(int socket){
 				recv(socket,&tam,4,0);
 				void* vmct = malloc(tam);
 				recv(socket,vmct,tam,0);
-				muse_cpy_t* dmct = deserializar_muse_cpy(vmct);
-				resultado = muse_cpy(dmct);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del cpy %d a: %d\n",socket,resultado);
-				muse_cpy_destroy(dmct);
-				free(vmct);
+				muse_cpy_t* mct = deserializar_muse_cpy(vmct);
+				resultado = muse_cpy(mct);
+				//recive 0 si fallo
+				if(resultado == 0){
+					operacion_respuesta = MUSE_ERROR;
+					send(socket,&respuesta,4,0);
+					free(vmct);
+					muse_cpy_destroy(mct);
+				}
+				else{
+					//funciono
+					operacion_respuesta = MUSE_EXITOSO;
+					send(socket,&respuesta,4,0);
+					free(vmct);
+					muse_cpy_destroy(mct);
+					muse_cpy_destroy(mct);
+					free(vmct);
+				}
+				printf("enviando resolucion del cpy a: %d, resultado: %d\n",socket,resultado);
 				break;
 			case MUSE_MAP:
 				recv(socket,&tam,4,0);

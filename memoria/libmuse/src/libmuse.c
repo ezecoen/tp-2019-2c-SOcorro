@@ -60,7 +60,168 @@ uint32_t muse_alloc(uint32_t tam){
 	muse_alloc_destroy(mat);
 	return direccion;
 }
+/**
+ * Libera una porción de memoria reservada.
+ * @param dir La dirección de la memoria a reservar. // liberar ??
+ */
 
+void muse_free(uint32_t dir){
+	muse_free_t* mft = crear_muse_free(muse_id,dir);
+	void* magic = serializar_muse_free(mft);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	free(magic);
+	muse_free_destroy(mft);
+	uint32_t operacion;
+	recv(socket_muse,&operacion,4,0);
+	if(operacion == MUSE_ERROR){
+		printf("error al realizar el free para: %d\n",dir);
+		raise(11);
+	}
+	else{
+		printf("free realizado para: %d\n",dir);
+	}
+}
+/**
+ * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
+ * @param dst Posición de memoria local con tamaño suficiente para almacenar `n` bytes.
+ * @param src Posición de memoria de MUSE de donde leer los `n` bytes.
+ * @param n Cantidad de bytes a copiar.
+ * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+ */
+
+int muse_get(void* dst, uint32_t src, size_t n){
+	muse_get_t* mgt = crear_muse_get(n,muse_id,src);
+	void* magic = serializar_muse_get(mgt);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	free(magic);
+	muse_get_destroy(mgt);
+	uint32_t resultado;
+	recv(socket_muse,&resultado,4,0);
+	if(resultado==MUSE_VOID){
+		uint32_t size_resultado,size_get;
+		recv(socket_muse,&size_resultado,4,0);
+		void* resultado = malloc(size_resultado);
+		muse_void* mv = deserializar_muse_void(resultado);
+		memcpy(&size_get,mv->size_paquete,4);
+		void* void_get = malloc(size_get);
+		memcpy(void_get,mv->paquete,size_get);
+		free(resultado);
+		muse_void_destroy(mv);
+		printf("get realizado, resultado en %p\n",void_get);
+		return void_get;
+	}
+	else{
+		printf("error al realizar el get en: %d\n",src);
+		raise(11);
+//		return -1? xq hubo segfault... es segfault siempre?!!
+	}
+}
+/**
+ * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
+ * @param dst Posición de memoria de MUSE con tamaño suficiente para almacenar `n` bytes.
+ * @param src Posición de memoria local de donde leer los `n` bytes.
+ * @param n Cantidad de bytes a copiar.
+ * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+ */
+
+int muse_cpy(uint32_t dst, void* src, int n){
+	muse_cpy_t* mct = crear_muse_cpy(n,muse_id,dst,src);
+	void* magic = serializar_muse_cpy(mct);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	free(magic);
+	muse_cpy_destroy(mct);
+	uint32_t operacion;
+	recv(socket_muse,&operacion,4,0);
+	if(operacion == MUSE_ERROR){
+		printf("error al realizar el cpy en: %d\n",dst);
+		raise(11);
+	}
+	else{
+		//entonces operacion es MUSE_EXITOSO
+		//hay q preguntar si segfault y error es lo mismo?
+		printf("cpy realizado en: %d\n",dst);
+	}
+
+
+	return 0;
+}
+/**
+ * Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes el archivo del `path` dado.
+ * @param path Path a un archivo en el FileSystem de MUSE a mappear.
+ * @param length Cantidad de bytes de memoria a usar para mappear el archivo.
+ * @param flags
+ *          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
+ *          MAP_SHARED      El segmento asociado al archivo es compartido.
+ * @return Retorna la posición de memoria de MUSE mappeada.
+ * @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
+ * @note: muse_free no libera la memoria mappeada. @see muse_unmap
+ */
+
+uint32_t muse_map(char *path, size_t length, int flags){
+	muse_map_t* mmt = crear_muse_map(length,muse_id,flags,path);
+	void* magic = serializar_muse_map(mmt);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t posicion_memoria_mapeada;
+	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
+		printf("error en map para : %s\n",path);
+		return posicion_memoria_mapeada = 0; // ??
+	}
+	printf("map hecho para : %s\n",path);
+	return posicion_memoria_mapeada;
+}
+/**
+ * Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+ * @param addr Dirección a memoria mappeada.
+ * @param len Cantidad de bytes a escribir.
+ * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+ * @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+ */
+int muse_sync(uint32_t addr, size_t len){ // size_t ?? es un int? wtf
+	muse_sync_t* mst = crear_muse_sync(len,muse_id,addr);
+	void* magic = serializar_muse_sync(mst);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t resultado;
+	if(recv(socket_muse,&resultado,4,0)==-1){
+		printf("error en sync\n");
+		return -1;
+
+	}
+	printf("sync realizado\n");
+	return 0;
+}
+
+/**
+ * Borra el mappeo a un archivo hecho por muse_map.
+ * @param dir Dirección a memoria mappeada.
+ * @param
+ * @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
+ * @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
+ * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+ */
+int muse_unmap(uint32_t dir){
+	muse_unmap_t* mut = crear_muse_unmap(muse_id,dir);
+	void* magic = serializar_muse_unmap(mut);
+	uint32_t tamanio_magic;
+	memcpy(&tamanio_magic,magic+4,4);
+	send(socket_muse,magic,tamanio_magic,0);
+	uint32_t resultado;
+	if(recv(socket_muse,&resultado,4,0)==-1) {
+		printf("error en unmap para %i\n",dir);
+		return -1;
+	}
+	printf("unmap realizado para %i\n",dir);
+	return 0;
+}
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
 	mat->id = string_duplicate(id);
@@ -106,30 +267,6 @@ muse_alloc_t* deserializar_muse_alloc(void* magic){
 	return mat;
 }
 
-/**
- * Libera una porción de memoria reservada.
- * @param dir La dirección de la memoria a reservar. // liberar ??
- */
-
-void muse_free(uint32_t dir){
-	muse_free_t* mft = crear_muse_free(muse_id,dir);
-	void* magic = serializar_muse_free(mft);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t operacion;
-	recv(socket_muse,&operacion,4,0);
-	if(operacion == MUSE_ERROR){
-		printf("error al realizar el free para: %d\n",dir);
-		raise(11);
-	}
-	else{
-		printf("free realizado para: %d\n",dir);
-		free(magic);
-		muse_free_destroy(mft);
-	}
-
-}
 
 muse_free_t* crear_muse_free(char* id,uint32_t direccion){
 	muse_free_t* mft = malloc(sizeof(muse_free_t));
@@ -178,43 +315,6 @@ muse_free_t* deserializar_muse_free(void* magic){
 }
 
 
-/**
- * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
- * @param dst Posición de memoria local con tamaño suficiente para almacenar `n` bytes.
- * @param src Posición de memoria de MUSE de donde leer los `n` bytes.
- * @param n Cantidad de bytes a copiar.
- * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
- */
-
-int muse_get(void* dst, uint32_t src, size_t n){
-	muse_get_t* mgt = crear_muse_get(n,muse_id,src);
-	void* magic = serializar_muse_get(mgt);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	free(magic);
-	muse_get_destroy(mgt);
-	uint32_t resultado;
-	recv(socket_muse,&resultado,4,0);
-	if(resultado==MUSE_VOID){
-		uint32_t size_resultado,size_get;
-		recv(socket_muse,&size_resultado,4,0);
-		void* resultado = malloc(size_resultado);
-		muse_void* mv = deserializar_muse_void(resultado);
-		memcpy(&size_get,mv->size_paquete,4);
-		void* void_get = malloc(size_get);
-		memcpy(void_get,mv->paquete,size_get);
-		free(resultado);
-		muse_void_destroy(mv);
-		printf("get realizado, resultado en %p\n",void_get);
-		return void_get;
-	}
-	else{
-		printf("error al realizar el get en: %d\n",src);
-		raise(11);
-//		return -1? es segfault siempre?
-	}
-}
 
 muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion){
 	muse_get_t* mgt = malloc(sizeof(muse_get_t));
@@ -266,29 +366,6 @@ muse_get_t* deserializar_muse_get(void* magic){
 	return mgt;
 }
 
-/**
- * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
- * @param dst Posición de memoria de MUSE con tamaño suficiente para almacenar `n` bytes.
- * @param src Posición de memoria local de donde leer los `n` bytes.
- * @param n Cantidad de bytes a copiar.
- * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
- */
-
-int muse_cpy(uint32_t dst, void* src, int n){
-	muse_cpy_t* mgt = crear_muse_cpy(n,muse_id,dst,src);
-	void* magic = serializar_muse_cpy(mgt);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0) == -1){
-		printf("error en cpy para : %d y %p\n",dst, src);
-		return -1;
-	}
-	printf("cpy hecho para : %d y %p\n",dst, src);
-
-	return 0;
-}
 
 muse_cpy_t* crear_muse_cpy(uint32_t tamanio, char* id,uint32_t direccion, void* paquete){
 	muse_cpy_t* mct = malloc(sizeof(muse_cpy_t));
@@ -349,32 +426,6 @@ muse_cpy_t* deserializar_muse_cpy(void* magic){
 	return mct;
 }
 
-/**
- * Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes el archivo del `path` dado.
- * @param path Path a un archivo en el FileSystem de MUSE a mappear.
- * @param length Cantidad de bytes de memoria a usar para mappear el archivo.
- * @param flags
- *          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
- *          MAP_SHARED      El segmento asociado al archivo es compartido.
- * @return Retorna la posición de memoria de MUSE mappeada.
- * @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
- * @note: muse_free no libera la memoria mappeada. @see muse_unmap
- */
-
-uint32_t muse_map(char *path, size_t length, int flags){
-	muse_map_t* mmt = crear_muse_map(length,muse_id,flags,path);
-	void* magic = serializar_muse_map(mmt);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t posicion_memoria_mapeada;
-	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
-		printf("error en map para : %s\n",path);
-		return posicion_memoria_mapeada = 0; // ??
-	}
-	printf("map hecho para : %s\n",path);
-	return posicion_memoria_mapeada;
-}
 
 muse_map_t* crear_muse_map(uint32_t tamanio, char* id, uint32_t flag, char* path){
 	muse_map_t* mmt = malloc(sizeof(muse_map_t));
@@ -439,28 +490,6 @@ muse_map_t* deserializar_muse_map(void* magic){
 	return mmt;
 }
 
-/**
- * Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
- * @param addr Dirección a memoria mappeada.
- * @param len Cantidad de bytes a escribir.
- * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
- * @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
- */
-int muse_sync(uint32_t addr, size_t len){ // size_t ?? es un int? wtf
-	muse_sync_t* mst = crear_muse_sync(len,muse_id,addr);
-	void* magic = serializar_muse_sync(mst);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0)==-1){
-		printf("error en sync\n");
-		return -1;
-
-	}
-	printf("sync realizado\n");
-	return 0;
-}
 
 
 muse_sync_t* crear_muse_sync(uint32_t tamanio, char* id, uint32_t direccion){
@@ -513,28 +542,6 @@ muse_sync_t* deserializar_muse_sync(void* magic){
 	return mst;
 }
 
-/**
- * Borra el mappeo a un archivo hecho por muse_map.
- * @param dir Dirección a memoria mappeada.
- * @param
- * @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
- * @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
- * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
- */
-int muse_unmap(uint32_t dir){
-	muse_unmap_t* mut = crear_muse_unmap(muse_id,dir);
-	void* magic = serializar_muse_unmap(mut);
-	uint32_t tamanio_magic;
-	memcpy(&tamanio_magic,magic+4,4);
-	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0)==-1) {
-		printf("error en unmap para %i\n",dir);
-		return -1;
-	}
-	printf("unmap realizado para %i\n",dir);
-	return 0;
-}
 
 muse_unmap_t* crear_muse_unmap(char* id, uint32_t direccion){
 	muse_unmap_t* mut = malloc(sizeof(muse_unmap_t));
