@@ -152,7 +152,6 @@ bitarray_nuestro* bitarray;
 
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
-_Bool staying_alive;//bit para terminar el programa
 s_config* configuracion;
 t_config* g_config;
 t_log* logg;
