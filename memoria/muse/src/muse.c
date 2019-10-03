@@ -270,6 +270,7 @@ int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio){
 								seg->num_segmento,pagina_nueva->num_pagina,0);
 					}
 				}
+				//restar espacio memoria
 			}
 			if(!agarrar_direccion_de_primera_pag_agregada){//=>tengo que llenar direccion_return
 				direccion_return = obtener_direccion_virtual(seg->num_segmento,pagina_buscada->num_pagina,
@@ -496,7 +497,6 @@ void ocupate_de_este(int socket){
 				printf("mando direccion virtual a %d: %d\n",socket,resultado);
 				muse_alloc_destroy(datos);
 				free(vmat);
-
 				break;
 			case MUSE_FREE:;
 				uint32_t tam;
@@ -505,7 +505,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
 				int resultado = muse_free(dmft);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del free %d a: %d\n",socket,resultado);
 				muse_free_destroy(dmft);
@@ -518,7 +518,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmgt,tam,0);
 				muse_get_t* dmgt = deserializar_muse_get(vmgt);
 				int resultado = muse_get(dmgt);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del get %d a: %d\n",socket,resultado);
 				muse_get_destroy(dmgt);
@@ -531,7 +531,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmct,tam,0);
 				muse_cpy_t* dmct = deserializar_muse_cpy(vmct);
 				int resultado = muse_cpy(dmct);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del cpy %d a: %d\n",socket,resultado);
 				muse_cpy_destroy(dmct);
@@ -544,7 +544,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmmt,tam,0);
 				muse_map_t* dmmt = deserializar_muse_map(vmmt);
 				int resultado = muse_map(dmmt);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del map %d a: %d\n",socket,resultado);
 				muse_map_destroy(dmmt);
@@ -557,7 +557,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmst,tam,0);
 				muse_sync_t* dmst = deserializar_muse_sync(vmst);
 				int resultado = muse_sync(dmst);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del sync %d a: %d\n",socket,resultado);
 				muse_sync_destroy(dmst);
@@ -570,7 +570,7 @@ void ocupate_de_este(int socket){
 				recv(socket,vmut,tam,0);
 				muse_unmap_t* dmut = deserializar_muse_unmap(vmut);
 				int resultado = muse_unmap(dmut);
-				//devuelve si esta todo ok o no
+				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
 				printf("enviando resolucion del unmap %d a: %d\n",socket,resultado);
 				muse_unmap_destroy(dmut);
