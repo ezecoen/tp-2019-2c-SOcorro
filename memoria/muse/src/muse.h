@@ -177,7 +177,7 @@ t_bit* ejecutar_clock_modificado();
 int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
 void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset);
 int muse_free(muse_free_t* datos);
-int muse_get(muse_get_t* datos);
+void* muse_get(muse_get_t* datos);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);

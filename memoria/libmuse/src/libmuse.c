@@ -52,7 +52,8 @@ uint32_t muse_alloc(uint32_t tam){
 	uint32_t tamanio_magic;
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
-	uint32_t direccion;
+	uint32_t comando, direccion;
+	recv(socket_muse,&comando,4,0);
 	recv(socket_muse,&direccion,4,0);
 	printf("Direccion recibida en libmuse: %d\n",direccion);
 	free(magic);
@@ -116,13 +117,16 @@ void muse_free(uint32_t dir){
 	uint32_t tamanio_magic;
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
-	_Bool resultado;
-	if (recv(socket_muse,&resultado,4,0) == -1){
+	uint32_t operacion;
+	recv(socket_muse,&operacion,4,0);
+	if(operacion == MUSE_ERROR){
 		printf("error al realizar el free para: %d\n",dir);
-
+		raise(11);
 	}
 	else{
 		printf("free realizado para: %d\n",dir);
+		free(magic);
+		muse_free_destroy(mft);
 	}
 
 }
@@ -173,10 +177,11 @@ muse_free_t* deserializar_muse_free(void* magic){
 	return mft;
 }
 
+
 /**
- * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
- * @param dst Posición de memoria de MUSE con tamaño suficiente para almacenar `n` bytes.
- * @param src Posición de memoria local de donde leer los `n` bytes.
+ * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
+ * @param dst Posición de memoria local con tamaño suficiente para almacenar `n` bytes.
+ * @param src Posición de memoria de MUSE de donde leer los `n` bytes.
  * @param n Cantidad de bytes a copiar.
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */
@@ -187,13 +192,28 @@ int muse_get(void* dst, uint32_t src, size_t n){
 	uint32_t tamanio_magic;
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
+	free(magic);
+	muse_get_destroy(mgt);
 	uint32_t resultado;
-	if(recv(socket_muse,&resultado,4,0) == -1){
-		printf("error en get para : %d\n",src);
-		return -1;
+	recv(socket_muse,&resultado,4,0);
+	if(resultado==MUSE_VOID){
+		uint32_t size_resultado,size_get;
+		recv(socket_muse,&size_resultado,4,0);
+		void* resultado = malloc(size_resultado);
+		muse_void* mv = deserializar_muse_void(resultado);
+		memcpy(&size_get,mv->size_paquete,4);
+		void* void_get = malloc(size_get);
+		memcpy(void_get,mv->paquete,size_get);
+		free(resultado);
+		muse_void_destroy(mv);
+		printf("get realizado, resultado en %p\n",void_get);
+		return void_get;
 	}
-	printf("get hecho para : %d\n",src);
-	return 0;
+	else{
+		printf("error al realizar el get en: %d\n",src);
+		raise(11);
+//		return -1? es segfault siempre?
+	}
 }
 
 muse_get_t* crear_muse_get(uint32_t tamanio, char* id,uint32_t direccion){
@@ -247,9 +267,9 @@ muse_get_t* deserializar_muse_get(void* magic){
 }
 
 /**
- * Copia una cantidad `n` de bytes desde una posición de memoria de MUSE a una `dst` local.
- * @param dst Posición de memoria local con tamaño suficiente para almacenar `n` bytes.
- * @param src Posición de memoria de MUSE de donde leer los `n` bytes.
+ * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
+ * @param dst Posición de memoria de MUSE con tamaño suficiente para almacenar `n` bytes.
+ * @param src Posición de memoria local de donde leer los `n` bytes.
  * @param n Cantidad de bytes a copiar.
  * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
  */

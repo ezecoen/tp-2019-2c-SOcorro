@@ -331,6 +331,7 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 	return resultado_decimal;
 }
 int muse_free(muse_free_t* datos){
+//	retorna 0 si falla
 	if(direccion_valida_cliente(datos->direccion,0,datos->id)){
 //		liberar_direccion_cliente(datos->direccion,datos->id);
 	}
@@ -360,7 +361,7 @@ void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pa
 	*destino_pagina = bin_a_dec(char_pagina);
 	*destino_segmento = bin_a_dec(char_segmento);
 }
-int muse_get(muse_get_t* datos){
+void* muse_get(muse_get_t* datos){
 	return 0;
 }
 int muse_cpy(muse_cpy_t* datos){
@@ -462,10 +463,10 @@ void esperar_conexion(uint32_t servidor){
 }
 void ocupate_de_este(int socket){
 	_Bool exit_loop = false;
-	uint32_t tam;
-	uint32_t resultado;
-	uint32_t operacion;
-	while(recv(socket,&operacion,4,MSG_WAITALL)!=-1 && exit_loop==false){
+	uint32_t tam, operacion_respuesta, resultado, operacion;
+	char* id_cliente;
+	void* respuesta;
+	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
 		printf("Nuevo pedido de %d\n",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
@@ -484,7 +485,6 @@ void ocupate_de_este(int socket){
 				string_append(&id,pid_char);
 				log_info(logg,"nuevo cliente, id: %s",id);
 				mandar_char(id,socket,operacion);
-				//hay q liberar lo de sockaddr_in?
 				free(pid_char);
 				free(id);
 				break;
@@ -494,8 +494,13 @@ void ocupate_de_este(int socket){
 				recv(socket,vmat,tam,0);
 				muse_alloc_t* datos = deserializar_muse_alloc(vmat);
 				resultado = muse_alloc(datos);
-				send(socket,&resultado,4,0);
+				respuesta = malloc(8);
+				operacion_respuesta = MUSE_INT;
+				memcpy(respuesta,&operacion_respuesta,4);
+				memcpy(respuesta+4,&resultado,4);
+				send(socket,respuesta,8,0);
 				printf("mando direccion virtual a %d: %d\n",socket,resultado);
+				free(respuesta);
 				muse_alloc_destroy(datos);
 				free(vmat);
 				break;
@@ -505,9 +510,15 @@ void ocupate_de_este(int socket){
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
 				resultado = muse_free(dmft);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del free %d a: %d\n",socket,resultado);
+				if(resultado == 0){
+					operacion_respuesta = MUSE_ERROR;
+				}
+				else{
+					operacion_respuesta = MUSE_EXITOSO;
+				}
+				memcpy(respuesta,&operacion_respuesta,4);
+				send(socket,&operacion_respuesta,4,0);
+				printf("haciendo free de %d, resultado: %d\n",socket,resultado);
 				muse_free_destroy(dmft);
 				free(vmft);
 				break;
@@ -516,10 +527,24 @@ void ocupate_de_este(int socket){
 				void* vmgt = malloc(tam);
 				recv(socket,vmgt,tam,0);
 				muse_get_t* dmgt = deserializar_muse_get(vmgt);
-				resultado = muse_get(dmgt);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del get %d a: %d\n",socket,resultado);
+				void* resultado_get = muse_get(dmgt);
+				//devuelve el void* resultado
+				if(resultado_get !=NULL){
+					muse_void* mv = crear_muse_void(resultado_get,dmgt->tamanio);
+					respuesta = serializar_muse_void(mv);
+					uint32_t tamaño_respuesta;
+					memcpy(&tamaño_respuesta,respuesta+4,4);
+					send(socket,respuesta,tamaño_respuesta);
+					printf("enviando resolucion del get a: %d\n",socket);
+					free(resultado_get);
+					free(respuesta);
+					muse_void_destroy(mv);
+				}
+				else{
+//					hay que pensar si todos los errores son segm fault!!??
+					operacion_respuesta = MUSE_ERROR;
+					send(socket,&operacion_respuesta,4,0);
+				}
 				muse_get_destroy(dmgt);
 				free(vmgt);
 				break;

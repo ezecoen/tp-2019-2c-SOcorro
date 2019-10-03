@@ -13,13 +13,12 @@ int main(void) {
 	iniciar_log();
 	leer_config();
 	pruebita();
-//	int init = muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
-//	if(init==0){
-//		int direccion = muse_alloc(1000);
-//		printf("Direccion recibida en prueba: %d\n",direccion);
-//	}
-//	muse_close();
-//	matar_muse(configuracion->ip_muse,configuracion->puerto_muse);
+	int init = muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
+	if(init==0){
+		int direccion = muse_alloc(1000);
+		printf("Direccion recibida en prueba: %d\n",direccion);
+	}
+	muse_close();
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola
