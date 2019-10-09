@@ -36,18 +36,16 @@ int main(int argc, char **argv) {
 void init_estructuras(){
 	upcm = malloc(configuracion->tam_mem);
 	swap = malloc(configuracion->tam_swap);//provisorio
-	tabla_de_segmentos = list_create();
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
-
+	tabla_de_programas = list_create();
 	CANT_PAGINAS_MEMORIA = redondear_double_arriba((double)configuracion->tam_mem/
 			(double)configuracion->tam_pag);
 	CANT_PAGINAS_MEMORIA_VIRTUAL = redondear_double_arriba((double)configuracion->tam_swap/
 			(double)configuracion->tam_pag);
 
 	DIR_TAM_DESPLAZAMIENTO = log_2((double)configuracion->tam_pag);
-	DIR_TAM_PAGINA = log_2((double)(configuracion->tam_mem+configuracion->tam_swap));
-	DIR_TAM_DIRECCION = DIR_TAM_PAGINA*2+DIR_TAM_DESPLAZAMIENTO;
-	printf("SEG:%d|PAG:%d|OFF:%d=%d\n",DIR_TAM_PAGINA,DIR_TAM_PAGINA,DIR_TAM_DESPLAZAMIENTO,DIR_TAM_DIRECCION);
+	DIR_TAM_DIRECCION = 32;
+	DIR_TAM_PAGINA = DIR_TAM_DIRECCION - DIR_TAM_DESPLAZAMIENTO;
 
 	init_bitarray();
 }
@@ -61,13 +59,7 @@ int log_2(double n){
      }
      return logValue;
  }
-void free_final(){
-//	free(upcm);
-//	free(swap);
-//	free(path_de_config);
-//	destroy_bitarray();
-//	free tabla de segmentos
-}
+
 void iniciar_log(char* path){//0 es archivo, 1 es consola
 	char* nombre = string_new();
 	string_append(&nombre,path);
@@ -132,28 +124,34 @@ int redondear_double_arriba(double d){
 		return (int)d;
 	}
 }
+t_list* traer_tabla_de_segmentos(char* id_programa){
+	_Bool id_programa_igual(programa_t* programa){
+		return string_equals_ignore_case(programa->id_programa,id_programa);
+	}
+	programa_t* programa_buscado = list_find(tabla_de_programas,(void*)id_programa_igual);
+	return programa_buscado->tabla_de_segmentos;
+}
 int muse_alloc(muse_alloc_t* datos){
 	//me fijo si hay lugar disponible
+	uint32_t direccion_return = 0;
 	if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
-		//busco si ya existe un segmento del que me pidio memoria
-		segmento* segmento_buscado = buscar_segmento_por_id(datos->id);
-		uint32_t direccion_return = 0;
-		if(segmento_buscado==NULL){//hay q crear el segmento
-			uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(
-					datos->tamanio+sizeof(heap_metadata)*2);
+		//busco si ya tengo algun segmento
+		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+		if(list_is_empty(tabla_de_segmentos)){
+			//hay que crear el 1er segmento
+			uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
 			segmento* segmento_nuevo = malloc(sizeof(segmento));
 			segmento_nuevo->compartido = false;
 			segmento_nuevo->mmapeado = false;
 			segmento_nuevo->nombre = string_duplicate(datos->id);
 
-			int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-
-					datos->tamanio-sizeof(heap_metadata)*2;
+			int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-datos->tamanio-sizeof(heap_metadata)*2;
 			t_list* paginas = list_create();
 			if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
 				lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
 				for(int i = 0;i<cantidad_de_paginas;i++){
 					pagina* pag = malloc(sizeof(pagina));
-					pag->modificado = false;
+					pag->modificado = false;//??
 					pag->num_pagina = i;
 					pag->ultimo_heap_metadata_libre = -1;//todas menos la ultima
 					pag->presencia = true;
@@ -179,16 +177,35 @@ int muse_alloc(muse_alloc_t* datos){
 				segmento_nuevo->paginas = paginas;
 				segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
 				list_add(tabla_de_segmentos,segmento_nuevo);
-				direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,8);//tamanio heap
+				direccion_return = 8;//xq es el tamaño de un heap_metadata
 			}
 			else{
-				//se pudre to2 xd
-				return 0;
+				//no hay lugar en el sistema
+				return -1;
+			}
+
+		}
+		else{
+			//tabla de segmentos no esta vacia
+			segmento* segmento_buscado = buscar_segmento_con_espacio(tabla_de_segmentos,datos->tamanio+sizeof(heap_metadata));
+			if(segmento_buscado == NULL){
+				segmento* ultimo_segmento = list_get(tabla_de_segmentos,list_size(tabla_de_segmentos));
+				if(!ultimo_segmento->mmapeado){
+					//se puede agrandar
+				}
+				else{
+					//no se puede agrandar, hay que crear uno nuevo
+				}
+			}
+			else{
+				//entra en segmento_buscado
 			}
 		}
-		else{//=>se encontro un segmento que pertenece a ese id...
-			direccion_return = reservar_lugar_en_segmento(segmento_buscado,datos->tamanio);
-		}
+
+
+
+
+
 		//retorno la direccion de memoria (virtual) que le asigne
 		return direccion_return;
 	}
@@ -196,11 +213,8 @@ int muse_alloc(muse_alloc_t* datos){
 		return 0;
 	}
 }
-segmento* buscar_segmento_por_id(char* id){
-	_Bool segmento_igual(segmento* seg){
-		return string_equals_ignore_case(seg->nombre,id);
-	}
-	return list_find(tabla_de_segmentos,(void*)segmento_igual);
+segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio){
+	//codear xd!!
 }
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	uint32_t pags = tamanio/configuracion->tam_pag;
@@ -296,10 +310,11 @@ void* asignar_marco_nuevo(){
 	return upcm + bit_libre->bit_position * configuracion->tam_pag;
 }
 t_bit* ejecutar_clock_modificado(){
+	//falta codear!!
 	t_bit* bit_return = NULL;
 	return bit_return;
 }
-int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
+int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//testea2
 	//num_seg-num_pag-offset-\0
 	char resultado[DIR_TAM_DIRECCION+1];
@@ -332,12 +347,10 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 }
 int muse_free(muse_free_t* datos){
 //	retorna 0 si falla
-	if(direccion_valida_cliente(datos->direccion,0,datos->id)){
-//		liberar_direccion_cliente(datos->direccion,datos->id);
-	}
+
 	return 0;
 }
-void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset){
+void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset){
 	//testea2
 	char binario[DIR_TAM_DIRECCION+1];
 	dec_a_bin(binario,direccion,DIR_TAM_DIRECCION+1);
@@ -362,6 +375,50 @@ void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pa
 	*destino_segmento = bin_a_dec(char_segmento);
 }
 void* muse_get(muse_get_t* datos){
+	void* resultado_get;
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado!=NULL){
+		//encontro un segmento, hay que buscar la direccion ahi adentro
+		//if(cayo en un heap) => se pudre to2?
+		//seguro hay que ir rocorriendo to2 el segmento y analizar en que heap cae la consulta
+	}
+	else{
+		resultado_get = NULL;
+	}
+	return resultado_get;
+}
+segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
+	//codear xd!!
+	return NULL;
+}
+segmento* buscar_segmento_por_numero(t_list* tabla_de_segmentos,uint32_t dir_segmento,char* id){
+	_Bool numero_de_segmento_igual(segmento* segmento){
+		return segmento->num_segmento == dir_segmento;
+	}
+	segmento* segmento_buscado = list_find(tabla_de_segmentos,(void*)numero_de_segmento_igual);
+//	si no se encuentra ninguno, segmento_buscado queda en NULL
+	if(segmento_buscado != NULL){
+		if(string_contains(segmento_buscado->nombre,id)){
+			return segmento_buscado;
+		}
+		else{
+			return NULL;
+		}
+	}
+	return segmento_buscado;
+}
+void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset){
+//hay que buscar la pagina, buscar el heap_metadata en el que esta la direccion buscada, ver el tamanio y si no se pasa=>traerla
+	_Bool numero_de_pagina(pagina* pag){
+		return pag->num_pagina == dir_pagina;
+	}
+	pagina* pagina_buscada = list_find(segmento_buscado->paginas,(void*)numero_de_pagina);
+	if(!pagina_buscada->presencia){//=> la traigo a memoria
+		ejecutar_clock_modificado();//hay q codearlo
+	}
+	//aca ya tendria en memoria la pagina. podria necesitar mas... hay q pensarlo
+
 	return NULL;
 }
 int muse_cpy(muse_cpy_t* datos){
@@ -379,32 +436,6 @@ int muse_unmap(muse_unmap_t* datos){
 }
 int muse_close(char* id_cliente){
 	return 0;
-}
-_Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente){
-	//para ver si me paso con los bits/no existe el segmento => segment fault
-	//si no se usa el tamanio => se le pasa 0. testear fuerchi
-	int seg,pag,off;
-	abrir_direccion_virtual(direccion,&seg,&pag,&off);
-	if(off >= configuracion->tam_pag){
-		return false;
-	}
-	_Bool numero_de_segmento(segmento* segmento){
-		return segmento->num_segmento == seg;
-	}
-	segmento* segmento_encontrado = list_find(tabla_de_segmentos,(void*)numero_de_segmento);
-	if(segmento_encontrado == NULL){
-		return false;
-	}
-	if(!string_equals_ignore_case(segmento_encontrado->nombre,id_cliente)){
-		return false;
-	}
-	if(list_size(segmento_encontrado->paginas) < pag){
-		return false;
-	}
-	if((list_size(segmento_encontrado->paginas)-pag)*configuracion->tam_pag < tamanio+off){
-		return false;
-	}
-	return true;
 }
 uint32_t crear_servidor(uint32_t puerto){
 	/*== creamos el socket ==*/
@@ -479,18 +510,21 @@ void ocupate_de_este(int socket){
 				recv(socket,&pid,4,0);
 				char* pid_char = string_itoa(pid);
 				//hay q conseguir la ip de el cliente xd
-				char* id = string_new();
+				id_cliente = string_new();
 				struct sockaddr_in addr;
 				uint32_t addrlen = sizeof(addr);
 				getpeername(socket, (struct sockaddr *)&addr, &addrlen);
 				char* ip = inet_ntoa(addr.sin_addr);
-				string_append(&id,ip);
-				string_append(&id,"-");
-				string_append(&id,pid_char);
-				log_info(logg,"nuevo cliente, id: %s",id);
-				mandar_char(id,socket,operacion);
+				string_append(&id_cliente,ip);
+				string_append(&id_cliente,"-");
+				string_append(&id_cliente,pid_char);
+				log_info(logg,"nuevo cliente, id: %s",id_cliente);
+				mandar_char(id_cliente,socket,operacion);
+				programa_t* programa = malloc(sizeof(programa_t));
+				programa->tabla_de_segmentos = list_create();
+				programa->id_programa = id_cliente;
+				list_add(tabla_de_programas,programa);
 				free(pid_char);
-				free(id);
 				break;
 			case MUSE_ALLOC:;
 				recv(socket,&tam,4,0);
@@ -614,6 +648,7 @@ void ocupate_de_este(int socket){
 				break;
 			case MUSE_CLOSE:;
 //				si no se libera algun muse_alloc-> es un memory leak
+			//liberar tabla de programas
 				resultado = muse_close(id_cliente);
 				printf("Se fue %d\n",socket);
 				exit_loop = true;

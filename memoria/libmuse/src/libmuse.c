@@ -19,14 +19,16 @@
  *  el ID del proceso/hilo según "IP-ID".
  */
 int muse_init(int id, char* ip, int puerto){
-	int sock = conectar_socket_a(ip,puerto);
-	if(sock == -1){
-		puts("Nada de muse :(");
-		return -1;
+	if(iniciado < 0){
+		int sock = conectar_socket_a(ip,puerto);
+		if(sock == -1){
+			puts("Nada de muse :(");
+			return -1;
+		}
+		socket_muse = sock;
+		muse_id = string_new();
+		iniciado = handshake_muse(id);//aca se setea muse_id
 	}
-	socket_muse = sock;
-	muse_id = string_new();
-	int iniciado = handshake_muse(id);//aca se setea muse_id
 	//falta cerrar el sock
 	return iniciado;
 }
@@ -35,9 +37,11 @@ int muse_init(int id, char* ip, int puerto){
  * Cierra la biblioteca de MUSE.
  */
 void muse_close(){
+	//si no se hizo init explota?
 	int operacion = MUSE_CLOSE;
 	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
+	iniciado = -1;
 	puts("Chau muse  :´(");
 }
 
