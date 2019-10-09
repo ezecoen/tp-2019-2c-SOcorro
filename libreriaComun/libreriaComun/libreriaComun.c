@@ -8,7 +8,7 @@
 //	void* buffer = malloc(pack_size);
 //	recv(socket,buffer,pack_size,0);
 
-uint32_t crear_servidor(uint32_t puerto){
+int crear_servidor(int puerto){
 	/*== creamos el socket ==*/
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
@@ -22,7 +22,7 @@ uint32_t crear_servidor(uint32_t puerto){
 		perror("Fallo el binde0 del servidor");
 		return 1;
 	}
-	printf("Estoy escuchando en el puerto %d\n",puerto);
+	log_info(logger,"Estoy escuchando en el puerto %d\n",puerto);
 	listen(servidor,SOMAXCONN);
 	return servidor;
 }
@@ -165,12 +165,11 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	}
 	return cliente;
 }
-uint32_t aceptar_cliente(uint32_t servidor){
+int aceptar_cliente(int servidor){
 	struct sockaddr_in direccion_cliente;
 	uint32_t tamanio_direccion = sizeof(struct sockaddr_in);
 	uint32_t cliente;
 	cliente = accept(servidor,(void*) &direccion_cliente,&tamanio_direccion);
-	puts("conexion recibida!");
 	return cliente;
 }
 uint64_t timestamp(){
