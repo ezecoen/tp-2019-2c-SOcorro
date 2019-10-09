@@ -179,7 +179,7 @@ int muse_alloc(muse_alloc_t* datos){
 				segmento_nuevo->paginas = paginas;
 				segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
 				list_add(tabla_de_segmentos,segmento_nuevo);
-				direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,8);//tamaño heap
+				direccion_return = obtener_direccion_virtual(segmento_nuevo->num_segmento,0,8);//tamanio heap
 			}
 			else{
 				//se pudre to2 xd
@@ -331,6 +331,7 @@ int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_
 	return resultado_decimal;
 }
 int muse_free(muse_free_t* datos){
+//	retorna 0 si falla
 	if(direccion_valida_cliente(datos->direccion,0,datos->id)){
 //		liberar_direccion_cliente(datos->direccion,datos->id);
 	}
@@ -360,10 +361,11 @@ void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pa
 	*destino_pagina = bin_a_dec(char_pagina);
 	*destino_segmento = bin_a_dec(char_segmento);
 }
-int muse_get(muse_get_t* datos){
-	return 0;
+void* muse_get(muse_get_t* datos){
+	return NULL;
 }
 int muse_cpy(muse_cpy_t* datos){
+//	devuelve 0 si falla
 	return 0;
 }
 int muse_map(muse_map_t* datos){
@@ -375,9 +377,12 @@ int muse_sync(muse_sync_t* datos){
 int muse_unmap(muse_unmap_t* datos){
 	return 0;
 }
+int muse_close(char* id_cliente){
+	return 0;
+}
 _Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente){
 	//para ver si me paso con los bits/no existe el segmento => segment fault
-	//si no se usa el tamaño => se le pasa 0. testear fuerchi
+	//si no se usa el tamanio => se le pasa 0. testear fuerchi
 	int seg,pag,off;
 	abrir_direccion_virtual(direccion,&seg,&pag,&off);
 	if(off >= configuracion->tam_pag){
@@ -462,10 +467,10 @@ void esperar_conexion(uint32_t servidor){
 }
 void ocupate_de_este(int socket){
 	_Bool exit_loop = false;
-	uint32_t tam;
-	uint32_t resultado;
-	uint32_t operacion;
-	while(recv(socket,&operacion,4,MSG_WAITALL)!=-1 && exit_loop==false){
+	uint32_t tam, operacion_respuesta, resultado, operacion;
+	char* id_cliente;
+	void* respuesta;
+	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
 		printf("Nuevo pedido de %d\n",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
@@ -484,7 +489,6 @@ void ocupate_de_este(int socket){
 				string_append(&id,pid_char);
 				log_info(logg,"nuevo cliente, id: %s",id);
 				mandar_char(id,socket,operacion);
-				//hay q liberar lo de sockaddr_in?
 				free(pid_char);
 				free(id);
 				break;
@@ -494,8 +498,13 @@ void ocupate_de_este(int socket){
 				recv(socket,vmat,tam,0);
 				muse_alloc_t* datos = deserializar_muse_alloc(vmat);
 				resultado = muse_alloc(datos);
-				send(socket,&resultado,4,0);
+				respuesta = malloc(8);
+				operacion_respuesta = MUSE_INT;
+				memcpy(respuesta,&operacion_respuesta,4);
+				memcpy(respuesta+4,&resultado,4);
+				send(socket,respuesta,8,0);
 				printf("mando direccion virtual a %d: %d\n",socket,resultado);
+				free(respuesta);
 				muse_alloc_destroy(datos);
 				free(vmat);
 				break;
@@ -505,9 +514,15 @@ void ocupate_de_este(int socket){
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
 				resultado = muse_free(dmft);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del free %d a: %d\n",socket,resultado);
+				if(resultado == 0){
+					operacion_respuesta = MUSE_ERROR;
+				}
+				else{
+					operacion_respuesta = MUSE_EXITOSO;
+				}
+				memcpy(respuesta,&operacion_respuesta,4);
+				send(socket,&operacion_respuesta,4,0);
+				printf("haciendo free de %d, resultado: %d\n",socket,resultado);
 				muse_free_destroy(dmft);
 				free(vmft);
 				break;
@@ -516,10 +531,24 @@ void ocupate_de_este(int socket){
 				void* vmgt = malloc(tam);
 				recv(socket,vmgt,tam,0);
 				muse_get_t* dmgt = deserializar_muse_get(vmgt);
-				resultado = muse_get(dmgt);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del get %d a: %d\n",socket,resultado);
+				void* resultado_get = muse_get(dmgt);
+				//devuelve el void* resultado
+				if(resultado_get !=NULL){
+					muse_void* mv = crear_muse_void(resultado_get,dmgt->tamanio);
+					respuesta = serializar_muse_void(mv);
+					uint32_t tamanio_respuesta;
+					memcpy(&tamanio_respuesta,respuesta+4,4);
+					send(socket,respuesta,tamanio_respuesta,0);
+					printf("enviando resolucion del get a: %d\n",socket);
+					free(resultado_get);
+					free(respuesta);
+					muse_void_destroy(mv);
+				}
+				else{
+//					hay que pensar si todos los errores son segm fault!!??
+					operacion_respuesta = MUSE_ERROR;
+					send(socket,&operacion_respuesta,4,0);
+				}
 				muse_get_destroy(dmgt);
 				free(vmgt);
 				break;
@@ -527,15 +556,27 @@ void ocupate_de_este(int socket){
 				recv(socket,&tam,4,0);
 				void* vmct = malloc(tam);
 				recv(socket,vmct,tam,0);
-				muse_cpy_t* dmct = deserializar_muse_cpy(vmct);
-				resultado = muse_cpy(dmct);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
-				printf("enviando resolucion del cpy %d a: %d\n",socket,resultado);
-				muse_cpy_destroy(dmct);
-				free(vmct);
+				muse_cpy_t* mct = deserializar_muse_cpy(vmct);
+				resultado = muse_cpy(mct);
+				//recive 0 si fallo
+				if(resultado == 0){
+					operacion_respuesta = MUSE_ERROR;
+					send(socket,&respuesta,4,0);
+					free(vmct);
+					muse_cpy_destroy(mct);
+				}
+				else{
+					//funciono
+					operacion_respuesta = MUSE_EXITOSO;
+					send(socket,&respuesta,4,0);
+					free(vmct);
+					muse_cpy_destroy(mct);
+					muse_cpy_destroy(mct);
+					free(vmct);
+				}
+				printf("enviando resolucion del cpy a: %d, resultado: %d\n",socket,resultado);
 				break;
-			case MUSE_MAP:
+			case MUSE_MAP://hay que hacerla bien
 				recv(socket,&tam,4,0);
 				void* vmmt = malloc(tam);
 				recv(socket,vmmt,tam,0);
@@ -547,7 +588,7 @@ void ocupate_de_este(int socket){
 				muse_map_destroy(dmmt);
 				free(vmmt);
 				break;
-			case MUSE_SYNC:
+			case MUSE_SYNC://hay que hacerla bien
 				recv(socket,&tam,4,0);
 				void* vmst = malloc(tam);
 				recv(socket,vmst,tam,0);
@@ -559,7 +600,7 @@ void ocupate_de_este(int socket){
 				muse_sync_destroy(dmst);
 				free(vmst);
 				break;
-			case MUSE_UNMAP:
+			case MUSE_UNMAP://hay que hacerla bien
 				recv(socket,&tam,4,0);
 				void* vmut = malloc(tam);
 				recv(socket,vmut,tam,0);
@@ -571,8 +612,9 @@ void ocupate_de_este(int socket){
 				muse_unmap_destroy(dmut);
 				free(vmut);
 				break;
-			case MUSE_CLOSE:
+			case MUSE_CLOSE:;
 //				si no se libera algun muse_alloc-> es un memory leak
+				resultado = muse_close(id_cliente);
 				printf("Se fue %d\n",socket);
 				exit_loop = true;
 				break;
@@ -634,7 +676,7 @@ void muse_alloc_destroy(muse_alloc_t* mat){
 }
 void* serializar_muse_alloc(muse_alloc_t* mat){
 	int bytes = sizeof(uint32_t)*2+ mat->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_ALLOC;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -679,7 +721,7 @@ void muse_free_destroy(muse_free_t* mfr){
 
 void* serializar_muse_free(muse_free_t* mft){
 	int bytes = sizeof(uint32_t)*2+ mft->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_FREE;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -725,7 +767,7 @@ void muse_get_destroy(muse_get_t* mgt){
 
 void* serializar_muse_get(muse_get_t* mgt){
 	int bytes = sizeof(uint32_t)*3+ mgt->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_GET;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -779,7 +821,7 @@ void muse_cpy_destroy(muse_cpy_t* mct){
 
 void* serializar_muse_cpy(muse_cpy_t* mct){
 	int bytes = sizeof(uint32_t)*3+ mct->size_id + mct->size_paquete + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_CPY;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -837,7 +879,7 @@ void muse_map_destroy(muse_map_t* mmt){
 
 void* serializar_muse_map(muse_map_t* mmt){
 	int bytes = sizeof(uint32_t)*4+ mmt->size_id + mmt->size_path + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_MAP;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -897,7 +939,7 @@ void muse_sync_destroy(muse_sync_t* mst){
 
 void* serializar_muse_sync(muse_sync_t* mst){
 	int bytes = sizeof(uint32_t)*3+ mst->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_SYNC;
 	int puntero = 0;
 	void* magic = malloc(bytes);
@@ -946,7 +988,7 @@ void muse_unmap_destroy(muse_unmap_t* mut){
 
 void* serializar_muse_unmap(muse_unmap_t* mut){
 	int bytes = sizeof(uint32_t)*2 + mut->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de mat y 2 int de comando y tamaño
+	//2 int de adentro de mat y 2 int de comando y tamanio
 	int comando = MUSE_UNMAP;
 	int puntero = 0;
 	void* magic = malloc(bytes);
