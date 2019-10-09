@@ -47,12 +47,13 @@ typedef struct{
 * @NAME: char_length
 * @DESC: Devuelve el tamaño de un char, incluido el '\0'
 */
+int servidor;
+t_log* logger;
 uint32_t char_length(char* string);
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
 uint32_t tamanoDireccion;
-uint32_t servidor;
 void mandar(uint32_t tipo,void* algo,uint32_t _socket);
 char* recibir_char(uint32_t _socket);
 void mandar_char(char* _char, uint32_t _socket,uint32_t comando);
@@ -65,6 +66,6 @@ void exitoso_destroy(t_exitoso* exitoso);
 void* serializar_paquete_exitoso(t_exitoso* exitoso);
 t_exitoso* deserializar_paquete_exitoso(void* magic);
 uint64_t timestamp();
-uint32_t aceptar_cliente(uint32_t servidor);
-uint32_t crear_servidor(uint32_t puerto);
+int aceptar_cliente(int servidor);
+int crear_servidor(int puerto);
 #endif /* LIBRERIA_COMUN_H_ */

@@ -25,16 +25,56 @@
 
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
-
 /*==	Variables Globales		==*/
-int servidor;
+int cantidad_de_bloques;
 t_log* logger;
+FILE* fs;
+
+typedef enum {
+	GETATTR,
+	READDIR,
+	OPEN,
+	READ,
+	MKNOD,
+	MKDIR,
+	CHMOD,
+	UNLINK
+}operaciones;
+
+typedef struct{
+	uint32_t punteros [1024];
+}_bloques_de_punteros;
+
+typedef struct{
+	uint8_t estado;
+	char nombre_de_archivo[71];
+	uint32_t bloque_padre; //_bloque
+	uint32_t tamanio_de_archivo;//maximo 4 gb
+	uint64_t fecha_de_creacion;
+	uint64_t fecha_de_modificacion;
+	_bloques_de_punteros punteros_indirectos[1000];
+}nodo;
+
+typedef struct { //tiene que pesar 4096
+	char id[3];
+	uint32_t version;
+	uint32_t bloque_inicio_bitmap;
+	uint32_t tamanio_bitmap;
+	char relleno[4081];
+}header;
+
+typedef struct{
+	unsigned char bytes [4096];
+}bloque;
+
+
 
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
 int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint64_t timestamp();
+void hace_algo(int cliente);
 
 
 #endif /* SAC_SERVER_H_ */

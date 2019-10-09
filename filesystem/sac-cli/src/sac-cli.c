@@ -1,4 +1,5 @@
 #include "sac-cli.h"
+#include "libreriaComun/libreriaComun.h"
 
 
 /* Este es el contenido por defecto que va a contener
@@ -51,8 +52,46 @@ struct t_runtime_options {
  * 	@RETURN
  * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
  */
+void conectar_socket_a_server(char* ip, int puerto){
+	struct sockaddr_in direccionServidor;
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = inet_addr(ip);
+	direccionServidor.sin_port = htons(puerto);
+
+	if (connect(_socket,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
+	{
+		perror("Error al conectar");
+	}
+}
+struct stat *ato_stat(char *str_stat) {
+    struct stat* param = (struct stat*)malloc(sizeof(struct stat)); // parameters
+    memcpy(param, str_stat, sizeof(struct stat));
+
+    return param;
+}
+char *statptr_to_str(struct stat *buf) {
+    char *str = (char *)malloc(2000 * sizeof(char));
+    memcpy(str, buf, sizeof(struct stat));
+
+    return str;
+}
+void* serializar_char(char* path){
+	int comando = CHAR;
+	int tamanio_del_path = strlen(path)+1;
+	int puntero = 0;
+	void* magic = malloc(tamanio_del_path + sizeof(int));
+	memcpy(magic+puntero,&comando,sizeof(comando));
+	puntero += sizeof(comando);
+	memcpy(magic+puntero,&tamanio_del_path,sizeof(tamanio_del_path));
+	puntero += sizeof(tamanio_del_path);
+	memcpy(magic+puntero,path,tamanio_del_path);
+	puntero += tamanio_del_path;
+	return magic;
+
+}
 static int sac_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
+	void* magic = serializar_char(path);
 
 	memset(stbuf, 0, sizeof(struct stat));
 
@@ -210,7 +249,6 @@ static struct fuse_operations sac_oper = {
 		.open = sac_open,
 		.read = sac_read,
 		.mknod = sac_mknod,
-		// .setattr
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
 		.unlink = sac_unlink
@@ -243,6 +281,11 @@ static struct fuse_opt fuse_options[] = {
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
 int main(int argc, char *argv[]) {
+	/*==	Init Socket		==*/
+	_socket = socket(AF_INET, SOCK_STREAM,0);
+	t_error* a = crear_error("pepe");
+	puts(a->descripcion);
+
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
 	// Limpio la estructura que va a contener los parametros
