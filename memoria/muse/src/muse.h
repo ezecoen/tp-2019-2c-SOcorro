@@ -25,7 +25,6 @@ typedef struct programa_t{
 }programa_t;
 
 typedef struct segmento{
-	char* nombre;
 	_Bool mmapeado;
 	_Bool compartido;
 	uint32_t num_segmento;
@@ -176,10 +175,11 @@ int bin_a_dec(char* binario);
 int redondear_double_arriba(double d);
 int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
+uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior);
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio);
 segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
-int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
+_Bool encontrar_ultima_pagina(pagina* pag);
 void* asignar_marco_nuevo();
 t_bit* ejecutar_clock_modificado();
 int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
@@ -187,7 +187,6 @@ void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
-segmento* buscar_segmento_por_numero(t_list* tabla_de_segmentos,uint32_t dir_segmento,char* id);
 void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
