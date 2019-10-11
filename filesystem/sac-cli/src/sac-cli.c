@@ -167,11 +167,11 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 }
 static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	int res;
-	    res = mknod(path, mode, rdev);
-	    if(res == -1)
-	        return -errno;
+	res = mknod(path, mode, rdev);
+	if(res == -1)
+		return -errno;
 
-	    return 0;
+	return 0;
 }
 static int sac_chmod(const char *path, mode_t mode)
 {

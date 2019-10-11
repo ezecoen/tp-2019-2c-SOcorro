@@ -74,7 +74,7 @@ void esperar_conexion(int servidor);
 int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint64_t timestamp();
-void hace_algo(int cliente);
+void atender_cliente(int cliente);
 
 
 #endif /* SAC_SERVER_H_ */
