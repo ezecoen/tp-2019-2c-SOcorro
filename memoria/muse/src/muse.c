@@ -8,6 +8,24 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras();
 
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"asdasd");
+//	list_add(tabla_de_programas,programa);
+//
+//	programa_t* programa1 = malloc(sizeof(programa_t));
+//	programa1->tabla_de_segmentos = list_create();
+//	programa1->id_programa = string_new();
+//	string_append(&programa1->id_programa,"asdasd1");
+//	list_add(tabla_de_programas,programa1);
+//
+//	programa_t* programa2 = malloc(sizeof(programa_t));
+//	programa2->tabla_de_segmentos = list_create();
+//	programa2->id_programa = string_new();
+//	string_append(&programa2->id_programa,"asdasd2");
+//	list_add(tabla_de_programas,programa2);
+//
 ////	prueba creo segmento 1
 //	muse_alloc_t* mat = crear_muse_alloc(1000,"asdasd");
 //	int result = muse_alloc(mat);
@@ -23,7 +41,7 @@ int main(int argc, char **argv) {
 //	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
 ////	prueba uso segmento 3
 //	int result3 = muse_alloc(mat2);
-//	printf("\nDireccion virtual de %d|%d|%d: %d",2,18,0,result3);
+//	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
 
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -133,6 +151,7 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 }
 int muse_alloc(muse_alloc_t* datos){
 //me fijo si hay lugar disponible
+//ME ESTA QUEDANDO MEDIO HEAP EN CADA PAGINA Y HACE Q SE ROMPA!!!!!!!!!!!!!
 uint32_t direccion_return = -1;
 if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	//busco si ya tengo algun segmento
@@ -209,7 +228,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 		}
 		else{
 			//no entra en ningun segmento existente
-			segmento* ultimo_segmento = list_get(tabla_de_segmentos,list_size(tabla_de_segmentos));//mmm??!?!?!
+			segmento* ultimo_segmento = list_get(tabla_de_segmentos,list_size(tabla_de_segmentos)-1);//mmm??!?!?!
 			if(!ultimo_segmento->mmapeado){
 				//se puede agrandar el ultimo segmento
 				pagina* ultima_pagina = list_find(ultimo_segmento->paginas,(void*)encontrar_ultima_pagina);
@@ -247,15 +266,15 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							pagina_nueva->ultimo_heap_metadata_libre = -1;
 							//porque la pag va a estar llena
 						}
-						list_add(segmento_buscado->paginas,pagina_nueva);
+						list_add(ultimo_segmento->paginas,pagina_nueva);
 						if(i==0){
 							if(agarrar_direccion_de_primera_pag_agregada){
-								direccion_return = segmento_buscado->base_logica+pagina_nueva->num_pagina*configuracion->tam_pag;
+								direccion_return = ultimo_segmento->base_logica+pagina_nueva->num_pagina*configuracion->tam_pag;
 							}
 						}
 					}
 					if(!agarrar_direccion_de_primera_pag_agregada){//=>tengo que llenar direccion_return
-						direccion_return = segmento_buscado->base_logica+ultima_pagina->num_pagina*configuracion->tam_pag+
+						direccion_return = ultimo_segmento->base_logica+ultima_pagina->num_pagina*configuracion->tam_pag+
 								ultima_pagina->ultimo_heap_metadata_libre+sizeof(heap_metadata);
 					}
 					ultimo_heap->isFree = false;
