@@ -22,19 +22,9 @@
 #include <fcntl.h>
 #include <sys/statfs.h>
 
-typedef enum {
-	GETATTR,
-	READDIR,
-	OPEN,
-	READ,
-	MKNOD,
-	MKDIR,
-	CHMOD,
-	UNLINK
-}operaciones;
-
 /*==	Variables Globales		==*/
 int _socket;
 t_log* logger;
+
 
 #endif /* SAC_CLI_H_ */

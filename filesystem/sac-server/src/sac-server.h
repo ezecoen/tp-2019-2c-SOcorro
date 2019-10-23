@@ -30,17 +30,6 @@ int cantidad_de_bloques;
 t_log* logger;
 FILE* fs;
 
-typedef enum {
-	GETATTR,
-	READDIR,
-	OPEN,
-	READ,
-	MKNOD,
-	MKDIR,
-	CHMOD,
-	UNLINK
-}operaciones;
-
 typedef struct{
 	uint32_t punteros [1024];
 }_bloques_de_punteros;
@@ -66,7 +55,6 @@ typedef struct { //tiene que pesar 4096
 typedef struct{
 	unsigned char bytes [4096];
 }bloque;
-
 
 
 /*==	Firmas de Funciones		==*/

@@ -6,10 +6,8 @@ int main(void) {
 	logger = log_create("loger","sac-server",1,LOG_LEVEL_TRACE);
 	int _servidor = crear_servidor(8080);
 
-
 	while(1){
 		esperar_conexion(_servidor);
-
 	}
 
 	return 0;
@@ -37,9 +35,33 @@ void esperar_conexion(int servidor){
 
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
+	while(1){
+		int operacion;
 
+		operacion = recibir_op(cliente);
+
+		switch(operacion){
+		case READDIR:
+			sac_readdir();
+			break;
+		case OPEN:
+			break;
+		case READ:
+			break;
+		case MKNOD:
+			break;
+		case MKDIR:
+			break;
+		case CHMOD:
+			break;
+		case UNLINK:
+			break;
+		}
+	}
 }
 
+void sac_readdir(){
 
+}
 
 
