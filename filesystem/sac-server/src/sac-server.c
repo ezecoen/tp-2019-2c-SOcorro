@@ -232,16 +232,19 @@ void esperar_conexion(int servidor){
 	int cliente = aceptar_cliente(servidor);
 	log_info(logger,"Se conecto un cliente con el socket numero %d",cliente);
 //	falta la implementacion de la funcion que va hacer el hilo al conectarse sac-cli
-	pthread_t sac_cli;
-		if(pthread_create(&sac_cli,NULL,(void*)ocupate_de_esta,(void*)cliente)!=0){
-			log_error(logger,"Error al crear el hilo de journal");
-		}
-		pthread_detach(sac_cli);
+	pthread_t hilo_nuevo_cliente;
+	if(pthread_create(&hilo_nuevo_cliente,NULL,(void*)atender_cliente,(void*)cliente)!=0){
+		log_error(logger,"Error al crear el hilo de journal");
+	}
+	pthread_detach(hilo_nuevo_cliente);
+	close(cliente);
 }
-void crear_fs(){
-	int X = 1024 * 1024 * 1024 - 1;
-	FILE *fp = fopen("myfs", "w");
-	fseek(fp, X , SEEK_SET);
-	fputc('\0', fp);
-	fclose(fp);
+
+void atender_cliente(int cliente){
+	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
+
 }
+
+
+
+

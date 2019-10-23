@@ -19,17 +19,23 @@
 #include <string.h>
 
 //ESTRUCTURAS
+typedef struct programa_t{
+	char* id_programa;
+	t_list* tabla_de_segmentos;
+}programa_t;
+
 typedef struct segmento{
-	char* nombre;
 	_Bool mmapeado;
 	_Bool compartido;
 	uint32_t num_segmento;
+	uint32_t base_logica;
+	uint32_t tamanio;
 	t_list* paginas;
+	int ultimo_heap_metadata_libre;
 }segmento;
 
 typedef struct pagina{
 	uint32_t num_pagina;
-	int ultimo_heap_metadata_libre;
 	_Bool presencia;
 	_Bool modificado;
 	void* datos;
@@ -141,7 +147,7 @@ char* path_de_config;
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
-t_list* tabla_de_segmentos;
+t_list* tabla_de_programas;
 int DIR_TAM_DIRECCION;
 int DIR_TAM_DESPLAZAMIENTO;
 int DIR_TAM_PAGINA;
@@ -169,21 +175,24 @@ int bin_a_dec(char* binario);
 int redondear_double_arriba(double d);
 int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
-segmento* buscar_segmento_por_id(char* id);
+uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior);
+segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio);
+segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
-int reservar_lugar_en_segmento(segmento* seg,uint32_t tamanio);
+_Bool encontrar_ultima_pagina(pagina* pag);
 void* asignar_marco_nuevo();
 t_bit* ejecutar_clock_modificado();
-int obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
-void abrir_direccion_virtual(int direccion,int* destino_segmento,int* destino_pagina, int* destino_offset);
+int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
+void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset);
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
+segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
+void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
 int muse_close(char* id_cliente);
-_Bool direccion_valida_cliente(int direccion,int tamanio,char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
 void mandar_char(char* _char, uint32_t _socket,uint32_t com);
 uint32_t aceptar_cliente(uint32_t servidor);
@@ -230,6 +239,7 @@ muse_void* crear_muse_void(void* paquete, uint32_t size_paquete);
 void muse_void_destroy(muse_void* mv);
 void* serializar_muse_void(muse_void* mv);
 muse_void* deserializar_muse_void(void* magic);
-
+void* list_last_element(t_list* lista);
+pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag);
 
 #endif /* MUSE_H_ */

@@ -84,6 +84,7 @@ typedef enum{
 
 //VARIABLES GLOBALES
 int socket_muse;
+int iniciado = -1;
 char* muse_id;
 
 //FUNCIONES
