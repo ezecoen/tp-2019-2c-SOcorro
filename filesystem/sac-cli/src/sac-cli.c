@@ -292,8 +292,12 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 	_socket = socket(AF_INET, SOCK_STREAM,0);
-	t_error* a = crear_error("pepe");
-	puts(a->descripcion);
+
+//	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
+
+//	Que garcha es esto
+//	t_error* a = crear_error("pepe");
+//	puts(a->descripcion);
 
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 

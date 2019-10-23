@@ -15,12 +15,13 @@ int main(int argc,char* argv[]) {
 		init_fs(argv[1]);
 		log_info(logger,"El fileSystem fue creado");
 	}
-	uint32_t a1 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[0];
-	uint32_t a2 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[1];
-	uint32_t a3 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[0];
-	uint32_t a4 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[1];
-	uint32_t a5 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[0];
-	uint32_t a6 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[1];
+
+//	uint32_t a1 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[0];
+//	uint32_t a2 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[1];
+//	uint32_t a3 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[0];
+//	uint32_t a4 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[1];
+//	uint32_t a5 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[0];
+//	uint32_t a6 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[1];
 
 
 
@@ -175,44 +176,48 @@ uint64_t timestamp(){
 	uint64_t a = result;
 	return a;
 }
-//void ocupate_de_esta(int cliente){
-//	int cli;
-//	//whilear el hilo
-//	recv(cliente,&cli,4,MSG_WAITALL);
-//	if(cli != INIT_CLI){
-//		perror("Se conecto un rancio");
-//		close(cliente);
-//		return;
-//	}
-//	operacion* op = recibir_instruccion(cliente);
-//
-//	switch(op->op){
-//	case READDIR:
-//		log_info(logger,"Llego la instruccion READDIR");
-//		break;
-//	case OPEN:
-//		log_info(logger,"Llego la instruccion OPEN");
-//		break;
-//	case READ:
-//		log_info(logger,"Llego la instruccion READ");
-//		break;
-//	case MKNOD:
-//		log_info(logger,"Llego la instruccion MKNOD");
-//		break;
-//	case MKDIR:
-//		log_info(logger,"Llego la instruccion MKDIR");
-//		break;
-//	case CHMOD:
-//		log_info(logger,"Llego la instruccion CHMOD");
-//		break;
-//	case UNLINK:
-//		log_info(logger,"Llego la instruccion UNLINK");
-//		break;
-//	default:
-//		log_error(logger, "Llego una instruccion no habilitada");
-//		break;
-//	}
-//}
+void ocupate_de_esta(int cliente){
+	int cli;
+
+	recv(cliente,&cli,4,MSG_WAITALL);
+	if(cli != INIT_CLI){
+		perror("Se conecto un rancio");
+		close(cliente);
+		return;
+	}
+
+	operacion* op = recibir_instruccion(cliente);
+
+	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+
+	switch(op->op){
+	case READDIR:
+		log_info(logger,"Llego la instruccion READDIR");
+		sac_readdir();
+		break;
+	case OPEN:
+		log_info(logger,"Llego la instruccion OPEN");
+		break;
+	case READ:
+		log_info(logger,"Llego la instruccion READ");
+		break;
+	case MKNOD:
+		log_info(logger,"Llego la instruccion MKNOD");
+		break;
+	case MKDIR:
+		log_info(logger,"Llego la instruccion MKDIR");
+		break;
+	case CHMOD:
+		log_info(logger,"Llego la instruccion CHMOD");
+		break;
+	case UNLINK:
+		log_info(logger,"Llego la instruccion UNLINK");
+		break;
+	default:
+		log_error(logger, "Llego una instruccion no habilitada");
+		break;
+	}
+}
 
 operacion* recibir_instruccion(int cliente){
 	int op;
@@ -244,33 +249,61 @@ void esperar_conexion(int servidor){
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
 
+	if(recv(cliente,&cli,4,MSG_WAITALL) != INIT_CLI){
+		perror("Se conecto un rancio");
+		close(cliente);
+		return;
+	}
 
 	operaciones operacion;
 
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 
-
 		switch(operacion){
 		case READDIR:
-			sac_readdir();
+			log_info(logger,"Llego la instruccion READDIR");
+			sac_readdir(cliente);
 			break;
 		case OPEN:
+			log_info(logger,"Llego la instruccion OPEN");
 			break;
 		case READ:
+			log_info(logger,"Llego la instruccion READ");
 			break;
 		case MKNOD:
+			log_info(logger,"Llego la instruccion MKNOD");
 			break;
 		case MKDIR:
+			log_info(logger,"Llego la instruccion MKDIR");
 			break;
 		case CHMOD:
+			log_info(logger,"Llego la instruccion CHMOD");
 			break;
 		case UNLINK:
+			log_info(logger,"Llego la instruccion UNLINK");
+			break;
+		default:
+			log_error(logger, "Llego una instruccion no habilitada");
 			break;
 		}
 	}
 }
 
-void sac_readdir(){
+void sac_readdir(int cliente){
+
+//	tengo que recivir el tamanio de la estructura entera pero no tengo
+//	el socket,deberia pasarme el socket por parametro o deberia hacer
+//	el recv antes y mandarme el tamanio por parametro
+
+	uint32_t _tam;
+	recv(cliente,&_tam,4,0);
+	void* magic = malloc(_tam);
+	recv(cliente,&magic,_tam,0);
+
+	t_readdir* pedido = malloc(sizeof(t_readdir));
+
+	pedido = deserializar_readdir(magic);
+
 
 }
 

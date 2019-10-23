@@ -87,4 +87,8 @@ int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint32_t length_de_char_asterisco(char** arrays);
 
+t_readdir* crear_readdir (char* path);
+void* serializar_readdir(t_readdir* estructura);
+t_readdir* deserializar_readdir (void* magic);
+
 #endif /* LIBRERIA_COMUN_H_ */

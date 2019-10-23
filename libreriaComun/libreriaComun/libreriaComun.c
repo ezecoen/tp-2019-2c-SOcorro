@@ -215,6 +215,18 @@ void* serializar_readdir(t_readdir* estructura){
 	return magic;
 }
 
-t_readdir deserializar_readdir (void* magic){
+t_readdir* deserializar_readdir (void* magic){
+	t_readdir* estructura = malloc(sizeof(t_readdir));
+	uint32_t puntero = 0;
+	memcpy(&estructura->size_path,magic+puntero,4);
+	puntero += 4;
+	estructura->path = malloc(estructura->size_path);
+	memcpy(estructura->path, magic+puntero, estructura->size_path);
+	puntero += estructura->size_path;
+	return estructura;
+}
 
+void reddir_destroy (t_readdir* estructura){
+	free(estructura->path);
+	free(estructura);
 }
