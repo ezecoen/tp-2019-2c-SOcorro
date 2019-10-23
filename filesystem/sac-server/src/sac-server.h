@@ -18,28 +18,17 @@
 #include <commons/string.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
+#include <commons/bitarray.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
-/*==	Variables Globales		==*/
-int cantidad_de_bloques;
-t_log* logger;
-FILE* fs;
-
-typedef enum {
-	GETATTR,
-	READDIR,
-	OPEN,
-	READ,
-	MKNOD,
-	MKDIR,
-	CHMOD,
-	UNLINK
-}operaciones;
 
 typedef struct{
 	uint32_t punteros [1024];
@@ -67,14 +56,40 @@ typedef struct{
 	unsigned char bytes [4096];
 }bloque;
 
+typedef struct{
+	int op;
+	void* argumentos;
+}operacion;
 
 
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
-int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint64_t timestamp();
 void hace_algo(int cliente);
-
-
+operacion* recibir_instruccion(int cliente);
+void init_relleno(char* _relleno);
+void escribir_header(bloque* disco);
+header* levantar_header(bloque* _bloque);
+void crear_fs(void);
+int fileSize(char* filename);
+void escribir_bitmap_inicio(bloque* disco,t_bitarray* bitarray);
+t_bitarray* init_set_bitmap();
+t_bitarray* levantar_bit_array(bloque* bloque);
+header* levantar_header(bloque* _bloque);
+void levantar_tabla_de_nodo(bloque* bloque);
+void escribir_tabla_de_nodos(bloque* _bloque);
+bool el_fs_esta_formateado(char* fs);
+void init_fs(char* fs);
+void load_fs(char* fs);
+/*==	Variables Globales		==*/
+int cantidad_de_bloques;
+t_log* logger;
+FILE* fs;
+int tam_del_fs;
+int tam_de_bitmap;
+bloque* primer_bloque_de_disco;
+t_bitarray* bitarray;
+header* _header;
+nodo* tabla_de_nodos[];
 #endif /* SAC_SERVER_H_ */

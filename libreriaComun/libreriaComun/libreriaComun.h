@@ -33,6 +33,18 @@ typedef enum{
 	EXITOSO,
 }t_comando;
 
+typedef enum operaciones{
+	INIT_CLI,
+	GETATTR,
+	READDIR,
+	OPEN,
+	READ,
+	MKNOD,
+	MKDIR,
+	CHMOD,
+	UNLINK
+}operaciones;
+
 typedef struct{
 	uint32_t size_descripcion;
 	char* descripcion;
