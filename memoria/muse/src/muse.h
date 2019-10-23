@@ -31,11 +31,11 @@ typedef struct segmento{
 	uint32_t base_logica;
 	uint32_t tamanio;
 	t_list* paginas;
+	int ultimo_heap_metadata_libre;
 }segmento;
 
 typedef struct pagina{
 	uint32_t num_pagina;
-	int ultimo_heap_metadata_libre;
 	_Bool presencia;
 	_Bool modificado;
 	void* datos;
@@ -239,6 +239,7 @@ muse_void* crear_muse_void(void* paquete, uint32_t size_paquete);
 void muse_void_destroy(muse_void* mv);
 void* serializar_muse_void(muse_void* mv);
 muse_void* deserializar_muse_void(void* magic);
-
+void* list_last_element(t_list* lista);
+pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag);
 
 #endif /* MUSE_H_ */

@@ -34,6 +34,7 @@ typedef enum{
 }t_comando;
 
 typedef enum operaciones{
+	INIT_CLI,
 	GETATTR,
 	READDIR,
 	OPEN,
