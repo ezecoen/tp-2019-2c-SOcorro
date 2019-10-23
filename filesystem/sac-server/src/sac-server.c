@@ -175,45 +175,45 @@ uint64_t timestamp(){
 	uint64_t a = result;
 	return a;
 }
-void ocupate_de_esta(int cliente){
-	int cli;
-	//whilear el hilo
-	recv(cliente,&cli,4,MSG_WAITALL);
-	if(cli != INIT_CLI){
-		perror("Se conecto un rancio");
-		close(cliente);
-		return;
-	}
-	operacion* op = recibir_instruccion(cliente);
+//void ocupate_de_esta(int cliente){
+//	int cli;
+//	//whilear el hilo
+//	recv(cliente,&cli,4,MSG_WAITALL);
+//	if(cli != INIT_CLI){
+//		perror("Se conecto un rancio");
+//		close(cliente);
+//		return;
+//	}
+//	operacion* op = recibir_instruccion(cliente);
+//
+//	switch(op->op){
+//	case READDIR:
+//		log_info(logger,"Llego la instruccion READDIR");
+//		break;
+//	case OPEN:
+//		log_info(logger,"Llego la instruccion OPEN");
+//		break;
+//	case READ:
+//		log_info(logger,"Llego la instruccion READ");
+//		break;
+//	case MKNOD:
+//		log_info(logger,"Llego la instruccion MKNOD");
+//		break;
+//	case MKDIR:
+//		log_info(logger,"Llego la instruccion MKDIR");
+//		break;
+//	case CHMOD:
+//		log_info(logger,"Llego la instruccion CHMOD");
+//		break;
+//	case UNLINK:
+//		log_info(logger,"Llego la instruccion UNLINK");
+//		break;
+//	default:
+//		log_error(logger, "Llego una instruccion no habilitada");
+//		break;
+//	}
+//}
 
-	switch(op->op){
-	case READDIR:
-		log_info(logger,"Llego la instruccion READDIR");
-		break;
-	case OPEN:
-		log_info(logger,"Llego la instruccion OPEN");
-		break;
-	case READ:
-		log_info(logger,"Llego la instruccion READ");
-		break;
-	case MKNOD:
-		log_info(logger,"Llego la instruccion MKNOD");
-		break;
-	case MKDIR:
-		log_info(logger,"Llego la instruccion MKDIR");
-		break;
-	case CHMOD:
-		log_info(logger,"Llego la instruccion CHMOD");
-		break;
-	case UNLINK:
-		log_info(logger,"Llego la instruccion UNLINK");
-		break;
-	default:
-		log_error(logger, "Llego una instruccion no habilitada");
-		break;
-	}
-
-}
 operacion* recibir_instruccion(int cliente){
 	int op;
 	int tamanio;
@@ -228,6 +228,7 @@ operacion* recibir_instruccion(int cliente){
 	free(argumentos);
 	return _operacion;
 }
+
 void esperar_conexion(int servidor){
 	int cliente = aceptar_cliente(servidor);
 	log_info(logger,"Se conecto un cliente con el socket numero %d",cliente);
@@ -242,10 +243,12 @@ void esperar_conexion(int servidor){
 
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
-	while(1){
-		int operacion;
 
-		operacion = recibir_op(cliente);
+
+	operaciones operacion;
+
+	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+
 
 		switch(operacion){
 		case READDIR:

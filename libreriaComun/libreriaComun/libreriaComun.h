@@ -33,7 +33,7 @@ typedef enum{
 	EXITOSO,
 }t_comando;
 
-typedef enum operaciones{
+typedef enum {
 	INIT_CLI,
 	GETATTR,
 	READDIR,
