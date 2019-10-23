@@ -16,11 +16,17 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue creado");
 	}
 	uint32_t a1 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[0];
+	log_info(logger,"%d",a1);
 	uint32_t a2 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[1];
+	log_info(logger,"%d",a2);
 	uint32_t a3 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[0];
+	log_info(logger,"%d",a3);
 	uint32_t a4 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[1];
+	log_info(logger,"%d",a4);
 	uint32_t a5 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[0];
+	log_info(logger,"%d",a5);
 	uint32_t a6 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[1];
+	log_info(logger,"%d",a6);
 
 
 
@@ -64,10 +70,11 @@ void load_fs(char* fs){
 	log_info(logger,"Cargando el header");
 	bitarray = levantar_bit_array(primer_bloque_de_disco+1);
 	log_info(logger,"Cargando el bitmap");
-	//levantar_tabla_de_nodo(primer_bloque_de_disco+1+tam_de_bitmap);
+	levantar_tabla_de_nodo(primer_bloque_de_disco+1+tam_de_bitmap);
 	log_info(logger,"Cargando la tabla de nodos");
 }
 void levantar_tabla_de_nodo(bloque* bloque){
+	tabla_de_nodos = (nodo**)malloc(sizeof(nodo*)*1024);
 	for(int i = 0;i<1024;i++){
 		tabla_de_nodos[i] = (nodo*) bloque;
 		bloque++;
@@ -146,11 +153,6 @@ int fileSize(char* filename){
 }
 void escribir_header(bloque* disco){
 	header* _header = (header*) disco;
-//	disco[0] = 'S';
-//	disco[1] = 'A';
-//	disco[2] = 'C';
-//	disco[3] = '1';
-//	disco[4] = '2';
 	memcpy(_header->id,"SAC",3);
 	_header->version = (uint32_t)1;
 	_header->bloque_inicio_bitmap = (uint32_t)2;
