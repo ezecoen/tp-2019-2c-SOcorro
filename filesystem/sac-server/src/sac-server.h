@@ -82,6 +82,7 @@ bool el_fs_esta_formateado(char* fs);
 void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
+
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 t_log* logger;
@@ -91,5 +92,5 @@ int tam_de_bitmap;
 bloque* primer_bloque_de_disco;
 t_bitarray* bitarray;
 header* _header;
-nodo* tabla_de_nodos[];
+nodo** tabla_de_nodos;
 #endif /* SAC_SERVER_H_ */
