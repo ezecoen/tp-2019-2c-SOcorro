@@ -75,20 +75,20 @@ char *statptr_to_str(struct stat *buf) {
 
     return str;
 }
-void* serializar_char(char* path){
-	int comando = CHAR;
-	int tamanio_del_path = strlen(path)+1;
-	int puntero = 0;
-	void* magic = malloc(tamanio_del_path + sizeof(int));
-	memcpy(magic+puntero,&comando,sizeof(comando));
-	puntero += sizeof(comando);
-	memcpy(magic+puntero,&tamanio_del_path,sizeof(tamanio_del_path));
-	puntero += sizeof(tamanio_del_path);
-	memcpy(magic+puntero,path,tamanio_del_path);
-	puntero += tamanio_del_path;
-	return magic;
-
-}
+//void* serializar_char(char* path){
+//	int comando = CHAR;
+//	int tamanio_del_path = strlen(path)+1;
+//	int puntero = 0;
+//	void* magic = malloc(tamanio_del_path + sizeof(int));
+//	memcpy(magic+puntero,&comando,sizeof(comando));
+//	puntero += sizeof(comando);
+//	memcpy(magic+puntero,&tamanio_del_path,sizeof(tamanio_del_path));
+//	puntero += sizeof(tamanio_del_path);
+//	memcpy(magic+puntero,path,tamanio_del_path);
+//	puntero += tamanio_del_path;
+//	return magic;
+//
+//}
 static int sac_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
 	void* magic = serializar_char(path);
@@ -131,7 +131,16 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	(void) offset;
 	(void) fi;
 
-	if (strcmp(path, "/") != 0)
+	char* _respuesta;
+
+	t_readdir* estructura = crear_readdir(path);
+
+	serializar_readdir(estructura);
+
+	_respuesta = recibir_char(_socket);
+
+
+	if (strlen(path)>71 ||  == -1)
 		return -ENOENT;
 
 	// "." y ".." son entradas validas, la primera es una referencia al directorio donde estamos parados
@@ -283,8 +292,12 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 	_socket = socket(AF_INET, SOCK_STREAM,0);
-	t_error* a = crear_error("pepe");
-	puts(a->descripcion);
+
+//	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
+
+//	Que garcha es esto
+//	t_error* a = crear_error("pepe");
+//	puts(a->descripcion);
 
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
