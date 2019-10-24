@@ -59,10 +59,8 @@ void init_estructuras(){
 	swap = malloc(configuracion->tam_swap);//provisorio
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
-	CANT_PAGINAS_MEMORIA = redondear_double_arriba((double)configuracion->tam_mem/
-			(double)configuracion->tam_pag);
-	CANT_PAGINAS_MEMORIA_VIRTUAL = redondear_double_arriba((double)configuracion->tam_swap/
-			(double)configuracion->tam_pag);
+	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
+	CANT_PAGINAS_MEMORIA_VIRTUAL = configuracion->tam_swap/configuracion->tam_pag;
 
 	DIR_TAM_DESPLAZAMIENTO = log_2((double)configuracion->tam_pag);
 	DIR_TAM_DIRECCION = 32;
@@ -195,6 +193,8 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			segmento_nuevo->base_logica = 0;
 			segmento_nuevo->tamanio = cantidad_de_paginas*configuracion->tam_pag;
 			segmento_nuevo->ultimo_heap_metadata_libre = datos->tamanio+sizeof(heap_metadata);
+			segmento_nuevo->direcciones_heaps = list_create();
+			list_add(segmento_nuevo->direcciones_heaps,0);//el primer heap esta en el 0
 			t_list* paginas = list_create();
 			for(int i = 0;i<cantidad_de_paginas;i++){
 				pagina* pag = malloc(sizeof(pagina));
@@ -210,32 +210,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					free(heap_nuevo);
 				}
 			}
-			if(espacio_libre_ultima_pag>configuracion->tam_pag-sizeof(heap_metadata)) {
-			// significa que el heap esta entre las ultimas dos paginas
-				heap_metadata* heap_al_final = malloc(sizeof(heap_metadata));
-				heap_al_final->isFree = true; //es el ultimo
-				heap_al_final->size = espacio_libre_ultima_pag;
-				int heap_en_ultima_pagina = configuracion->tam_pag-espacio_libre_ultima_pag;
-				int heap_en_ante_ultima_pagina = sizeof(heap_metadata)-heap_en_ultima_pagina;
-				int offset_heap = configuracion->tam_pag-heap_en_ante_ultima_pagina;
-				pagina* anteultima_pagina = list_get(paginas,cantidad_de_paginas-2);
-				pagina* ultima_pagina = list_get(paginas,cantidad_de_paginas-1);
-				memcpy(anteultima_pagina->datos+offset_heap,heap_al_final,heap_en_ante_ultima_pagina);
-				memcpy(ultima_pagina->datos,heap_al_final+heap_en_ante_ultima_pagina,heap_en_ultima_pagina);
-				free(heap_al_final);
-
-			}else {
-				// va a continuacion de la info en la ultima pagina
-				heap_metadata* heap_al_final = malloc(sizeof(heap_metadata));
-				heap_al_final->isFree = true; //es el ultimo
-				heap_al_final->size = espacio_libre_ultima_pag;
-				pagina* ultima_pagina = list_get(paginas,cantidad_de_paginas-1);
-				int offset_heap = configuracion->tam_pag-espacio_libre_ultima_pag-sizeof(heap_metadata);
-				memcpy(ultima_pagina->datos+offset_heap,heap_al_final,sizeof(heap_metadata));
-				free(heap_al_final);
-
-			}
-
 			segmento_nuevo->paginas = paginas;
 			segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
 			list_add(tabla_de_segmentos,segmento_nuevo);
@@ -247,7 +221,8 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 		}
 	}
 	else{
-		//tabla de segmentos no esta vacia //hay que buscar el segmento del programa
+		//esta to2 mal, hay que rehacer!!!
+		//tabla de segmentos no esta vacia => hay que buscar si entra en algun segmento ya existente
 		segmento* segmento_buscado = buscar_segmento_con_espacio(tabla_de_segmentos,datos->tamanio+sizeof(heap_metadata));
 		if(segmento_buscado != NULL){
 			//entra en segmento_buscado, es decir, entra en la ultima pagina
@@ -406,10 +381,8 @@ else{//no hay lugar
 }
 }
 
-void* list_last_element(t_list* lista)
-{
+void* list_last_element(t_list* lista){
 	return (list_get(lista,lista->elements_count-1));
-
 }
 
 uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior){
@@ -433,20 +406,16 @@ return pag;
 }
 
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio){
-	//re hacer / arreglar / funciona siempre salvo con lo del heap entre pags !!
+	//hay q hacerlo pensando en que se van a hacer free de varios muse_alloc!!??
 	_Bool encontrar_segmento_con_espacio(segmento* segmento){
 		_Bool respuesta;
-		pagina* ultima_pag =list_last_element(segmento->paginas);
-		//pagina* ultima_pag = list_find(segmento->paginas,(void*)encontrar_ultima_pagina);
-		heap_metadata* ultimo_heap = malloc(sizeof(heap_metadata));
-		memcpy(ultimo_heap,ultima_pag->datos+segmento->ultimo_heap_metadata_libre,sizeof(heap_metadata));
-		if(ultimo_heap->isFree && ultimo_heap->size>=tamanio){
+
+		if(segmento->ultimo_heap_metadata_libre){
 			respuesta = true;
 		}
 		else{
 			respuesta = false;
 		}
-		free(ultimo_heap);
 		return respuesta;
 	}
 	segmento* segmento_encontrado = list_find(tabla_de_segmentos,(void*)encontrar_segmento_con_espacio);
