@@ -180,4 +180,53 @@ uint64_t timestamp(){
 	return a;
 }
 
+uint32_t length_de_char_asterisco(char** arrays){
+	uint32_t i = 0;
+	while(arrays[i] != NULL){
+		i++;
+	}
+	return i;
+}
 
+t_readdir* crear_readdir (char* path){
+	int size_path = char_length(path);
+	t_readdir* estruc = malloc(sizeof(t_readdir));
+	estruc->path = malloc(size_path);
+
+	estruc->size_path = size_path;
+	memcpy(estruc->path, path, estruc->size_path);
+	return estruc;
+}
+
+void* serializar_readdir(t_readdir* estructura){
+	int bytes = sizeof(int) + estructura->size_path + sizeof(int)*2;
+	int comando = READDIR;
+	int puntero=0;
+	void* magic = malloc(bytes);
+
+	memcpy(magic+puntero, &comando, sizeof(int));
+	puntero += sizeof(int);
+	memcpy(magic+puntero, &bytes, sizeof(int));
+	puntero += sizeof(int);
+	memcpy(magic+puntero, &estructura->size_path, sizeof(int));
+	puntero += sizeof(int);
+	memcpy(magic+puntero, estructura->path, &estructura->size_path);
+	puntero += estructura->size_path;
+	return magic;
+}
+
+t_readdir* deserializar_readdir (void* magic){
+	t_readdir* estructura = malloc(sizeof(t_readdir));
+	uint32_t puntero = 0;
+	memcpy(&estructura->size_path,magic+puntero,4);
+	puntero += 4;
+	estructura->path = malloc(estructura->size_path);
+	memcpy(estructura->path, magic+puntero, estructura->size_path);
+	puntero += estructura->size_path;
+	return estructura;
+}
+
+void reddir_destroy (t_readdir* estructura){
+	free(estructura->path);
+	free(estructura);
+}
