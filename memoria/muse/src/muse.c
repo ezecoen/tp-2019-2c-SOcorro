@@ -152,6 +152,7 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 int muse_alloc(muse_alloc_t* datos){
 //me fijo si hay lugar disponible
 //ME ESTA QUEDANDO MEDIO HEAP EN CADA PAGINA Y HACE Q SE ROMPA!!!!!!!!!!!!!
+//hay que fijarse q onda los bitarrays!!
 uint32_t direccion_return = -1;
 if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	//busco si ya tengo algun segmento
@@ -171,7 +172,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			t_list* paginas = list_create();
 			for(int i = 0;i<cantidad_de_paginas;i++){
 				pagina* pag = malloc(sizeof(pagina));
-				pag->modificado = false;//??
 				pag->num_pagina = i;
 				pag->ultimo_heap_metadata_libre = -1;//todas menos la ultima
 				pag->presencia = true;
@@ -221,7 +221,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			ultimo_heap->size = datos->tamanio;
 			int offset_pagina = configuracion->tam_pag-heap_nuevo->size-sizeof(heap_metadata)-datos->tamanio;
 			pagina_buscada->ultimo_heap_metadata_libre += sizeof(heap_metadata)+datos->tamanio;
-			pagina_buscada->modificado = true;
 			direccion_return = segmento_buscado->base_logica+pagina_buscada->num_pagina*configuracion->tam_pag+offset_pagina;
 			free(heap_nuevo);
 			free(ultimo_heap);
@@ -253,7 +252,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					}
 					for(int i = 0;i<paginas_necesarias;i++){
 						pagina* pagina_nueva = malloc(sizeof(pagina*));
-						pagina_nueva->modificado = true;//quedan en modificado??
 						pagina_nueva->num_pagina = ultima_pagina->num_pagina+1+i;
 						pagina_nueva->presencia = true;
 						pagina_nueva->datos = asignar_marco_nuevo();
@@ -283,7 +281,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					//este memcpy actualiza el heap_metadata anterior
 					free(ultimo_heap);
 					free(heap_nuevo);
-					ultima_pagina->modificado = true;
 					ultima_pagina->ultimo_heap_metadata_libre = -1;
 				}
 				else{//=>no hay lugar
@@ -305,7 +302,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					t_list* paginas = list_create();
 					for(int i = 0;i<cantidad_de_paginas;i++){
 						pagina* pag = malloc(sizeof(pagina));
-						pag->modificado = false;//??
 						pag->num_pagina = i;
 						pag->ultimo_heap_metadata_libre = -1;//todas menos la ultima
 						pag->presencia = true;
@@ -386,17 +382,53 @@ _Bool encontrar_ultima_pagina(pagina* pag){
 
 void* asignar_marco_nuevo(){
 //	retorno un marco nuevo en memoria
-	t_bit* bit_libre = bit_libre_memoria();
+//	esto va a tener q estar mutexeado
+	t_bit_memoria* bit_libre = bit_libre_memoria();
 	if(bit_libre == NULL){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
 	return upcm + bit_libre->bit_position * configuracion->tam_pag;
 }
-t_bit* ejecutar_clock_modificado(){
-	//falta codear!!
-	t_bit* bit_return = NULL;
+t_bit_memoria* ejecutar_clock_modificado(){
+	//(uso,modificado) hay que pensar como hacer para mover el "puntero" del algoritmo
+	//primero hay que buscar si hay alguna pagina de memoria en (0,0) -> en el bitarray_memoria
+	//si no se encuentra hay que buscar el (0,1) y pasando los (1,x) a (0,x)
+	//si no se encuentra repetir los pasos devuelta
+
+	t_bit_memoria* bit_return = buscar_0_0();
+	if(bit_return==NULL){
+		bit_return = buscar_0_1();
+		if(bit_return == NULL){
+			bit_return = ejecutar_clock_modificado();
+		}
+	}
 	return bit_return;
+}
+t_bit_memoria* buscar_0_0(){
+	_Bool encontrar_0_0(t_bit_memoria* bit){
+		if(!bit->bit_uso && !bit->bit_modificado){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	return list_find(bitarray->bitarray_memoria,(void*)encontrar_0_0);
+}
+t_bit_memoria* buscar_0_1(){
+	_Bool encontrar_0_1(t_bit_memoria* bit){
+		if(!bit->bit_uso && bit->bit_modificado){
+			return true;
+		}
+		else{
+			if(bit->bit_uso){
+				bit->bit_uso = false;
+			}
+			return false;
+		}
+	}
+	return list_find(bitarray->bitarray_memoria,(void*)encontrar_0_1);
 }
 int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//testea2
@@ -743,17 +775,17 @@ void init_bitarray(){
 	bitarray->size_memoria = CANT_PAGINAS_MEMORIA;
 	bitarray->bitarray_memoria = list_create();
 	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA; i++){
-		t_bit* bit = malloc(sizeof(t_bit));
+		t_bit_memoria* bit = malloc(sizeof(t_bit_memoria));
 		bit->bit_position = i;
-		bit->bit_usado = false;
+		bit->ocupado = false;
 		list_add(bitarray->bitarray_memoria,bit);
 	}
 	bitarray->size_memoria_virtual = CANT_PAGINAS_MEMORIA_VIRTUAL;
 	bitarray->bitarray_memoria_virtual = list_create();
 	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA_VIRTUAL; i++){
-		t_bit* bit = malloc(sizeof(t_bit));
+		t_bit_swap* bit = malloc(sizeof(t_bit_swap));
 		bit->bit_position = i;
-		bit->bit_usado = false;
+		bit->ocupado = false;
 		list_add(bitarray->bitarray_memoria_virtual,bit);
 	}
 }
@@ -762,19 +794,22 @@ void destroy_bitarray(){
 	list_destroy_and_destroy_elements(bitarray->bitarray_memoria_virtual,free);
 	free(bitarray);
 }
-t_bit* bit_libre_memoria_virtual(){
+t_bit_swap* bit_libre_memoria_virtual(){
+	_Bool bit_libre(t_bit_swap* bit){
+		return !bit->ocupado;
+	}
 	return list_find(bitarray->bitarray_memoria_virtual,(void*)bit_libre);
 }
-t_bit* bit_libre_memoria(){
+t_bit_memoria* bit_libre_memoria(){
 	//si encuentro uno, ya le pongo como que esta usado
-	t_bit* bit_asignado = list_find(bitarray->bitarray_memoria,(void*)bit_libre);
+	_Bool bit_libre(t_bit_memoria* bit){
+		return !bit->ocupado;
+	}
+	t_bit_memoria* bit_asignado = list_find(bitarray->bitarray_memoria,(void*)bit_libre);
 	if(bit_asignado!=NULL){
-		bit_asignado->bit_usado = true;
+		bit_asignado->ocupado = true;
 	}
 	return bit_asignado;
-}
-_Bool bit_libre(t_bit* bit){
-	return !bit->bit_usado;
 }
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));

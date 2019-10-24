@@ -37,7 +37,6 @@ typedef struct pagina{
 	uint32_t num_pagina;
 	int ultimo_heap_metadata_libre;
 	_Bool presencia;
-	_Bool modificado;
 	void* datos;
 }pagina;
 
@@ -46,17 +45,23 @@ typedef struct heap_metadata{
 	_Bool isFree;
 }heap_metadata;
 
-typedef struct {
-	t_list* bitarray_memoria;
+typedef struct bitarray_nuestro{
+	t_list* bitarray_memoria;//se llena con t_bit_memoria
 	uint32_t size_memoria;
-	t_list* bitarray_memoria_virtual;
+	t_list* bitarray_memoria_virtual;//se llena con t_bit_swap
 	uint32_t size_memoria_virtual;
 }bitarray_nuestro;
 
-typedef struct t_bit{
-	bool bit_usado;
+typedef struct t_bit_memoria{
+	_Bool ocupado;
 	uint32_t bit_position;
-}t_bit;
+	_Bool bit_uso;//para clock
+	_Bool bit_modificado;//para clock
+}t_bit_memoria;
+typedef struct t_bit_swap{
+	_Bool ocupado;
+	uint32_t bit_position;
+}t_bit_swap;
 
 typedef struct muse_alloc_t{
 	uint32_t size_id;
@@ -181,7 +186,9 @@ segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 _Bool encontrar_ultima_pagina(pagina* pag);
 void* asignar_marco_nuevo();
-t_bit* ejecutar_clock_modificado();
+t_bit_memoria* ejecutar_clock_modificado();
+t_bit_memoria* buscar_0_0();
+t_bit_memoria* buscar_0_1();
 int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
 void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset);
 int muse_free(muse_free_t* datos);
@@ -200,9 +207,9 @@ void esperar_conexion(uint32_t servidor);
 void ocupate_de_este(int socket);
 void init_bitarray();
 void destroy_bitarray();
-t_bit* bit_libre_memoria();
-t_bit* bit_libre_memoria_virtual();
-_Bool bit_libre(t_bit* bit);
+t_bit_memoria* bit_libre_memoria();
+t_bit_swap* bit_libre_memoria_virtual();
+_Bool bit_libre(t_bit_memoria* bit);
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);
