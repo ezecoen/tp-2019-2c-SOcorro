@@ -32,6 +32,7 @@ typedef struct segmento{
 	uint32_t tamanio;
 	t_list* paginas;
 	int ultimo_heap_metadata_libre;
+	t_list* direcciones_heaps;
 }segmento;
 
 typedef struct pagina{
@@ -153,7 +154,6 @@ int DIR_TAM_DESPLAZAMIENTO;
 int DIR_TAM_PAGINA;
 int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
-
 bitarray_nuestro* bitarray;
 
 struct sockaddr_in direccionServidor;

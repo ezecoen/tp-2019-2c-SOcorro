@@ -3,7 +3,8 @@
 int main(int argc, char **argv) {
 //	INICIANDO
 
-	path_de_config = string_duplicate(argv[1]);
+	path_de_config = string_duplicate("/home/utnso/tp-2019-2c-SOcorro/memoria/muse/muse.config");
+	//path_de_config = string_duplicate(argv[1]);
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras();
@@ -31,7 +32,8 @@ int main(int argc, char **argv) {
 //	int result = muse_alloc(mat);
 //	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
 //	fflush(stdout);
-////	prueba creo segmento 2
+
+	////	prueba creo segmento 2
 //	muse_alloc_t* mat1 = crear_muse_alloc(1000,"asdasd1");
 //	int result1 = muse_alloc(mat1);
 //	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
@@ -43,6 +45,7 @@ int main(int argc, char **argv) {
 //	int result3 = muse_alloc(mat2);
 //	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
 
+	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -76,8 +79,7 @@ int log_2(double n){
          n /= 2;
      }
      return logValue;
- }
-
+}
 void iniciar_log(char* path){//0 es archivo, 1 es consola
 	char* nombre = string_new();
 	string_append(&nombre,path);
@@ -149,6 +151,30 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 	programa_t* programa_buscado = list_find(tabla_de_programas,(void*)id_programa_igual);
 	return programa_buscado->tabla_de_segmentos;
 }
+void liberar_paginas_de_segmento(segmento* segmento) {
+	//Esto solo recorre toodo el segmento
+	//en realidad, la lista de heaps
+	//y va calculando cuales paginas pueden liberarse
+	for(int i=0;i<list_size(segmento->direcciones_heaps);i++) {
+		int dir_heap = list_get(segmento->direcciones_heaps,i);
+		heap_metadata* _heap = malloc(sizeof(heap_metadata));
+		int numero_de_pagina = redondear_double_arriba((double)dir_heap/configuracion->tam_pag);
+		pagina* pag = buscar_pagina_por_numero(segmento->paginas,numero_de_pagina);
+		//memccpy(_heap,dir_heap+pag->,sizeof(heap_metadata));
+		if(_heap->isFree) {
+			//si esta free
+			//y no es la primera..
+			if(i!=0){
+			//tengo que mirar la pag siguiente y anterior
+			// y ver si puedo liberar algo
+
+			}
+		} else {
+			//si no esta free ..
+			//nada?
+		}
+	}
+}
 int muse_alloc(muse_alloc_t* datos){
 //me fijo si hay lugar disponible
 //ME ESTA QUEDANDO MEDIO HEAP EN CADA PAGINA Y HACE Q SE ROMPA!!!!!!!!!!!!!
@@ -159,7 +185,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	if(list_is_empty(tabla_de_segmentos)){
 		//hay que crear el 1er segmento
 		uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
-
 		int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-datos->tamanio-sizeof(heap_metadata)*2;
 		if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
 			lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
