@@ -17,7 +17,7 @@
 #include <commons/config.h>
 #include <commons/log.h>
 #include <string.h>
-
+#include <stdbool.h>
 //ESTRUCTURAS
 typedef struct programa_t{
 	char* id_programa;
@@ -31,20 +31,22 @@ typedef struct segmento{
 	uint32_t base_logica;
 	uint32_t tamanio;
 	t_list* paginas;
-	int ultimo_heap_metadata_libre;
-	t_list* direcciones_heaps;
+	t_list* info_heaps;
 }segmento;
-
-typedef struct pagina{
-	uint32_t num_pagina;
-	_Bool presencia;
-	void* datos;
-}pagina;
 
 typedef struct heap_metadata{
 	uint32_t size;
-	_Bool isFree;
-}heap_metadata;
+	_Bool is_free;
+
+}__attribute__((packed)) heap_metadata ;
+
+typedef struct heap_lista{
+	int direccion_heap_metadata;
+	int espacio;
+	_Bool is_free;
+	int indice;
+}__attribute__((packed)) heap_lista ;
+
 
 typedef struct bitarray_nuestro{
 	t_list* bitarray_memoria;//se llena con t_bit_memoria
@@ -64,6 +66,12 @@ typedef struct t_bit_swap{
 	uint32_t bit_position;
 }t_bit_swap;
 
+
+typedef struct pagina{
+	uint32_t num_pagina;
+	_Bool presencia;
+	t_bit_memoria* bit_marco;
+}pagina;
 typedef struct muse_alloc_t{
 	uint32_t size_id;
 	char* id;
@@ -113,12 +121,12 @@ typedef struct muse_unmap_t{
 	uint32_t direccion;
 }muse_unmap_t;
 
-typedef struct{
+typedef struct muse_char{
 	uint32_t size_mensaje;
 	char* mensaje;
 }muse_char;
 
-typedef struct{
+typedef struct muse_void{
 	uint32_t size_paquete;
 	void* paquete;
 }muse_void;
@@ -131,7 +139,7 @@ typedef struct s_config{
 	char* ip;
 }s_config;
 
-typedef enum{
+typedef enum t_comando_muse{
 	MUSE_INIT=0,//no tiene crear/serializar/etc
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
@@ -185,7 +193,8 @@ segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamani
 segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 _Bool encontrar_ultima_pagina(pagina* pag);
-void* asignar_marco_nuevo();
+t_bit_memoria* asignar_marco_nuevo();
+void* obtener_puntero_a_marco(t_bit_memoria* bit_marco);
 t_bit_memoria* ejecutar_clock_modificado();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
