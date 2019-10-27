@@ -82,6 +82,7 @@ bool el_fs_esta_formateado(char* fs);
 void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
+void sac_readdir(int cliente);
 
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;

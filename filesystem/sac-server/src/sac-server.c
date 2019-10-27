@@ -99,7 +99,7 @@ t_bitarray* init_set_bitmap(){
 		bitarray_set_bit(bitarray,i);
 	}
 	for(int j = tam_de_bitmap+1+1024;j<bitarray->size;j++){
-		bitarray_test_bit(bitarray,j);
+		bitarray_clean_bit(bitarray,j);
 	}
 	return bitarray;
 }
@@ -177,48 +177,49 @@ uint64_t timestamp(){
 	uint64_t a = result;
 	return a;
 }
-void ocupate_de_esta(int cliente){
-	int cli;
-
-	recv(cliente,&cli,4,MSG_WAITALL);
-	if(cli != INIT_CLI){
-		perror("Se conecto un rancio");
-		close(cliente);
-		return;
-	}
-
-	operacion* op = recibir_instruccion(cliente);
-
-	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
-
-	switch(op->op){
-	case READDIR:
-		log_info(logger,"Llego la instruccion READDIR");
-		sac_readdir();
-		break;
-	case OPEN:
-		log_info(logger,"Llego la instruccion OPEN");
-		break;
-	case READ:
-		log_info(logger,"Llego la instruccion READ");
-		break;
-	case MKNOD:
-		log_info(logger,"Llego la instruccion MKNOD");
-		break;
-	case MKDIR:
-		log_info(logger,"Llego la instruccion MKDIR");
-		break;
-	case CHMOD:
-		log_info(logger,"Llego la instruccion CHMOD");
-		break;
-	case UNLINK:
-		log_info(logger,"Llego la instruccion UNLINK");
-		break;
-	default:
-		log_error(logger, "Llego una instruccion no habilitada");
-		break;
-	}
-}
+//void ocupate_de_esta(int cliente){
+//	int cli;
+//
+//	recv(cliente,&cli,4,MSG_WAITALL);
+//	if(cli != INIT_CLI){
+//		perror("Se conecto un rancio");
+//		close(cliente);
+//		return;
+//	}
+//
+//	operacion* op = recibir_instruccion(cliente);
+//
+//	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+//
+//		switch(op->op){
+//		case READDIR:
+//			log_info(logger,"Llego la instruccion READDIR");
+//			sac_readdir();
+//			break;
+//		case OPEN:
+//			log_info(logger,"Llego la instruccion OPEN");
+//			break;
+//		case READ:
+//			log_info(logger,"Llego la instruccion READ");
+//			break;
+//		case MKNOD:
+//			log_info(logger,"Llego la instruccion MKNOD");
+//			break;
+//		case MKDIR:
+//			log_info(logger,"Llego la instruccion MKDIR");
+//			break;
+//		case CHMOD:
+//			log_info(logger,"Llego la instruccion CHMOD");
+//			break;
+//		case UNLINK:
+//			log_info(logger,"Llego la instruccion UNLINK");
+//			break;
+//		default:
+//			log_error(logger, "Llego una instruccion no habilitada");
+//			break;
+//		}
+//	}
+//}
 
 operacion* recibir_instruccion(int cliente){
 	int op;
@@ -249,7 +250,7 @@ void esperar_conexion(int servidor){
 
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
-
+	int cli;
 	if(recv(cliente,&cli,4,MSG_WAITALL) != INIT_CLI){
 		perror("Se conecto un rancio");
 		close(cliente);
@@ -300,12 +301,14 @@ void sac_readdir(int cliente){
 	recv(cliente,&_tam,4,0);
 	void* magic = malloc(_tam);
 	recv(cliente,&magic,_tam,0);
+	char* path_pedido = deserializar_path(magic);
+	free(magic);
+//	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
+//	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
+//									las entradas de directorio o un error (si no existe devolver -ENOENT)
 
-	t_readdir* pedido = malloc(sizeof(t_readdir));
-
-	pedido = deserializar_readdir(magic);
 
 
+	free(path_pedido);
 }
-
 

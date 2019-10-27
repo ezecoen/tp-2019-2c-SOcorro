@@ -26,5 +26,7 @@
 int _socket;
 t_log* logger;
 
+void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler, int cant);
+
 
 #endif /* SAC_CLI_H_ */
