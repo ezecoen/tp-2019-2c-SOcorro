@@ -31,8 +31,8 @@ struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
 
 typedef struct{
-	uint32_t punteros [1024];
-}_bloques_de_punteros;
+	uint32_t punteros;
+}puntero_a_bloque_de_puntero;
 
 typedef struct{
 	uint8_t estado;
@@ -41,7 +41,7 @@ typedef struct{
 	uint32_t tamanio_de_archivo;//maximo 4 gb
 	uint64_t fecha_de_creacion;
 	uint64_t fecha_de_modificacion;
-	_bloques_de_punteros punteros_indirectos[1000];
+	puntero_a_bloque_de_puntero punteros_indirectos[1000];
 }nodo;
 
 typedef struct { //tiene que pesar 4096
@@ -84,6 +84,10 @@ void load_fs(char* fs);
 void atender_cliente(int cliente);
 void sac_readdir(int cliente);
 
+void crear_nodo(const char* path);
+nodo* dame_el_primer_nodo_libre();
+int _mknod(char* nombre);
+int _mkdir(char* nombre);
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 t_log* logger;
