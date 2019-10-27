@@ -42,6 +42,7 @@ void muse_close(){
 	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
 	iniciado = -1;
+	free(muse_id);
 	puts("Chau muse  :´(");
 }
 
