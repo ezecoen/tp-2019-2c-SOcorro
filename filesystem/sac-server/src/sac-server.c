@@ -11,22 +11,13 @@ int main(int argc,char* argv[]) {
 	if(el_fs_esta_formateado(argv[1])){
 		load_fs(argv[1]);
 		log_info(logger,"El fileSystem esta cargado");
+
+
+
 	}else{
 		init_fs(argv[1]);
 		log_info(logger,"El fileSystem fue creado");
 	}
-	uint32_t a1 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[0];
-	log_info(logger,"%d",a1);
-	uint32_t a2 = tabla_de_nodos[0]->punteros_indirectos[0].punteros[1];
-	log_info(logger,"%d",a2);
-	uint32_t a3 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[0];
-	log_info(logger,"%d",a3);
-	uint32_t a4 = tabla_de_nodos[0]->punteros_indirectos[1].punteros[1];
-	log_info(logger,"%d",a4);
-	uint32_t a5 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[0];
-	log_info(logger,"%d",a5);
-	uint32_t a6 = tabla_de_nodos[1]->punteros_indirectos[0].punteros[1];
-	log_info(logger,"%d",a6);
 
 
 
@@ -38,6 +29,32 @@ int main(int argc,char* argv[]) {
 //	}
 
 	return 0;
+}
+int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
+	nodo* nodo = dame_el_primer_nodo_libre();
+	if(nodo == -1){
+		//no hay mas nodos
+		return -1;
+	}
+	nodo->estado=1;
+	nodo->fecha_de_creacion = timestamp();
+	nodo->fecha_de_modificacion = timestamp();
+	strcpy(nodo->nombre_de_archivo,nombre);
+//	nodo->bloque_padre
+	return 1;
+}
+int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
+	nodo* nodo = dame_el_primer_nodo_libre();
+	if(nodo == -1){
+		//no hay mas nodos
+		return -1;
+	}
+	nodo->estado=2;
+	nodo->fecha_de_creacion = timestamp();
+	nodo->fecha_de_modificacion = timestamp();
+	strcpy(nodo->nombre_de_archivo,nombre);
+//	nodo->bloque_padre
+	return 1;
 }
 bool el_fs_esta_formateado(char* fs){
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
@@ -64,6 +81,9 @@ void init_fs(char* fs){
 void load_fs(char* fs){
 	tam_del_fs = fileSize(fs);
 	tam_de_bitmap = tam_del_fs/4096/8/4096;
+	if(tam_de_bitmap==0){
+		tam_de_bitmap++;
+	}
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
 	primer_bloque_de_disco = mmap(NULL,tam_del_fs,PROT_READ | PROT_WRITE,MAP_FILE | MAP_SHARED,disco_fd,0);
 	_header = levantar_header(primer_bloque_de_disco);
@@ -93,13 +113,16 @@ t_bitarray* levantar_bit_array(bloque* bloque){
 	return bitarray;
 }
 t_bitarray* init_set_bitmap(){
+	if(tam_de_bitmap==0){
+		tam_de_bitmap++;
+	}
 	char* a = string_repeat(0,tam_de_bitmap*4096);
 	t_bitarray* bitarray = bitarray_create_with_mode(a,tam_de_bitmap*4096,MSB_FIRST);
 	for(int i=0;i<tam_de_bitmap+1+1024;i++){//sumo 1 por el header y 1024 por la tabla de nodos
 		bitarray_set_bit(bitarray,i);
 	}
 	for(int j = tam_de_bitmap+1+1024;j<bitarray->size;j++){
-		bitarray_test_bit(bitarray,j);
+		bitarray_clean_bit(bitarray,j);
 	}
 	return bitarray;
 }
@@ -113,15 +136,7 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 		for(int i = 0;i<71;i++){
 			nodo_vacio->nombre_de_archivo[i] = '-';
 		}
-		for(int i=0;i<1000;i++){
-			for(int j=0;i<1024;i++){
-				if(j==0){
-					nodo_vacio->punteros_indirectos[i].punteros[j]= 1;
-				}else{
-					nodo_vacio->punteros_indirectos[i].punteros[j]= 0;
-				}
-			}
-		}
+		nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 		nodo_vacio->tamanio_de_archivo=0;
 		_bloque++;
 	}
@@ -135,10 +150,8 @@ void escribir_bitmap_inicio(bloque* disco,t_bitarray* bitarray){
 	int bloques = _bits/4096;
 	int sub_array = 0;
 	for(int i=0;i<bloques;i++){
-		//printf("Bloque %d \n",i);
 		for(int j=0;j<4096;j++){
 			disco->bytes[j]=bitarray->bitarray[sub_array];
-			//printf("%d",disco->bytes[j]);
 			sub_array++;
 		}
 		disco++;
@@ -169,13 +182,43 @@ void printear(bloque* bloq){
 		printf("%c",bloq->bytes[i]);
 	}
 }
-
 uint64_t timestamp(){
 	struct timeval tv;
 	gettimeofday(&tv, NULL);
 	unsigned long long result = (((unsigned long long )tv.tv_sec) * 1000 + ((unsigned long) tv.tv_usec) / 1000);
 	uint64_t a = result;
 	return a;
+}
+void crear_nodo(const char* path){
+	if(strlen(path)<71){
+		log_error(logger,"Error al crear el nodo, nombre muy largo");
+//		devolver el error a sac-cli
+		return;
+	}
+	nodo* nodo = dame_el_primer_nodo_libre();;
+	nodo->estado=2;
+	nodo->fecha_de_creacion = timestamp();
+	nodo->bloque_padre=0; //0 si es el root
+	nodo->fecha_de_modificacion=timestamp();
+	strcpy(nodo->nombre_de_archivo,path);
+	nodo->tamanio_de_archivo=0;
+	nodo->punteros_indirectos;
+}
+nodo* dame_el_primer_nodo_libre(){
+	for(int i = 0;i<1024;i++){
+		if(tabla_de_nodos[i]->estado == 0){
+			// el indice de la tabla de nodos es el numero de nodo
+			nodo* bloque_del_nodo = (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+			return bloque_del_nodo;
+		}
+	}
+	//no hay nodos libres
+	return -1;
+
+}
+bloque* bloque_de_nodo(int nodo){
+	bloque* ret = primer_bloque_de_disco+1+tam_de_bitmap+nodo;
+	return ret;
 }
 void ocupate_de_esta(int cliente){
 	int cli;
@@ -187,36 +230,37 @@ void ocupate_de_esta(int cliente){
 		return;
 	}
 
-	operacion* op = recibir_instruccion(cliente);
+	int op;
 
-	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+	while(recv(cliente,&op,4,MSG_WAITALL)>0){
 
-	switch(op->op){
-	case READDIR:
-		log_info(logger,"Llego la instruccion READDIR");
-		sac_readdir();
-		break;
-	case OPEN:
-		log_info(logger,"Llego la instruccion OPEN");
-		break;
-	case READ:
-		log_info(logger,"Llego la instruccion READ");
-		break;
-	case MKNOD:
-		log_info(logger,"Llego la instruccion MKNOD");
-		break;
-	case MKDIR:
-		log_info(logger,"Llego la instruccion MKDIR");
-		break;
-	case CHMOD:
-		log_info(logger,"Llego la instruccion CHMOD");
-		break;
-	case UNLINK:
-		log_info(logger,"Llego la instruccion UNLINK");
-		break;
-	default:
-		log_error(logger, "Llego una instruccion no habilitada");
-		break;
+		switch(op){
+		case READDIR:
+			log_info(logger,"Llego la instruccion READDIR");
+			sac_readdir();
+			break;
+		case OPEN:
+			log_info(logger,"Llego la instruccion OPEN");
+			break;
+		case READ:
+			log_info(logger,"Llego la instruccion READ");
+			break;
+		case MKNOD:
+			log_info(logger,"Llego la instruccion MKNOD");
+			break;
+		case MKDIR:
+			log_info(logger,"Llego la instruccion MKDIR");
+			break;
+		case CHMOD:
+			log_info(logger,"Llego la instruccion CHMOD");
+			break;
+		case UNLINK:
+			log_info(logger,"Llego la instruccion UNLINK");
+			break;
+		default:
+			log_error(logger, "Llego una instruccion no habilitada");
+			break;
+		}
 	}
 }
 
@@ -249,6 +293,7 @@ void esperar_conexion(int servidor){
 
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
+	int cli;
 
 	if(recv(cliente,&cli,4,MSG_WAITALL) != INIT_CLI){
 		perror("Se conecto un rancio");
@@ -301,9 +346,7 @@ void sac_readdir(int cliente){
 	void* magic = malloc(_tam);
 	recv(cliente,&magic,_tam,0);
 
-	t_readdir* pedido = malloc(sizeof(t_readdir));
-
-	pedido = deserializar_readdir(magic);
+	t_readdir* pedido = deserializar_readdir(magic);
 
 
 }
