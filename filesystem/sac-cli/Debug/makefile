@@ -26,7 +26,7 @@ endif
 all: sac-cli
 
 dependents:
-	-cd /home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug && $(MAKE) all
+	-cd /home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug && $(MAKE) clean all
 
 # Tool invocations
 sac-cli: $(OBJS) $(USER_OBJS) /home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug/liblibreriaComun.so

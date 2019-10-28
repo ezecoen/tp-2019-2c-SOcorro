@@ -51,9 +51,9 @@ typedef struct{
 }t_exitoso;
 
 typedef struct{
-	uint32_t modo;
 	uint32_t size; //4bytes
 	uint64_t modif_time; //8bytes
+	uint32_t modo; //4bytes
 }t_getattr;
 
 /**

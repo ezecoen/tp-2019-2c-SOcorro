@@ -310,9 +310,13 @@ void esperar_conexion(int servidor){
 
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
-	int cli;
+	uint32_t _tam;
+	int res;
+	void* magic;
+	char* path_pedido;
 
-	if(recv(cliente,&cli,4,MSG_WAITALL) != INIT_CLI){
+	int cli = recv(cliente,&cli,4,MSG_WAITALL);
+	if(cli != INIT_CLI){
 		perror("Se conecto un rancio");
 		close(cliente);
 		return;
@@ -341,9 +345,31 @@ void atender_cliente(int cliente){
 			break;
 		case MKNOD:
 			log_info(logger,"Llego la instruccion MKNOD");
+			recv(cliente,&_tam,4,0);
+			magic = malloc(_tam);
+			recv(cliente,&magic,_tam,0);
+			path_pedido = deserializar_path(magic);
+			free(magic);
+			res = _mknod(path_pedido);
+//			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
+//			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
+//			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los
+//			que esten a nuestro alcance por lo menos)
+
+//			mandar socket respuesta con el valor de la respuesta
 			break;
 		case MKDIR:
 			log_info(logger,"Llego la instruccion MKDIR");
+			recv(cliente,&_tam,4,0);
+			magic = malloc(_tam);
+			recv(cliente,&magic,_tam,0);
+			path_pedido = deserializar_path(magic);
+			free(magic);
+			res = _mkdir(path_pedido);
+//			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
+//			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
+//			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los
+//			que esten a nuestro alcance por lo menos)
 			break;
 		case CHMOD:
 			log_info(logger,"Llego la instruccion CHMOD");
@@ -358,7 +384,7 @@ void atender_cliente(int cliente){
 	}
 }
 
-void sac_readdir(int cliente){
+void _readdir(int cliente){
 
 //	tengo que recivir el tamanio de la estructura entera pero no tengo
 //	el socket,deberia pasarme el socket por parametro o deberia hacer
@@ -373,8 +399,6 @@ void sac_readdir(int cliente){
 //	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
 //	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
 //									las entradas de directorio o un error (si no existe devolver -ENOENT)
-
-	char* pedido = deserializar_path(magic);
 
 
 	free(path_pedido);

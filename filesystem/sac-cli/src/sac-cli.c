@@ -2,6 +2,7 @@
 #include "libreriaComun/libreriaComun.h"
 
 
+
 /* Este es el contenido por defecto que va a contener
  * el unico archivo que se encuentre presente en el FS.
  * Si se modifica la cadena se podra ver reflejado cuando
@@ -61,21 +62,6 @@ char *statptr_to_str(struct stat *buf) {
     return str;
 }
 
-//void* serializar_char(char* path){
-//	int comando = CHAR;
-//	int tamanio_del_path = strlen(path)+1;
-//	int puntero = 0;
-//	void* magic = malloc(tamanio_del_path + sizeof(int));
-//	memcpy(magic+puntero,&comando,sizeof(comando));
-//	puntero += sizeof(comando);
-//	memcpy(magic+puntero,&tamanio_del_path,sizeof(tamanio_del_path));
-//	puntero += sizeof(tamanio_del_path);
-//	memcpy(magic+puntero,path,tamanio_del_path);
-//	puntero += tamanio_del_path;
-//	return magic;
-//
-//}
-
 /*
  * @DESC
  *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
@@ -92,24 +78,50 @@ char *statptr_to_str(struct stat *buf) {
  */
 
 static int sac_getattr(const char *path, struct stat *stbuf) {
-	int res = 0;
-//	void* magic = serializar_char(path);
+	int _tam;
 
 	memset(stbuf, 0, sizeof(struct stat));
 
+	void* peticion = serializar_path(path, GETATTR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, error;
+	if(op == ERROR){
+		recv(_socket,&error,4,0);
+		return -error;
+	}
+	else{
+		recv(_socket,&tam,4,0);
+		_respuesta = malloc(tam);
+		recv(_socket,_respuesta,tam,0);
+		t_getattr* atributos = deserializar_getattr(_respuesta);
+		stbuf->st_size = (long int)atributos->size;
+		struct timespec time;// = malloc(sizeof(struct timespec));
+		time.tv_sec = (__time_t)(atributos->modif_time/1000);
+		stbuf->st_mtim = time;
+		stbuf->st_mode = atributos->modo | 0777;
+		return 0;
+	}
+//	st_mtime;
+
+
 	//Si path es igual a "/" nos estan pidiendo los atributos del punto de montaje
 
-	if (strcmp(path, "/") == 0) {
-		stbuf->st_mode = S_IFDIR | 0777;
-		stbuf->st_nlink = 2;
-	} else if (strcmp(path, DEFAULT_FILE_PATH) == 0) {
-		stbuf->st_mode = S_IFREG | 0777;
-		stbuf->st_nlink = 1;
-		stbuf->st_size = strlen(DEFAULT_FILE_CONTENT);
-	} else {
-		res = -ENOENT;
-	}
-	return res;
+//	if (strcmp(path, "/") == 0) {
+//		stbuf->st_mode = S_IFDIR | 0777;
+//		stbuf->st_nlink = 2;
+//	} else if (strcmp(path, DEFAULT_FILE_PATH) == 0) {
+//		stbuf->st_mode = S_IFREG | 0777;
+//		stbuf->st_nlink = 1;
+//		stbuf->st_size = strlen(DEFAULT_FILE_CONTENT);
+//	} else {
+//		res = -ENOENT;
+//	}
+//	return res;
 }
 
 
@@ -143,11 +155,11 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, cant, error;
-	switch(op){
-	case ERROR:
+	if(op == ERROR){
 		recv(_socket,&error,4,0);
 		return -error;
-	case READDIR:
+	}
+	else{
 		recv(_socket,&tam,4,0);
 		_respuesta = malloc(tam);
 		recv(_socket,_respuesta,tam,0);
@@ -206,11 +218,11 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, error;
-	switch(op){
-	case ERROR:
+	if(op == ERROR){
 		recv(_socket,&error,4,0);
 		return -error;
-	case MKNOD:
+	}
+	else{
 		return 0;
 	}
 
@@ -257,11 +269,11 @@ static int sac_mkdir(const char *path, mode_t mode)
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, error;
-	switch(op){
-	case ERROR:
+	if(op == ERROR){
 		recv(_socket,&error,4,0);
 		return -error;
-	case MKDIR:
+	}
+	else{
 		return 0;
 	}
 
