@@ -153,7 +153,8 @@ typedef enum t_comando_muse{
 	MUSE_EXITOSO=10,//falta
 	MUSE_CHAR=11,
 	MUSE_INT=12,//no tiene crear/serializar/etc xq es solo un int de 4bytes
-	MUSE_VOID=13
+	MUSE_VOID=13,
+	MUSE_SEG_FAULT=14
 }t_comando_muse;
 
 //VARIABLES GLOBALES

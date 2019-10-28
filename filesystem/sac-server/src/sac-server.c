@@ -1,6 +1,7 @@
 // servidor para probar sockets mañana
 #include "sac-server.h"
-#include "libreriaComun/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
 	if(argc != 2){
@@ -17,14 +18,14 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue creado");
 	}
 
+	int _servidor = crear_servidor(8080);
+	while(1){
+		esperar_conexion(_servidor);
+	}
 
 
 
 
-//	int _servidor = crear_servidor(8080);
-//	while(1){
-//		esperar_conexion(_servidor);
-//	}
 
 	return 0;
 }
@@ -54,6 +55,15 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	strcpy(nodo->nombre_de_archivo,nombre);
 //	nodo->bloque_padre
 	return 1;
+}
+t_getattr* _getattr(char* nombre){
+	nodo* _nodo = dame_el_nodo_de(nombre);
+	if(_nodo == -1){//no hay nodos
+		return -1;
+	}
+	t_getattr* a = crear_getattr(_nodo->tamanio_de_archivo,_nodo->fecha_de_modificacion,_nodo->estado);
+	return a;
+
 }
 bool el_fs_esta_formateado(char* fs){
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
@@ -181,13 +191,6 @@ void printear(bloque* bloq){
 		printf("%c",bloq->bytes[i]);
 	}
 }
-uint64_t timestamp(){
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	unsigned long long result = (((unsigned long long )tv.tv_sec) * 1000 + ((unsigned long) tv.tv_usec) / 1000);
-	uint64_t a = result;
-	return a;
-}
 void crear_nodo(const char* path){
 	if(strlen(path)<71){
 		log_error(logger,"Error al crear el nodo, nombre muy largo");
@@ -215,55 +218,18 @@ nodo* dame_el_primer_nodo_libre(){
 	return -1;
 
 }
+nodo* dame_el_nodo_de(const char* _nombre){
+	for(int i = 0;i<1024;i++){
+		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,_nombre)){
+			return (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+		}
+	}
+	return -1;
+}
 bloque* bloque_de_nodo(int nodo){
 	bloque* ret = primer_bloque_de_disco+1+tam_de_bitmap+nodo;
 	return ret;
 }
-
-//void ocupate_de_esta(int cliente){
-//	int cli;
-//
-//	recv(cliente,&cli,4,MSG_WAITALL);
-//	if(cli != INIT_CLI){
-//		perror("Se conecto un rancio");
-//		close(cliente);
-//		return;
-//	}
-//
-//	int op;
-//
-//	while(recv(cliente,&op,4,MSG_WAITALL)>0){
-//
-//		switch(op){
-//		case READDIR:
-//			log_info(logger,"Llego la instruccion READDIR");
-//			sac_readdir();
-//			break;
-//		case OPEN:
-//			log_info(logger,"Llego la instruccion OPEN");
-//			break;
-//		case READ:
-//			log_info(logger,"Llego la instruccion READ");
-//			break;
-//		case MKNOD:
-//			log_info(logger,"Llego la instruccion MKNOD");
-//			break;
-//		case MKDIR:
-//			log_info(logger,"Llego la instruccion MKDIR");
-//			break;
-//		case CHMOD:
-//			log_info(logger,"Llego la instruccion CHMOD");
-//			break;
-//		case UNLINK:
-//			log_info(logger,"Llego la instruccion UNLINK");
-//			break;
-//		default:
-//			log_error(logger, "Llego una instruccion no habilitada");
-//			break;
-//		}
-//	}
-//}
-
 operacion* recibir_instruccion(int cliente){
 	int op;
 	int tamanio;
@@ -290,12 +256,21 @@ void esperar_conexion(int servidor){
 	pthread_detach(hilo_nuevo_cliente);
 	close(cliente);
 }
-
+void* armar_error(int error_code){
+	void* err = malloc(sizeof(int)*2);
+	memcpy(err,ERROR,4);
+	memcpy(err+4,error_code,4);
+	return err;
+}
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
-	int cli;
+	uint32_t _tam;
+	int res;
+	void* magic;
+	char* path_pedido;
 
-	if(recv(cliente,&cli,4,MSG_WAITALL) != INIT_CLI){
+	int cli = recv(cliente,&cli,4,MSG_WAITALL);
+	if(cli != INIT_CLI){
 		perror("Se conecto un rancio");
 		close(cliente);
 		return;
@@ -306,9 +281,19 @@ void atender_cliente(int cliente){
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 
 		switch(operacion){
+		case GETATTR:
+			log_info(logger,"Llego la instruccion GETATTR");
+			path_pedido = recibir_path(cliente);
+			t_getattr* attr = _getattr(path_pedido);
+			if(attr == -1){
+				send(cliente,(void*)ERROR,4,0);
+			}else{
+				magic = serializar_getattr(attr);
+				send(cliente,magic,(int)magic+4,0);
+			}
+			break;
 		case READDIR:
 			log_info(logger,"Llego la instruccion READDIR");
-			_readdir(cliente);
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");
@@ -318,9 +303,35 @@ void atender_cliente(int cliente){
 			break;
 		case MKNOD:
 			log_info(logger,"Llego la instruccion MKNOD");
+			path_pedido = recibir_path(cliente);
+			res = _mknod(path_pedido);
+			if(res == -1){
+//				mandar error
+			}else{
+				send(cliente,(void*)MKNOD,4,0);
+
+			}
+			break;
+//			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
+//			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
+//			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los
+//			que esten a nuestro alcance por lo menos)
+
+//			mandar socket respuesta con el valor de la respuesta
 			break;
 		case MKDIR:
 			log_info(logger,"Llego la instruccion MKDIR");
+			char* path = recibir_path(cliente);
+			int resultado = _mkdir(path);
+			if(resultado == -1){
+//				mandar error
+			}else{
+				send(cliente,(void*)MKDIR,4,0);
+			}
+//			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
+//			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
+//			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los
+//			que esten a nuestro alcance por lo menos)
 			break;
 		case CHMOD:
 			log_info(logger,"Llego la instruccion CHMOD");
@@ -335,7 +346,7 @@ void atender_cliente(int cliente){
 	}
 }
 
-void sac_readdir(int cliente){
+void _readdir(int cliente){
 
 //	tengo que recivir el tamanio de la estructura entera pero no tengo
 //	el socket,deberia pasarme el socket por parametro o deberia hacer
@@ -350,8 +361,6 @@ void sac_readdir(int cliente){
 //	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
 //	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
 //									las entradas de directorio o un error (si no existe devolver -ENOENT)
-
-	char* pedido = deserializar_path(magic);
 
 
 	free(path_pedido);

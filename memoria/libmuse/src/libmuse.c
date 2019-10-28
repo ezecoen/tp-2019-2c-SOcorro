@@ -113,22 +113,20 @@ int muse_get(void* dst, uint32_t src, size_t n){
 	uint32_t resultado;
 	recv(socket_muse,&resultado,4,0);
 	if(resultado==MUSE_VOID){
-		uint32_t size_resultado,size_get;
+		uint32_t size_resultado;
 		recv(socket_muse,&size_resultado,4,0);
 		void* resultado = malloc(size_resultado);
 		muse_void* mv = deserializar_muse_void(resultado);
-		memcpy(&size_get,mv->size_paquete,4);
-		void* void_get = malloc(size_get);
-		memcpy(void_get,mv->paquete,size_get);
+		memcpy(dst,mv->paquete,mv->size_paquete);
 		free(resultado);
 		muse_void_destroy(mv);
-		printf("get realizado, resultado en %p\n",void_get);
-		return void_get;
+		printf("get realizado, resultado en %p\n",dst);
+		return 0;
 	}
-	else{
-		printf("error al realizar el get en: %d\n",src);
+	else if(resultado == MUSE_SEG_FAULT){
+		printf("La cagaste con el get en: %d\n",src);
 		raise(11);
-//		return -1? xq hubo segfault... es segfault siempre?!!
+		return -1;
 	}
 }
 /**
