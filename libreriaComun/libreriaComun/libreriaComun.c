@@ -292,16 +292,16 @@ int tamanio_de_todos_las_ent_dir(t_list* lista){
 	return tam;
 }
 
-t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint32_t modo){
+t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo){
 	t_getattr* resp = malloc(sizeof(t_getattr));
 	resp->size = size;
 	resp->modif_time = modif_time;
-	resp->modo = modo;
+	resp->tipo = tipo;
 	return resp;
 }
 
 void* serializar_getattr(t_getattr* stat){
-	int _tam = sizeof(int)*2 + sizeof(uint64_t) + sizeof(uint32_t)*2;
+	int _tam = sizeof(int)*2 + sizeof(uint64_t) + sizeof(uint32_t) + sizeof(uint8_t);
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = GETATTR;
@@ -313,20 +313,19 @@ void* serializar_getattr(t_getattr* stat){
 	puntero += sizeof(uint32_t);
 	memcpy(magic+puntero, &stat->modif_time, sizeof(uint64_t));
 	puntero += sizeof(uint64_t);
-	memcpy(magic+puntero, &stat->modo, sizeof(uint32_t));
+	memcpy(magic+puntero, &stat->tipo, sizeof(uint8_t));
 	puntero += sizeof(uint32_t);
 	return magic;
 }
 
 t_getattr* deserializar_getattr(void* magic){
 	t_getattr* resp = malloc(sizeof(t_getattr));
-	int _tam;
 	int puntero = 0;
 	memcpy(&resp->size, magic+puntero, 4);
 	puntero += 4;
 	memcpy(&resp->modif_time, magic+puntero, 8);
 	puntero += 8;
-	memcpy(&resp->modo, magic+puntero, 4);
+	memcpy(&resp->tipo, magic+puntero, 1);
 	puntero += 4;
 	return resp;
 }

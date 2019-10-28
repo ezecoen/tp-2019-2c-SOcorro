@@ -57,10 +57,10 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 }
 t_getattr* _getattr(char* nombre){
 	nodo* _nodo = dame_el_nodo_de(nombre);
-	if(_nodo == -1){
+	if(_nodo == -1){//no hay nodos
 		return -1;
 	}
-	t_getattr* a = crear_getattr(_nodo->tamanio_de_archivo,_nodo->fecha_de_modificacion);
+	t_getattr* a = crear_getattr(_nodo->tamanio_de_archivo,_nodo->fecha_de_modificacion,_nodo->estado);
 	return a;
 
 }
@@ -236,51 +236,6 @@ bloque* bloque_de_nodo(int nodo){
 	bloque* ret = primer_bloque_de_disco+1+tam_de_bitmap+nodo;
 	return ret;
 }
-
-//void ocupate_de_esta(int cliente){
-//	int cli;
-//
-//	recv(cliente,&cli,4,MSG_WAITALL);
-//	if(cli != INIT_CLI){
-//		perror("Se conecto un rancio");
-//		close(cliente);
-//		return;
-//	}
-//
-//	int op;
-//
-//	while(recv(cliente,&op,4,MSG_WAITALL)>0){
-//
-//		switch(op){
-//		case READDIR:
-//			log_info(logger,"Llego la instruccion READDIR");
-//			sac_readdir();
-//			break;
-//		case OPEN:
-//			log_info(logger,"Llego la instruccion OPEN");
-//			break;
-//		case READ:
-//			log_info(logger,"Llego la instruccion READ");
-//			break;
-//		case MKNOD:
-//			log_info(logger,"Llego la instruccion MKNOD");
-//			break;
-//		case MKDIR:
-//			log_info(logger,"Llego la instruccion MKDIR");
-//			break;
-//		case CHMOD:
-//			log_info(logger,"Llego la instruccion CHMOD");
-//			break;
-//		case UNLINK:
-//			log_info(logger,"Llego la instruccion UNLINK");
-//			break;
-//		default:
-//			log_error(logger, "Llego una instruccion no habilitada");
-//			break;
-//		}
-//	}
-//}
-
 operacion* recibir_instruccion(int cliente){
 	int op;
 	int tamanio;
@@ -307,7 +262,12 @@ void esperar_conexion(int servidor){
 	pthread_detach(hilo_nuevo_cliente);
 	close(cliente);
 }
-
+void* armar_error(int error_code){
+	void* err = malloc(sizeof(int)*2);
+	memcpy(err,ERROR,4);
+	memcpy(err+4,error_code,4);
+	return err;
+}
 void atender_cliente(int cliente){
 	//Esperar con recv los pedidos de instrucciones que llegan del sac-cli
 	uint32_t _tam;
@@ -329,10 +289,14 @@ void atender_cliente(int cliente){
 		switch(operacion){
 		case GETATTR:
 			log_info(logger,"Llego la instruccion GETATTR");
-			char* path = recibir_path(cliente);
-			t_getattr* attr = _getattr(path);
-			void* magic = serializar_getattr(attr);
-			send(cliente,magic,(int)magic+4,0);
+			path_pedido = recibir_path(cliente);
+			t_getattr* attr = _getattr(path_pedido);
+			if(attr == -1){
+				send(cliente,(void*)ERROR,4,0);
+			}else{
+				magic = serializar_getattr(attr);
+				send(cliente,magic,(int)magic+4,0);
+			}
 			break;
 		case READDIR:
 			log_info(logger,"Llego la instruccion READDIR");
@@ -345,12 +309,15 @@ void atender_cliente(int cliente){
 			break;
 		case MKNOD:
 			log_info(logger,"Llego la instruccion MKNOD");
-			recv(cliente,&_tam,4,0);
-			magic = malloc(_tam);
-			recv(cliente,&magic,_tam,0);
-			path_pedido = deserializar_path(magic);
-			free(magic);
+			path_pedido = recibir_path(cliente);
 			res = _mknod(path_pedido);
+			if(res == -1){
+//				mandar error
+			}else{
+				send(cliente,(void*)MKNOD,4,0);
+
+			}
+			break;
 //			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
 //			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
 //			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los
@@ -360,12 +327,13 @@ void atender_cliente(int cliente){
 			break;
 		case MKDIR:
 			log_info(logger,"Llego la instruccion MKDIR");
-			recv(cliente,&_tam,4,0);
-			magic = malloc(_tam);
-			recv(cliente,&magic,_tam,0);
-			path_pedido = deserializar_path(magic);
-			free(magic);
-			res = _mkdir(path_pedido);
+			char* path = recibir_path(cliente);
+			int resultado = _mkdir(path);
+			if(resultado == -1){
+//				mandar error
+			}else{
+				send(cliente,(void*)MKDIR,4,0);
+			}
 //			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
 //			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
 //			todos los errores porque hay como mil y habria que contemplar la mayor cantidad posible (los

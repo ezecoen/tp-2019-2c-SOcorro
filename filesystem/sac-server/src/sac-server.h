@@ -26,6 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <errno.h>
 
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;

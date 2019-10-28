@@ -100,10 +100,14 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		recv(_socket,_respuesta,tam,0);
 		t_getattr* atributos = deserializar_getattr(_respuesta);
 		stbuf->st_size = (long int)atributos->size;
-		struct timespec time;// = malloc(sizeof(struct timespec));
+		struct timespec time;
 		time.tv_sec = (__time_t)(atributos->modif_time/1000);
 		stbuf->st_mtim = time;
-		stbuf->st_mode = atributos->modo | 0777;
+		if(atributos->tipo == 1){// es un archivo
+			stbuf->st_mode = S_IFREG | 0777;
+		}else{// es un directorio
+			stbuf->st_mode = S_IFDIR | 0777;
+		}
 		return 0;
 	}
 //	st_mtime;
