@@ -56,7 +56,8 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	return 1;
 }
 int _getattr(char* nombre){
-	nodo*
+	nodo* _nodo = dame_el_nodo_de(nombre);
+
 }
 bool el_fs_esta_formateado(char* fs){
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
@@ -317,9 +318,13 @@ void atender_cliente(int cliente){
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 
 		switch(operacion){
+		case GETATTR:
+			log_info(logger,"Llego la instruccion GETATTR");
+			char* path = recibir_path(cliente);
+			_getattr(path);
+			break;
 		case READDIR:
 			log_info(logger,"Llego la instruccion READDIR");
-			_readdir(cliente);
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");

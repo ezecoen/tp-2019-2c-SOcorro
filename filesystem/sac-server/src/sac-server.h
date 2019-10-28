@@ -88,6 +88,7 @@ void crear_nodo(const char* path);
 nodo* dame_el_primer_nodo_libre();
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
+nodo* dame_el_nodo_de(const char* _nombre);
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 t_log* logger;
