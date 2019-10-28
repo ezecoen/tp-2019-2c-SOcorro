@@ -55,8 +55,13 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 //	nodo->bloque_padre
 	return 1;
 }
-int _getattr(char* nombre){
+t_getattr* _getattr(char* nombre){
 	nodo* _nodo = dame_el_nodo_de(nombre);
+	if(_nodo == -1){
+		return -1;
+	}
+	t_getattr* a = crear_getattr(_nodo->tamanio_de_archivo,_nodo->fecha_de_modificacion);
+	return a;
 
 }
 bool el_fs_esta_formateado(char* fs){
@@ -321,7 +326,9 @@ void atender_cliente(int cliente){
 		case GETATTR:
 			log_info(logger,"Llego la instruccion GETATTR");
 			char* path = recibir_path(cliente);
-			_getattr(path);
+			t_getattr* attr = _getattr(path);
+			void* magic = serializar_getattr(attr);
+			send(cliente,magic,(int)magic+4,0);
 			break;
 		case READDIR:
 			log_info(logger,"Llego la instruccion READDIR");
