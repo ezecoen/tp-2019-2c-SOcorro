@@ -192,7 +192,6 @@ uint32_t length_de_char_asterisco(char** arrays){
 //	int size_path = char_length(path);
 //	t_readdir* estruc = malloc(sizeof(t_readdir));
 //	estruc->path = malloc(size_path);
-//
 //	estruc->size_path = size_path;
 //	memcpy(estruc->path, path, estruc->size_path);
 //	return estruc;
@@ -214,7 +213,15 @@ void* serializar_path(const char* path, operaciones comando){
 	puntero += size_path;
 	return magic;
 }
-
+char* recibir_path(int cliente){
+	int tam;
+	recv(cliente,&tam,4,0);
+	void* magic = malloc(tam);
+	recv(cliente,&magic,tam,0);
+	char* path = deserializar_path(magic);
+	free(magic);
+	return path;
+}
 char* deserializar_path (void* magic){
 	char* path;
 	int size_path;
@@ -285,7 +292,7 @@ int tamanio_de_todos_las_ent_dir(t_list* lista){
 	return tam;
 }
 
-t_getattr* crear_getattr(long int size, long int modif_time){
+t_getattr* crear_getattr(uint32_t size, uint64_t modif_time){
 	t_getattr* resp = malloc(sizeof(t_getattr));
 	resp->size = size;
 	resp->modif_time = modif_time;
@@ -293,11 +300,10 @@ t_getattr* crear_getattr(long int size, long int modif_time){
 }
 
 void* serializar_getattr(t_getattr* stat){
-	int _tam = sizeof(int)*2 + sizeof(long int)*2;
-	void magic = malloc(_tam);
+	int _tam = sizeof(int)*2 + sizeof(uint64_t) + sizeof(uint32_t);
+	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = GETATTR;
-
 	memcpy(magic+puntero, &op, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);

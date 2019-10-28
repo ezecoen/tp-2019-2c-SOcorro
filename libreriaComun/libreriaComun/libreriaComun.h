@@ -88,6 +88,6 @@ char* deserializar_path (void* magic);
 void* serializar_lista_ent_dir(t_list* lista);
 t_list* deserializar_lista_ent_dir (void* magic, int tam_lista);
 int tamanio_de_todos_las_ent_dir(t_list* lista);
-
+char* recibir_path(int socket_cliente);
 
 #endif /* LIBRERIA_COMUN_H_ */
