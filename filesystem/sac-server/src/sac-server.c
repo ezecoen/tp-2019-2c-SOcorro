@@ -12,8 +12,6 @@ int main(int argc,char* argv[]) {
 		load_fs(argv[1]);
 		log_info(logger,"El fileSystem esta cargado");
 
-
-
 	}else{
 		init_fs(argv[1]);
 		log_info(logger,"El fileSystem fue creado");
@@ -30,6 +28,7 @@ int main(int argc,char* argv[]) {
 
 	return 0;
 }
+
 int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
 	nodo* nodo = dame_el_primer_nodo_libre();
 	if(nodo == -1){
@@ -220,49 +219,50 @@ bloque* bloque_de_nodo(int nodo){
 	bloque* ret = primer_bloque_de_disco+1+tam_de_bitmap+nodo;
 	return ret;
 }
-void ocupate_de_esta(int cliente){
-	int cli;
 
-	recv(cliente,&cli,4,MSG_WAITALL);
-	if(cli != INIT_CLI){
-		perror("Se conecto un rancio");
-		close(cliente);
-		return;
-	}
-
-	int op;
-
-	while(recv(cliente,&op,4,MSG_WAITALL)>0){
-
-		switch(op){
-		case READDIR:
-			log_info(logger,"Llego la instruccion READDIR");
-			sac_readdir();
-			break;
-		case OPEN:
-			log_info(logger,"Llego la instruccion OPEN");
-			break;
-		case READ:
-			log_info(logger,"Llego la instruccion READ");
-			break;
-		case MKNOD:
-			log_info(logger,"Llego la instruccion MKNOD");
-			break;
-		case MKDIR:
-			log_info(logger,"Llego la instruccion MKDIR");
-			break;
-		case CHMOD:
-			log_info(logger,"Llego la instruccion CHMOD");
-			break;
-		case UNLINK:
-			log_info(logger,"Llego la instruccion UNLINK");
-			break;
-		default:
-			log_error(logger, "Llego una instruccion no habilitada");
-			break;
-		}
-	}
-}
+//void ocupate_de_esta(int cliente){
+//	int cli;
+//
+//	recv(cliente,&cli,4,MSG_WAITALL);
+//	if(cli != INIT_CLI){
+//		perror("Se conecto un rancio");
+//		close(cliente);
+//		return;
+//	}
+//
+//	int op;
+//
+//	while(recv(cliente,&op,4,MSG_WAITALL)>0){
+//
+//		switch(op){
+//		case READDIR:
+//			log_info(logger,"Llego la instruccion READDIR");
+//			sac_readdir();
+//			break;
+//		case OPEN:
+//			log_info(logger,"Llego la instruccion OPEN");
+//			break;
+//		case READ:
+//			log_info(logger,"Llego la instruccion READ");
+//			break;
+//		case MKNOD:
+//			log_info(logger,"Llego la instruccion MKNOD");
+//			break;
+//		case MKDIR:
+//			log_info(logger,"Llego la instruccion MKDIR");
+//			break;
+//		case CHMOD:
+//			log_info(logger,"Llego la instruccion CHMOD");
+//			break;
+//		case UNLINK:
+//			log_info(logger,"Llego la instruccion UNLINK");
+//			break;
+//		default:
+//			log_error(logger, "Llego una instruccion no habilitada");
+//			break;
+//		}
+//	}
+//}
 
 operacion* recibir_instruccion(int cliente){
 	int op;
@@ -308,7 +308,7 @@ void atender_cliente(int cliente){
 		switch(operacion){
 		case READDIR:
 			log_info(logger,"Llego la instruccion READDIR");
-			sac_readdir(cliente);
+			_readdir(cliente);
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");
@@ -345,10 +345,15 @@ void sac_readdir(int cliente){
 	recv(cliente,&_tam,4,0);
 	void* magic = malloc(_tam);
 	recv(cliente,&magic,_tam,0);
+	char* path_pedido = deserializar_path(magic);
+	free(magic);
+//	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
+//	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
+//									las entradas de directorio o un error (si no existe devolver -ENOENT)
 
-	t_readdir* pedido = deserializar_readdir(magic);
+	char* pedido = deserializar_path(magic);
 
 
+	free(path_pedido);
 }
-
 

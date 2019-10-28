@@ -26,13 +26,6 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 
-typedef enum{
-	EXIT,
-	CHAR,
-	ERROR,
-	EXITOSO,
-}t_comando;
-
 typedef enum {
 	INIT_CLI,
 	GETATTR,
@@ -42,7 +35,9 @@ typedef enum {
 	MKNOD,
 	MKDIR,
 	CHMOD,
-	UNLINK
+	UNLINK,
+	ERROR,
+	EXITOSO
 }operaciones;
 
 typedef struct{
@@ -74,6 +69,7 @@ uint32_t tamanoDireccion;
 void mandar(uint32_t tipo,void* algo,uint32_t _socket);
 char* recibir_char(uint32_t _socket);
 void mandar_char(char* _char, uint32_t _socket,uint32_t comando);
+uint32_t recibir_op(uint32_t sock);
 t_error* crear_error(char* descripcion);
 void error_destroy(t_error* error);
 void* serializar_paquete_error(t_error* error);
@@ -87,8 +83,11 @@ int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint32_t length_de_char_asterisco(char** arrays);
 
-t_readdir* crear_readdir (char* path);
-void* serializar_readdir(t_readdir* estructura);
-t_readdir* deserializar_readdir (void* magic);
+void* serializar_path(const char* path, operaciones comando);
+char* deserializar_path (void* magic);
+void* serializar_lista_ent_dir(t_list* lista);
+t_list* deserializar_lista_ent_dir (void* magic, int tam_lista);
+int tamanio_de_todos_las_ent_dir(t_list* lista);
+
 
 #endif /* LIBRERIA_COMUN_H_ */

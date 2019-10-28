@@ -37,21 +37,6 @@ struct t_runtime_options {
  */
 #define CUSTOM_FUSE_OPT_KEY(t, p, v) { t, offsetof(struct t_runtime_options, p), v }
 
-
-/*
- * @DESC
- *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
- * para obtener la metadata de un archivo/directorio. Esto puede ser tamaño, tipo,
- * permisos, dueño, etc ...
- *
- * @PARAMETROS
- * 		path - El path es relativo al punto de montaje y es la forma mediante la cual debemos
- * 		       encontrar el archivo o directorio que nos solicitan
- * 		stbuf - Esta esta estructura es la que debemos completar
- *
- * 	@RETURN
- * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
- */
 void conectar_socket_a_server(char* ip, int puerto){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
@@ -75,6 +60,7 @@ char *statptr_to_str(struct stat *buf) {
 
     return str;
 }
+
 //void* serializar_char(char* path){
 //	int comando = CHAR;
 //	int tamanio_del_path = strlen(path)+1;
@@ -89,9 +75,25 @@ char *statptr_to_str(struct stat *buf) {
 //	return magic;
 //
 //}
+
+/*
+ * @DESC
+ *  Esta función va a ser llamada cuando a la biblioteca de FUSE le llege un pedido
+ * para obtener la metadata de un archivo/directorio. Esto puede ser tamaño, tipo,
+ * permisos, dueño, etc ...
+ *
+ * @PARAMETROS
+ * 		path - El path es relativo al punto de montaje y es la forma mediante la cual debemos
+ * 		       encontrar el archivo o directorio que nos solicitan
+ * 		stbuf - Esta esta estructura es la que debemos completar
+ *
+ * 	@RETURN
+ * 		O archivo/directorio fue encontrado. -ENOENT archivo/directorio no encontrado
+ */
+
 static int sac_getattr(const char *path, struct stat *stbuf) {
 	int res = 0;
-	void* magic = serializar_char(path);
+//	void* magic = serializar_char(path);
 
 	memset(stbuf, 0, sizeof(struct stat));
 
@@ -131,25 +133,42 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	(void) offset;
 	(void) fi;
 
-	char* _respuesta;
+	int _tam;
 
-	t_readdir* estructura = crear_readdir(path);
+	void* peticion = serializar_path(path, READDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam,0);
+	free(peticion);
 
-	serializar_readdir(estructura);
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, cant, error;
+	switch(op){
+	case ERROR:
+		recv(_socket,&error,4,0);
+		return -error;
+	case READDIR:
+		recv(_socket,&tam,4,0);
+		_respuesta = malloc(tam);
+		recv(_socket,_respuesta,tam,0);
+		recv(_socket,&cant,4,0);
+		t_list* dirents = list_create();
+		dirents = deserializar_lista_ent_dir(_respuesta,cant);
+		cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		return 0;
+	}
+}
 
-	_respuesta = recibir_char(_socket);
+void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
+		int cant){
+	char* elem;
+	filler( buf, ".", NULL, 0 );  // Current Directory
+	filler( buf, "..", NULL, 0 ); // Parent Directory
 
-
-	if (strlen(path)>71 ||  == -1)
-		return -ENOENT;
-
-	// "." y ".." son entradas validas, la primera es una referencia al directorio donde estamos parados
-	// y la segunda indica el directorio padre
-	filler(buf, ".", NULL, 0);
-	filler(buf, "..", NULL, 0);
-	filler(buf, DEFAULT_FILE_NAME, NULL, 0);
-
-	return 0;
+	for(int i=0; i<cant; i++){    // All Other Directories
+		elem = list_get(lista,i);
+		filler(buf, elem, NULL, 0);
+	}
 }
 
 /*
@@ -174,14 +193,36 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 	return 0;
 }
-static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
-	int res;
-	res = mknod(path, mode, rdev);
-	if(res == -1)
-		return -errno;
 
-	return 0;
+
+static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
+	int _tam;
+
+	void* peticion = serializar_path(path, MKNOD);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, error;
+	switch(op){
+	case ERROR:
+		recv(_socket,&error,4,0);
+		return -error;
+	case MKNOD:
+		return 0;
+	}
+
+//	int res;
+//	res = mknod(path, mode, rdev);
+//	if(res == -1)
+//		return -errno;
+//
+//	return 0;
 }
+
+
 static int sac_chmod(const char *path, mode_t mode)
 {
     int res;
@@ -190,6 +231,8 @@ static int sac_chmod(const char *path, mode_t mode)
         return -errno;
     return 0;
 }
+
+
 static int sac_unlink(const char *path)
 {
     int res;
@@ -200,14 +243,35 @@ static int sac_unlink(const char *path)
 
     return 0;
 }
+
+
 static int sac_mkdir(const char *path, mode_t mode)
 {
-    int res;
+	int _tam;
 
-    res = mkdir(path, mode);
-    if(res == -1)
-        return -errno;
-    return 0;
+	void* peticion = serializar_path(path, MKDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, error;
+	switch(op){
+	case ERROR:
+		recv(_socket,&error,4,0);
+		return -error;
+	case MKDIR:
+		return 0;
+	}
+
+
+//    int res;
+//
+//    res = mkdir(path, mode);
+//    if(res == -1)
+//        return -errno;
+//    return 0;
 }
 
 /*
@@ -291,13 +355,10 @@ static struct fuse_opt fuse_options[] = {
 // debe estar el path al directorio donde vamos a montar nuestro FS
 int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
-	_socket = socket(AF_INET, SOCK_STREAM,0);
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
+//	_socket = conectar_socket_a("127.0.0.1", 8080);
 
-//	Que garcha es esto
-//	t_error* a = crear_error("pepe");
-//	puts(a->descripcion);
 
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
@@ -319,7 +380,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Esta es la funcion principal de FUSE, es la que se encarga
-	// de realizar el montaje, comuniscarse con el kernel, delegar todo
+	// de realizar el montaje, comuniscarse con el kernel, delegar to do
 	// en varios threads
 	return fuse_main(args.argc, args.argv, &sac_oper, NULL);
 }

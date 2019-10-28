@@ -82,6 +82,8 @@ bool el_fs_esta_formateado(char* fs);
 void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
+void _readdir(int cliente);
+
 void crear_nodo(const char* path);
 nodo* dame_el_primer_nodo_libre();
 int _mknod(char* nombre);
