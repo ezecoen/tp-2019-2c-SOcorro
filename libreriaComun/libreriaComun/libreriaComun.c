@@ -188,15 +188,15 @@ uint32_t length_de_char_asterisco(char** arrays){
 	return i;
 }
 
-t_readdir* crear_readdir (char* path){
-	int size_path = char_length(path);
-	t_readdir* estruc = malloc(sizeof(t_readdir));
-	estruc->path = malloc(size_path);
-
-	estruc->size_path = size_path;
-	memcpy(estruc->path, path, estruc->size_path);
-	return estruc;
-}
+//t_readdir* crear_readdir (char* path){
+//	int size_path = char_length(path);
+//	t_readdir* estruc = malloc(sizeof(t_readdir));
+//	estruc->path = malloc(size_path);
+//
+//	estruc->size_path = size_path;
+//	memcpy(estruc->path, path, estruc->size_path);
+//	return estruc;
+//}
 
 void* serializar_path(const char* path, operaciones comando){
 	int size_path = char_length(path);
@@ -227,10 +227,10 @@ char* deserializar_path (void* magic){
 	return path;
 }
 
-void reddir_destroy (t_readdir* estructura){
-	free(estructura->path);
-	free(estructura);
-}
+//void reddir_destroy (t_readdir* estructura){
+//	free(estructura->path);
+//	free(estructura);
+//}
 
 void* serializar_lista_ent_dir(t_list* lista){
 	int _tam = tamanio_de_todos_las_ent_dir(lista) + 12;
@@ -285,4 +285,37 @@ int tamanio_de_todos_las_ent_dir(t_list* lista){
 	return tam;
 }
 
+t_getattr* crear_getattr(long int size, long int modif_time){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	resp->size = size;
+	resp->modif_time = modif_time;
+	return resp;
+}
 
+void* serializar_getattr(t_getattr* stat){
+	int _tam = sizeof(int)*2 + sizeof(long int)*2;
+	void magic = malloc(_tam);
+	int puntero = 0;
+	operaciones op = GETATTR;
+
+	memcpy(magic+puntero, &op, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &_tam, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &stat->size, sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, &stat->modif_time, sizeof(uint64_t));
+	puntero += sizeof(uint64_t);
+	return magic;
+}
+
+t_getattr* deserializar_getattr(void* magic){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	int _tam;
+	int puntero = 0;
+	memcpy(&resp->size, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->modif_time, magic+puntero, 8);
+	puntero += 8;
+	return resp;
+}

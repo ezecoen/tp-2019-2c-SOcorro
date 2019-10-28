@@ -51,9 +51,9 @@ typedef struct{
 }t_exitoso;
 
 typedef struct{
-	uint32_t size_path;
-	char* path;
-}t_readdir;
+	uint32_t size; //4bytes
+	uint64_t modif_time; //8bytes
+}t_getattr;
 
 /**
 * @NAME: char_length
