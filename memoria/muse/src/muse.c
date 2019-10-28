@@ -169,30 +169,6 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 	programa_t* programa_buscado = list_find(tabla_de_programas,(void*)id_programa_igual);
 	return programa_buscado->tabla_de_segmentos;
 }
-void liberar_paginas_de_segmento(segmento* segmento) {
-	//Esto solo recorre toodo el segmento
-	//en realidad, la lista de heaps
-	//y va calculando cuales paginas pueden liberarse
-	for(int i=0;i<list_size(segmento->info_heaps);i++) {
-		int dir_heap = list_get(segmento->info_heaps,i);
-		heap_metadata* _heap = malloc(sizeof(heap_metadata));
-		int numero_de_pagina = redondear_double_arriba((double)dir_heap/configuracion->tam_pag);
-		pagina* pag = buscar_pagina_por_numero(segmento->paginas,numero_de_pagina);
-		//memccpy(_heap,dir_heap+pag->,sizeof(heap_metadata));
-		if(_heap->is_free) {
-			//si esta free
-			//y no es la primera..
-			if(i!=0){
-			//tengo que mirar la pag siguiente y anterior
-			// y ver si puedo liberar algo
-
-			}
-		} else {
-			//si no esta free ..
-			//nada?
-		}
-	}
-}
 int muse_alloc(muse_alloc_t* datos){
 //me fijo si hay lugar disponible
 int direccion_return = -1;
@@ -414,7 +390,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 					//verificar donde queda el heap nuevo
 					int nuevo_offset_heap_al_marco = heap_lista_nuevo->direccion_heap_metadata%configuracion->tam_pag;
-					int num_pagina_final = heap_lista_nuevo->direccion_heap_metadata / configuracion->tam_pag;
+					int num_pagina_final = redondear_double_arriba((double)heap_lista_nuevo->direccion_heap_metadata / configuracion->tam_pag);
 					if(nuevo_offset_heap_al_marco > configuracion->tam_pag-sizeof(heap_metadata)){
 						//significa que quedo en el medio
 						int tamanio_a_copiar = configuracion->tam_pag-nuevo_offset_heap_al_marco;
@@ -435,7 +411,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 					//verificar donde queda el heap viejo
 					int viejo_offset_heap_al_marco = lista_ultimo_heap->direccion_heap_metadata%configuracion->tam_pag;
-					int num_pagina_final_vieja = lista_ultimo_heap->direccion_heap_metadata / configuracion->tam_pag;
+					int num_pagina_final_vieja = redondear_double_arriba((double)lista_ultimo_heap->direccion_heap_metadata / configuracion->tam_pag);
 					if(viejo_offset_heap_al_marco > configuracion->tam_pag-sizeof(heap_metadata)){
 						//queda en el medio
 						int tamanio_a_copiar = configuracion->tam_pag-viejo_offset_heap_al_marco;
@@ -715,10 +691,102 @@ int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint
 	return resultado_decimal;
 }
 int muse_free(muse_free_t* datos){
-//	retorna 0 si falla
 
-	return 0;
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado==NULL)
+	{
+		//no existe el segmento buscado
+		return 0;
+	}
+
+	int nro_de_pagina = redondear_double_arriba((double)datos->direccion/configuracion->tam_pag);
+	pagina* pagina_del_heap=list_get(segmento_buscado->paginas,nro_de_pagina);
+	int offset_de_datos = datos->direccion%configuracion->tam_pag;
+	heap_lista* heap_lista_encontrado=NULL;
+	for (int i =0;i<list_size(segmento_buscado->info_heaps);i++) {
+		//por cada heap_lista, ver si es el heap que busco
+		heap_lista* heap_lista_aux = list_get(segmento_buscado->info_heaps,i);
+		if(heap_lista_aux->direccion_heap_metadata==offset_de_datos) {
+			heap_lista_encontrado = list_get(segmento_buscado->info_heaps,i);
+			heap_lista_encontrado->is_free=false;
+			break;
+		}
+	}
+	if(heap_lista_encontrado==NULL)
+	{
+		//no se encontro la direccion que se quiere liberar
+		return 0;
+	}
+	//hay que reemplazar el heap,
+	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
+	heap_metadata_nuevo->is_free= false;
+	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
+	//verificar donde queda el heap
+	if(offset_de_datos> configuracion->tam_pag-sizeof(heap_metadata)){
+		//significa que quedo en el medio
+		int tamanio_a_copiar = configuracion->tam_pag-offset_de_datos;
+		void* marco_final = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
+		memcpy(marco_final+offset_de_datos,heap_metadata_nuevo,tamanio_a_copiar);
+
+		pagina* pagina_siguiente= list_get(segmento_buscado->paginas,nro_de_pagina+1);
+		void* marco_final2 = obtener_puntero_a_marco(pagina_siguiente->bit_marco);
+		memcpy(marco_final2,heap_metadata_nuevo+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
+
+	}
+	else{
+		//no quedo en el medio
+		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
+		memcpy(puntero_a_marco+offset_de_datos,heap_metadata_nuevo,sizeof(heap_metadata));
+	}
+
+	t_list* heaps_lista =segmento_buscado->info_heaps;
+	//recorro todos los heaps_lista viendo cuales tengo que juntar
+	int contador_index=heaps_lista->elements_count-1;
+	while(contador_index>=0){
+		heap_lista* heap_de_lista=list_get(heaps_lista,contador_index);
+		if(heap_de_lista->is_free && contador_index==heaps_lista->elements_count-1){
+			//es el ultimo
+			// si parte del ultimo y el anterior esta vacio
+			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
+			if(heap_de_lista_anterior->is_free){
+				//desde esta pagina habria que liberar
+				int pagina_heap_anterior = redondear_double_arriba((double)heap_de_lista_anterior->direccion_heap_metadata/configuracion->tam_pag);
+				for(int i = pagina_heap_anterior;i<segmento_buscado->paginas->elements_count;){
+					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
+
+				}
+				int offset_heap_anterior=heap_de_lista_anterior->direccion_heap_metadata%configuracion->tam_pag;
+				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior-sizeof(heap_metadata)
+			//tengo que remove and free el ultimo heap_lista
+			list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
+			}
+		}else if(heap_de_lista->is_free && contador_index>0) {
+			//miro el de indice anterior
+			//si agarra dos seguidos que estan vacios
+			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
+			if(heap_de_lista_anterior->is_free) {//hay que mergearlos
+				 heap_de_lista_anterior->espacio+=sizeof(heap_metadata)+heap_de_lista->espacio;
+				 list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
+			}
+			//las paginas siguen asociadas al segmento
+
+		}else{
+			contador_index--;
+		}
+
+	}//termina el while
+	//cambiar todos los indices
+	for(int i=0;i<list_size(segmento_buscado->info_heaps);i++)
+	{
+		heap_lista* heap_de_lista = list_get(segmento_buscado->info_heaps,i);
+		heap_de_lista->indice=i;
+	}
+
+//	retorna 0 si falla
+	return 1;
 }
+
 void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset){
 	//testea2
 	char binario[DIR_TAM_DIRECCION+1];
@@ -1072,6 +1140,11 @@ t_bit_memoria* bit_libre_memoria(){
 		bit_asignado->ocupado = true;
 	}
 	return bit_asignado;
+}
+
+void* bit_liberar(t_bit_memoria* bit_a_liberar){
+	t_bit_memoria* _bit = list_find(bitarray->bitarray_memoria,(void*)bit_a_liberar);
+	_bit->ocupado=false;
 }
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
