@@ -1,5 +1,6 @@
 #include "sac-cli.h"
-#include "libreriaComun/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 
 

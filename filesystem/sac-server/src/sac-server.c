@@ -1,6 +1,7 @@
 // servidor para probar sockets mañana
 #include "sac-server.h"
-#include "libreriaComun/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
 	if(argc != 2){
@@ -189,13 +190,6 @@ void printear(bloque* bloq){
 	for(int i=0;i<4095;i++){
 		printf("%c",bloq->bytes[i]);
 	}
-}
-uint64_t timestamp(){
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	unsigned long long result = (((unsigned long long )tv.tv_sec) * 1000 + ((unsigned long) tv.tv_usec) / 1000);
-	uint64_t a = result;
-	return a;
 }
 void crear_nodo(const char* path){
 	if(strlen(path)<71){
