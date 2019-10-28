@@ -218,6 +218,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				hay_que_entrar_en_la_anteultima_pag = true;
 			}
 			else{
+				//el heap_m entra completo en la ultima pag
 				offset_heap = configuracion->tam_pag-espacio_libre_ultima_pag-sizeof(heap_metadata);
 			}
 			for(int i = 0;i<cantidad_de_paginas;i++){
@@ -353,27 +354,29 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			//no entra en ningun segmento existente
 			// hay que crear un nuevo segmento
 			// o ver si se puede agrandar el que hay
-			segmento* ultimo_segmento = list_get(tabla_de_segmentos,list_size(tabla_de_segmentos)-1);//mmm??!?!?! sure why not
+			segmento* ultimo_segmento = list_get(tabla_de_segmentos,list_size(tabla_de_segmentos)-1);
 			if(!ultimo_segmento->mmapeado){
-				//se puede agrandar el ultimo segmento -> le agrego pags
-				heap_metadata* ultimo_heap = malloc(sizeof(heap_metadata));
-				int nro_de_pag = ultimo_segmento->ultimo_heap_metadata_libre%configuracion->tam_pag;
+				heap_lista* lista_ultimo_heap = list_last_element(segmento_buscado->info_heaps);
 				pagina* ultima_pagina = list_last_element(segmento_buscado->paginas);
-				memcpy(ultimo_heap,nro_de_pag*configuracion->tam_pag+ultima_pagina->datos,sizeof(heap_metadata));
-				uint32_t lugar_extra_necesario = datos->tamanio-ultimo_heap->size+sizeof(heap_metadata);
+				heap_metadata* nuevo_ultimo_heap = malloc(sizeof(heap_metadata));
+				nuevo_ultimo_heap->is_free=true;
+				heap_metadata* ultimo_heap = malloc(sizeof(heap_metadata));
+				ultimo_heap->is_free=false;
+				ultimo_heap->size =datos->tamanio+sizeof(heap_metadata);//nuevo tamano
+				void* puntero_a_marco = obtener_puntero_a_marco(ultima_pagina->bit_marco);
+				int offset_heap_al_marco = lista_ultimo_heap->direccion_heap_metadata/configuracion->tam_pag;
+				uint32_t lugar_extra_necesario = datos->tamanio-lista_ultimo_heap->espacio+sizeof(heap_metadata);
 				uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(lugar_extra_necesario);
 				uint32_t tamanio_paginas_necesarias = paginas_necesarias*configuracion->tam_pag;
 				if(lugar_disponible >= tamanio_paginas_necesarias){//=>hay lugar, reservo las nuevas pags
 					lugar_disponible -= tamanio_paginas_necesarias;
 					ultimo_segmento->tamanio+=tamanio_paginas_necesarias;
-					//agrego las pagas a la lista del segmento
-					int espacio_libre_ultima_pag = tamanio_paginas_necesarias+configuracion->tam_pag
-							-datos->tamanio-sizeof(heap_metadata)*2-ultimo_segmento->ultimo_heap_metadata_libre; //??
-					heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
-					heap_nuevo->is_free = true;
-					heap_nuevo->size = espacio_libre_ultima_pag;
+					//agrego las pags a la lista del segmento
+					int espacio_libre_ultima_pag = tamanio_paginas_necesarias-datos->tamanio
+							- sizeof(heap_metadata)+lista_ultimo_heap->espacio;
+					nuevo_ultimo_heap->size = espacio_libre_ultima_pag;
 					_Bool agarrar_direccion_de_primera_pag_agregada = false;
-					if(ultimo_heap->size==0){
+					if(nuevo_ultimo_heap->size==0){
 						agarrar_direccion_de_primera_pag_agregada = true;
 					}
 					int cantidadDePaginasInicial = list_size(ultimo_segmento->paginas);
@@ -381,12 +384,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						pagina* pagina_nueva = malloc(sizeof(pagina*));
 						pagina_nueva->num_pagina = ultima_pagina->num_pagina+1+i;
 						pagina_nueva->presencia = true;
-						pagina_nueva->datos = asignar_marco_nuevo();
-						if(i==paginas_necesarias-1){//=>es la ultima pag
-							ultimo_segmento->ultimo_heap_metadata_libre =
-									configuracion->tam_pag-espacio_libre_ultima_pag-sizeof(heap_metadata);
-							memcpy(pagina_nueva->datos+ultimo_segmento->ultimo_heap_metadata_libre,heap_nuevo,sizeof(heap_metadata));
-						}
+						pagina_nueva->bit_marco = asignar_marco_nuevo();
 						list_add(ultimo_segmento->paginas,pagina_nueva);
 						if(i==0){
 							if(agarrar_direccion_de_primera_pag_agregada){
@@ -394,19 +392,25 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							}
 						}
 					} //termina el for
+					heap_lista* heap_lista_nuevo = malloc(sizeof(heap_lista));
+					heap_lista_nuevo->direccion_heap_metadata=
+					heap_lista_nuevo->espacio=espacio_libre_ultima_pag;
+					heap_lista_nuevo->indice=segmento_buscado->info_heaps->elements_count-2;
+					heap_lista_nuevo->is_free=true;
+					list_add_in_index(segmento_buscado->info_heaps,heap_lista_nuevo->indice+1,heap_lista_nuevo);
+
 					if(!agarrar_direccion_de_primera_pag_agregada){//=>tengo que llenar direccion_return
-						direccion_return = ultimo_segmento->base_logica+list_size(ultimo_segmento->paginas)*configuracion->tam_pag+
-								ultimo_segmento->ultimo_heap_metadata_libre+sizeof(heap_metadata);
+						int offset_pagina = list_last_element(ultimo_segmento->info_heaps);
+						direccion_return = ultimo_segmento->base_logica+ultimo_segmento->paginas->elements_count*
+								configuracion->tam_pag+offset_pagina+sizeof(heap_metadata);
 					}
-					ultimo_heap->is_free = false;
-					ultimo_heap->size = datos->tamanio;
-					memcpy(ultima_pagina->datos+ultima_pagina->ultimo_heap_metadata_libre,ultimo_heap,sizeof(heap_metadata));
-					memcpy(ultimo_segmento->ultimo_heap_metadata_libre,ultimo_heap,sizeof(heap_metadata));
-					//este memcpy actualiza el heap_metadata anterior /??
+					nuevo_ultimo_heap->size= espacio_libre_ultima_pag;
+					memcpy(ultimo_heap,puntero_a_marco+offset_heap_al_marco,sizeof(heap_metadata));
+					memcpy(nuevo_ultimo_heap,puntero_a_marco+offset_heap_al_marco+datos,sizeof(heap_metadata));
 					free(ultimo_heap);
-					free(heap_nuevo);
-					pagina* ultima_pag = list_last_element(ultimo_segmento->paginas);
-					ultimo_segmento->ultimo_heap_metadata_libre = -1;
+					free(heap_lista_nuevo);
+
+
 				}
 				else{//=>no hay lugar
 					free(ultimo_heap);
