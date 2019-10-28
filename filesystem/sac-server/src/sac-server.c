@@ -17,14 +17,14 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue creado");
 	}
 
+	int _servidor = crear_servidor(8080);
+	while(1){
+		esperar_conexion(_servidor);
+	}
 
 
 
 
-//	int _servidor = crear_servidor(8080);
-//	while(1){
-//		esperar_conexion(_servidor);
-//	}
 
 	return 0;
 }
