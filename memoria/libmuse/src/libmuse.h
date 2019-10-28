@@ -65,7 +65,7 @@ typedef struct{
 }muse_void;
 
 
-typedef enum{
+typedef enum t_comando_muse{
 	MUSE_INIT=0,//no tiene crear/serializar/etc
 	MUSE_ALLOC=1,
 	MUSE_FREE=2,
@@ -79,7 +79,8 @@ typedef enum{
 	MUSE_EXITOSO=10,//falta
 	MUSE_CHAR=11,
 	MUSE_INT=12,//no tiene crear/serializar/etc xq es solo un int de 4bytes
-	MUSE_VOID=13
+	MUSE_VOID=13,
+	MUSE_SEG_FAULT=14
 }t_comando_muse;
 
 //VARIABLES GLOBALES

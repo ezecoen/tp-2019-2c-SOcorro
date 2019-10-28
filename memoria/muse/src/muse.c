@@ -744,22 +744,40 @@ void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_
 	*destino_segmento = bin_a_dec(char_segmento);
 }
 void* muse_get(muse_get_t* datos){
-	void* resultado_get;
+	void* resultado_get = NULL;
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado!=NULL){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
-		//if(cayo en un heap) => se pudre to2?
-		//seguro hay que ir rocorriendo to2 el segmento y analizar en que heap cae la consulta
+		int direccion_final = datos->direccion+datos->tamanio;
+		int offset_final = direccion_final % configuracion->tam_pag;
+		int offset_inicial = datos->tamanio % configuracion->tam_pag;
+		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
+		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
+		int pagina_inicial = datos->direccion / configuracion->tam_pag;
+		void* super_void = malloc(tamanio_de_todas_las_paginas);
+		int puntero = 0;
+		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
+			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
+			void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+			memcpy(super_void+puntero,puntero_a_marco,sizeof(configuracion->tam_pag));
+		}
+		return super_void;
 	}
 	else{
+		//seg fault
 		resultado_get = NULL;
 	}
 	return resultado_get;
 }
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
-	//codear xd!!
-	return NULL;
+	_Bool buscar_segmento_por_direccion(segmento* seg){
+		if(direccion - seg->base_logica < seg->tamanio){
+			return true;
+		}
+		return false;
+	}
+	return list_find(tabla_de_segmentos,(void*)buscar_segmento_por_direccion);
 }
 pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag) {
 	_Bool numero_de_pagina(pagina* pag){
@@ -859,7 +877,7 @@ void esperar_conexion(uint32_t servidor){
 }
 void ocupate_de_este(int socket){
 	_Bool exit_loop = false;
-	uint32_t tam, operacion_respuesta, resultado, operacion;
+	int tam, operacion_respuesta, resultado, operacion;
 	char* id_cliente;
 	void* respuesta;
 	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
@@ -934,11 +952,11 @@ void ocupate_de_este(int socket){
 				recv(socket,&tam,4,0);
 				void* vmgt = malloc(tam);
 				recv(socket,vmgt,tam,0);
-				muse_get_t* dmgt = deserializar_muse_get(vmgt);
-				void* resultado_get = muse_get(dmgt);
+				muse_get_t* mgt = deserializar_muse_get(vmgt);
+				void* resultado_get = muse_get(mgt);
 				//devuelve el void* resultado
-				if(resultado_get !=NULL){
-					muse_void* mv = crear_muse_void(resultado_get,dmgt->tamanio);
+				if(resultado_get != NULL){
+					muse_void* mv = crear_muse_void(resultado_get,mgt->tamanio);
 					respuesta = serializar_muse_void(mv);
 					uint32_t tamanio_respuesta;
 					memcpy(&tamanio_respuesta,respuesta+4,4);
@@ -949,11 +967,11 @@ void ocupate_de_este(int socket){
 					muse_void_destroy(mv);
 				}
 				else{
-//					hay que pensar si todos los errores son segm fault!!??
-					operacion_respuesta = MUSE_ERROR;
+//					todos los errores son segm fault!!??
+					operacion_respuesta = MUSE_SEG_FAULT;
 					send(socket,&operacion_respuesta,4,0);
 				}
-				muse_get_destroy(dmgt);
+				muse_get_destroy(mgt);
 				free(vmgt);
 				break;
 			case MUSE_CPY:;
