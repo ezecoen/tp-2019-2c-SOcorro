@@ -9,17 +9,17 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras();
 
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"asdasd");
-	list_add(tabla_de_programas,programa);
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"asdasd");
+//	list_add(tabla_de_programas,programa);
 //
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"asdasd1");
-	list_add(tabla_de_programas,programa1);
+//	programa_t* programa1 = malloc(sizeof(programa_t));
+//	programa1->tabla_de_segmentos = list_create();
+//	programa1->id_programa = string_new();
+//	string_append(&programa1->id_programa,"asdasd1");
+//	list_add(tabla_de_programas,programa1);
 //
 //	programa_t* programa2 = malloc(sizeof(programa_t));
 //	programa2->tabla_de_segmentos = list_create();
@@ -27,20 +27,42 @@ int main(int argc, char **argv) {
 //	string_append(&programa2->id_programa,"asdasd2");
 //	list_add(tabla_de_programas,programa2);
 //
-//	prueba creo segmento 1
-	muse_alloc_t* mat = crear_muse_alloc(100,"asdasd");
-	int result = muse_alloc(mat);
+//	//	prueba creo segmento 1
+//	muse_alloc_t* mat = crear_muse_alloc(100,"asdasd");
+//	int result = muse_alloc(mat);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
+//	fflush(stdout);
+//
+//	//	prueba creo segmento 2
+//	muse_alloc_t* mat1 = crear_muse_alloc(500,"asdasd1");
+//	int result1 = muse_alloc(mat1);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
+//	//	prueba creo segmento 3
+//	muse_alloc_t* mat2 = crear_muse_alloc(250,"asdasd");
+//	int result2 = muse_alloc(mat2);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
+//	//	prueba uso segmento 3
+//	muse_alloc_t* mat3 = crear_muse_alloc(1000,"asdasd1");
+//	int result3 = muse_alloc(mat3);
+//	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
 
-	//	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(500,"asdasd1");
-	int result1 = muse_alloc(mat1);
-////	prueba creo segmento 3
-	muse_alloc_t* mat2 = crear_muse_alloc(250,"asdasd");
-	int result2 = muse_alloc(mat2);
-////	prueba uso segmento 3
-	muse_alloc_t* mat3 = crear_muse_alloc(1000,"asdasd1");
-	int result3 = muse_alloc(mat3);
-
+////	Pruebas clock modificado
+//	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
+//		_bit->ocupado = true;
+//		_bit->bit_modificado = true;
+//		_bit->bit_uso = true;
+//		return _bit;
+//	}
+//	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
+//	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
+//	_bit->bit_uso = true;
+//	_bit->bit_modificado = true;
+//	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
+//	_bit2->bit_uso = false;
+//	_bit2->bit_modificado = true;
+//	posicion_puntero_clock = 4;
+//	t_bit_memoria* _b = ejecutar_clock_modificado();
+//	printf("\n%d-numero de bit: %d.(%d,%d)",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
 	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -611,6 +633,7 @@ t_bit_memoria* ejecutar_clock_modificado(){
 			bit_return = ejecutar_clock_modificado();
 		}
 	}
+	bit_return->bit_modificado = false;//lo dejo en (0,0) listo para usar
 	return bit_return;
 }
 t_bit_memoria* buscar_0_0(){
@@ -634,18 +657,30 @@ t_bit_memoria* buscar_0_0(){
 	return bit_nulo;
 }
 t_bit_memoria* buscar_0_1(){
-	_Bool encontrar_0_1(t_bit_memoria* bit){
-		if(!bit->bit_uso && bit->bit_modificado){
-			return true;
+	int puntero_al_iniciar = posicion_puntero_clock;
+	t_bit_memoria* bit_nulo = NULL;
+	//busco en la primera mitad
+	for(int i = 0; i < bitarray->size_memoria-puntero_al_iniciar; i++){
+		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
+		if(_bit->bit_modificado && !_bit->bit_uso){
+			return _bit;
 		}
-		else{
-			if(bit->bit_uso){
-				bit->bit_uso = false;
-			}
-			return false;
+		if(_bit->bit_uso){
+			_bit->bit_uso = false;
+		}
+		posicion_puntero_clock++;
+	}
+	for(posicion_puntero_clock = 0; posicion_puntero_clock < puntero_al_iniciar;posicion_puntero_clock++){
+		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
+		if(_bit->bit_modificado && !_bit->bit_uso){
+			return _bit;
+		}
+		if(_bit->bit_uso){
+			_bit->bit_uso = false;
 		}
 	}
-	return list_find(bitarray->bitarray_memoria,(void*)encontrar_0_1);
+	posicion_puntero_clock = puntero_al_iniciar;
+	return bit_nulo;
 }
 int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
 	//testea2
@@ -1000,8 +1035,10 @@ void init_bitarray(){
 	bitarray->bitarray_memoria = list_create();
 	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA; i++){
 		t_bit_memoria* bit = malloc(sizeof(t_bit_memoria));
-		bit->bit_position = i;
 		bit->ocupado = false;
+		bit->bit_position = i;
+		bit->bit_modificado = false;
+		bit->bit_uso = 0;
 		list_add(bitarray->bitarray_memoria,bit);
 	}
 	bitarray->size_memoria_virtual = CANT_PAGINAS_MEMORIA_VIRTUAL;
