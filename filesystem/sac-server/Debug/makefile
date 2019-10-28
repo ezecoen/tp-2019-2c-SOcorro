@@ -29,7 +29,7 @@ all: sac-server
 sac-server: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug" -o "sac-server" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "sac-server" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
