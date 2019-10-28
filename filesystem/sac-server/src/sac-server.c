@@ -56,6 +56,9 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 //	nodo->bloque_padre
 	return 1;
 }
+int _getattr(char* nombre){
+	nodo*
+}
 bool el_fs_esta_formateado(char* fs){
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
 	int tam = fileSize(fs);
@@ -215,6 +218,14 @@ nodo* dame_el_primer_nodo_libre(){
 	//no hay nodos libres
 	return -1;
 
+}
+nodo* dame_el_nodo_de(const char* _nombre){
+	for(int i = 0;i<1024;i++){
+		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,_nombre)){
+			return (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+		}
+	}
+	return -1;
 }
 bloque* bloque_de_nodo(int nodo){
 	bloque* ret = primer_bloque_de_disco+1+tam_de_bitmap+nodo;
