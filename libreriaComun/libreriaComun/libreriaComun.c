@@ -159,7 +159,7 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
 	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
 	{
-		//puts("Error al conectar");
+		perror("Error de connect");
 //		log_error(logg,"Error al conectar a ip %s y puerto %d",ip,puerto);
 		return -1;
 	}
@@ -188,19 +188,19 @@ uint32_t length_de_char_asterisco(char** arrays){
 	return i;
 }
 
-t_readdir* crear_readdir (char* path){
+//t_readdir* crear_readdir (char* path){
+//	int size_path = char_length(path);
+//	t_readdir* estruc = malloc(sizeof(t_readdir));
+//	estruc->path = malloc(size_path);
+//
+//	estruc->size_path = size_path;
+//	memcpy(estruc->path, path, estruc->size_path);
+//	return estruc;
+//}
+
+void* serializar_path(const char* path, operaciones comando){
 	int size_path = char_length(path);
-	t_readdir* estruc = malloc(sizeof(t_readdir));
-	estruc->path = malloc(size_path);
-
-	estruc->size_path = size_path;
-	memcpy(estruc->path, path, estruc->size_path);
-	return estruc;
-}
-
-void* serializar_readdir(t_readdir* estructura){
-	int bytes = sizeof(int) + estructura->size_path + sizeof(int)*2;
-	int comando = READDIR;
+	int bytes = sizeof(int) + size_path + sizeof(int)*2;
 	int puntero=0;
 	void* magic = malloc(bytes);
 
@@ -208,25 +208,114 @@ void* serializar_readdir(t_readdir* estructura){
 	puntero += sizeof(int);
 	memcpy(magic+puntero, &bytes, sizeof(int));
 	puntero += sizeof(int);
-	memcpy(magic+puntero, &estructura->size_path, sizeof(int));
+	memcpy(magic+puntero, &size_path, sizeof(int));
 	puntero += sizeof(int);
-	memcpy(magic+puntero, estructura->path, &estructura->size_path);
-	puntero += estructura->size_path;
+	memcpy(magic+puntero, path, size_path);
+	puntero += size_path;
 	return magic;
 }
 
-t_readdir* deserializar_readdir (void* magic){
-	t_readdir* estructura = malloc(sizeof(t_readdir));
+char* deserializar_path (void* magic){
+	char* path;
+	int size_path;
 	uint32_t puntero = 0;
-	memcpy(&estructura->size_path,magic+puntero,4);
+	memcpy(&size_path,magic+puntero,4);
 	puntero += 4;
-	estructura->path = malloc(estructura->size_path);
-	memcpy(estructura->path, magic+puntero, estructura->size_path);
-	puntero += estructura->size_path;
-	return estructura;
+	path = malloc(size_path);
+	memcpy(path, magic+puntero, size_path);
+	puntero += size_path;
+	return path;
 }
 
-void reddir_destroy (t_readdir* estructura){
-	free(estructura->path);
-	free(estructura);
+//void reddir_destroy (t_readdir* estructura){
+//	free(estructura->path);
+//	free(estructura);
+//}
+
+void* serializar_lista_ent_dir(t_list* lista){
+	int _tam = tamanio_de_todos_las_ent_dir(lista) + 12;
+	void* magic = malloc(_tam);
+	int puntero = 0;
+	operaciones op = READDIR;
+
+	memcpy(magic+puntero, &op, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &_tam, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &lista->elements_count, 4);
+	puntero += 4;
+	for(int j = 0; j < lista->elements_count; j++){
+		char* elemento = list_get(lista, j);
+		int tam_elem = char_length(elemento);
+		memcpy(magic+puntero, &tam_elem, 4);
+		puntero += 4;
+		memcpy(magic+puntero, elemento, tam_elem);
+		puntero += tam_elem;
+	}
+	return magic;
+}
+
+t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
+	t_list* lista = list_create();
+	int tam_elem;
+	char* elem;
+
+	for(int i=0; i<tam_lista; i++){
+		int puntero = 0;
+
+		memcpy(&tam_elem, magic+puntero,4);
+		puntero += 4;
+		elem = malloc(tam_elem);
+		memcpy(elem,magic+puntero,tam_elem);
+		puntero += tam_elem;
+
+		list_add(lista,elem);
+	}
+	return lista;
+}
+
+int tamanio_de_todos_las_ent_dir(t_list* lista){
+	int tam = 0;
+	char* elem;
+
+	for(int i=0;i<lista->elements_count;i++){
+		elem = list_get(lista,i);
+		tam += char_length(elem)+4;
+	}
+	return tam;
+}
+
+t_getattr* crear_getattr(long int size, long int modif_time){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	resp->size = size;
+	resp->modif_time = modif_time;
+	return resp;
+}
+
+void* serializar_getattr(t_getattr* stat){
+	int _tam = sizeof(int)*2 + sizeof(long int)*2;
+	void magic = malloc(_tam);
+	int puntero = 0;
+	operaciones op = GETATTR;
+
+	memcpy(magic+puntero, &op, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &_tam, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &stat->size, sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, &stat->modif_time, sizeof(uint64_t));
+	puntero += sizeof(uint64_t);
+	return magic;
+}
+
+t_getattr* deserializar_getattr(void* magic){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	int _tam;
+	int puntero = 0;
+	memcpy(&resp->size, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->modif_time, magic+puntero, 8);
+	puntero += 8;
+	return resp;
 }

@@ -168,6 +168,7 @@ int DIR_TAM_PAGINA;
 int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
+int posicion_puntero_clock;
 
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
