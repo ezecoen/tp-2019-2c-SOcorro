@@ -46,23 +46,23 @@ int main(int argc, char **argv) {
 //	int result3 = muse_alloc(mat3);
 //	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
 
-////	Pruebas clock modificado
-//	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
-//		_bit->ocupado = true;
-//		_bit->bit_modificado = true;
-//		_bit->bit_uso = true;
-//		return _bit;
-//	}
-//	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
+//	Pruebas clock modificado
+	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
+		_bit->ocupado = true;
+		_bit->bit_modificado = true;
+		_bit->bit_uso = true;
+		return _bit;
+	}
+	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
 //	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
 //	_bit->bit_uso = true;
 //	_bit->bit_modificado = true;
 //	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
 //	_bit2->bit_uso = false;
 //	_bit2->bit_modificado = true;
-//	posicion_puntero_clock = 4;
-//	t_bit_memoria* _b = ejecutar_clock_modificado();
-//	printf("\n%d-numero de bit: %d.(%d,%d)",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
+	posicion_puntero_clock = 4;
+	t_bit_memoria* _b = ejecutar_clock_modificado();
+	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
 	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -608,6 +608,7 @@ t_bit_memoria* ejecutar_clock_modificado(){
 		}
 	}
 	bit_return->bit_modificado = false;//lo dejo en (0,0) listo para usar
+	//falta pasar la pagina a sacar a area de swap!!
 	return bit_return;
 }
 t_bit_memoria* buscar_0_0(){

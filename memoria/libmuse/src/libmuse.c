@@ -29,7 +29,6 @@ int muse_init(int id, char* ip, int puerto){
 		muse_id = string_new();
 		iniciado = handshake_muse(id);//aca se setea muse_id
 	}
-	//falta cerrar el sock
 	return iniciado;
 }
 
@@ -37,7 +36,9 @@ int muse_init(int id, char* ip, int puerto){
  * Cierra la biblioteca de MUSE.
  */
 void muse_close(){
-	//si no se hizo init explota?
+	if(iniciado<0){//si ya esta cerrado no hace nada
+		return;
+	}
 	int operacion = MUSE_CLOSE;
 	send(socket_muse,&operacion,4,0);
 	close(socket_muse);
@@ -59,8 +60,13 @@ uint32_t muse_alloc(uint32_t tam){
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t comando, direccion;
 	recv(socket_muse,&comando,4,0);
-	recv(socket_muse,&direccion,4,0);
-	printf("Direccion recibida en libmuse: %d\n",direccion);
+	if(comando == MUSE_INT){
+		recv(socket_muse,&direccion,4,0);
+		printf("Direccion recibida en libmuse: %d\n",direccion);
+	}
+	else{
+		//si hay error q pasa??
+	}
 	free(magic);
 	muse_alloc_destroy(mat);
 	return direccion;
