@@ -183,7 +183,7 @@ t_log* logg;
 
 //FUNCIONES
 void init_estructuras();
-void iniciar_memoria_virtual(char** argv);
+void iniciar_memoria_virtual(char* path);
 int log_2(double d);
 void iniciar_log(char* path);
 s_config* leer_config(char* path);

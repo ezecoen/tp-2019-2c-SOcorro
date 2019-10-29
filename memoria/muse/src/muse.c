@@ -5,9 +5,11 @@ int main(int argc, char **argv) {
 	printf("argv0 = %s\n",argv[0]);
 	printf("argv1 = %s\n",argv[1]);
 	path_de_config = string_duplicate(argv[1]);
+	path_swap = string_duplicate(argv[0]);
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
-	init_estructuras(argv[1]);
+	init_estructuras(path_swap);
+	return 0;
 
 //	programa_t* programa = malloc(sizeof(programa_t));
 //	programa->tabla_de_segmentos = list_create();
@@ -73,10 +75,10 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 }
-void init_estructuras(char** argv){
+void init_estructuras(char* path){
+	iniciar_memoria_virtual(path);
 	upcm = malloc(configuracion->tam_mem);
 	swap = malloc(configuracion->tam_swap);//provisorio
-	iniciar_memoria_virtual(argv);
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
@@ -89,14 +91,24 @@ void init_estructuras(char** argv){
 	init_bitarray();
 	posicion_puntero_clock = 0;
 }
-void iniciar_memoria_virtual(char** argv){
+void iniciar_memoria_virtual(char* path){
 	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!!!!!!!!!!!
-	char* aux = string_substring_until(argv[1],strlen(argv[1])-12);
+	log_info(logg,"almost");
+	int i =strlen(path);
+	for(;i>=0;i--)
+	{
+		if (path[i]=='/')
+		{
+			break;
+		}
+	}
+	char* aux = string_substring_until(path,i);
 	path_swap = string_new();
 	string_append(&path_swap,aux);
-	string_append(&path_swap,"/");
+	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
-	//fopen()
+
+	fopen(path_swap,"wb");
 }
 int log_2(double n){
 	//testea2
@@ -644,8 +656,31 @@ t_bit_memoria* buscar_0_1(){
 	return bit_nulo;
 }
 
-int muse_free(muse_free_t* datos){
+void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata)
+{	//verificar donde queda el heap nuevo
+	int nuevo_offset_heap_al_marco = heap_de_lista->direccion_heap_metadata%configuracion->tam_pag;
+	int num_pagina_del_heap = heap_de_lista->direccion_heap_metadata / configuracion->tam_pag;
+	if(nuevo_offset_heap_al_marco > configuracion->tam_pag-sizeof(heap_metadata)){
+		//significa que quedo en el medio
+		int tamanio_a_copiar = configuracion->tam_pag-nuevo_offset_heap_al_marco;
+		pagina* pagina_de_heap = list_get(seg->paginas,num_pagina_del_heap);
+		void* marco1 = obtener_puntero_a_marco(pagina_de_heap->bit_marco);
+		memcpy(marco1+nuevo_offset_heap_al_marco,nuevo_heap_metadata,tamanio_a_copiar);
 
+		pagina* pagina_de_heap2 = list_get(seg->paginas,num_pagina_del_heap+1);
+		void* marco2 = obtener_puntero_a_marco(pagina_de_heap2->bit_marco);
+		memcpy(marco2,nuevo_heap_metadata+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
+	}
+	else{
+			//no quedo en el medio
+		pagina* pagina_del_heap = list_get(seg->paginas,num_pagina_del_heap);
+		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
+		memcpy(puntero_a_marco+nuevo_offset_heap_al_marco,nuevo_heap_metadata,sizeof(heap_metadata));
+	}
+}
+
+
+int muse_free(muse_free_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
@@ -653,47 +688,31 @@ int muse_free(muse_free_t* datos){
 		return 0;
 	}
 
-	int nro_de_pagina = datos->direccion / configuracion->tam_pag;
-	pagina* pagina_del_heap = list_get(segmento_buscado->paginas,nro_de_pagina);
 	heap_lista* heap_lista_encontrado = NULL;
 	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
 		heap_lista* heap_lista_aux = list_get(segmento_buscado->info_heaps,i);
 		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == datos->direccion) {
 			heap_lista_encontrado = heap_lista_aux;
-			heap_lista_encontrado->is_free = false;
+			heap_lista_encontrado->is_free = true;
 			break;
 		}
 	}
 	if(heap_lista_encontrado == NULL){
 		//no se encontro la direccion que se quiere liberar
+		//segmentation fault??
+		//muse segmentation f
 		return 0;
 	}
-	//hay que reemplazar el heap,
+	//hay que reemplazar el heap posta,
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
-	heap_metadata_nuevo->is_free = false;
+	heap_metadata_nuevo->is_free = true;
 	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
-	int offset_heap = heap_lista_encontrado->direccion_heap_metadata % configuracion->tam_pag;
-	//verificar donde queda el heap
-	if(offset_heap > configuracion->tam_pag-sizeof(heap_metadata)){
-		//significa que quedo en el medio
-		int tamanio_a_copiar = configuracion->tam_pag-offset_heap;
-		void* marco_final = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
-		memcpy(marco_final+offset_heap-sizeof(heap_metadata),heap_metadata_nuevo,tamanio_a_copiar);
+	reemplazar_heap_en_memoria(heap_lista_encontrado,segmento_buscado,heap_metadata_nuevo);
+	//hay que ver que este la pagina en memoria ??
 
-		pagina* pagina_siguiente= list_get(segmento_buscado->paginas,nro_de_pagina+1);
-		void* marco_final2 = obtener_puntero_a_marco(pagina_siguiente->bit_marco);
-		memcpy(marco_final2,heap_metadata_nuevo+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
-
-	}
-	else{
-		//no quedo en el medio
-		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
-		memcpy(puntero_a_marco+offset_heap,heap_metadata_nuevo,sizeof(heap_metadata));
-	}
-
-	t_list* heaps_lista =segmento_buscado->info_heaps;
 	//recorro todos los heaps_lista viendo cuales tengo que juntar
+	t_list* heaps_lista =segmento_buscado->info_heaps;
 	int contador_index=heaps_lista->elements_count-1;
 	while(contador_index>=0){
 		heap_lista* heap_de_lista=list_get(heaps_lista,contador_index);
@@ -703,31 +722,33 @@ int muse_free(muse_free_t* datos){
 			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
 			if(heap_de_lista_anterior->is_free){
 				//desde esta pagina habria que liberar
-				int pagina_heap_anterior = heap_de_lista_anterior->direccion_heap_metadata / configuracion->tam_pag;
-				for(int i = pagina_heap_anterior;i<segmento_buscado->paginas->elements_count;){
+				int pagina_heap_anterior = (heap_de_lista_anterior->direccion_heap_metadata+sizeof(heap_metadata)) / configuracion->tam_pag;
+				for(int i = pagina_heap_anterior+1;i<segmento_buscado->paginas->elements_count;){
 					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
-					//no entendi el for aiuda!!
 				}
 				int offset_heap_anterior=heap_de_lista_anterior->direccion_heap_metadata%configuracion->tam_pag;
 				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior-sizeof(heap_metadata);
-				//tengo que remove and free el ultimo heap_lista
+				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
+				heap_metadata_nuevo->is_free=true;
+				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
+				reemplazar_heap_en_memoria(heap_de_lista_anterior,segmento_buscado,heap_metadata_nuevo);
 				list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
-				//falta cambiar el size del ultimo heap posta??!!
 			}
 		}else if(heap_de_lista->is_free && contador_index>0) {
 			//miro el de indice anterior
 			//si agarra dos seguidos que estan vacios
 			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
 			if(heap_de_lista_anterior->is_free) {//hay que mergearlos
-				 heap_de_lista_anterior->espacio+=sizeof(heap_metadata)+heap_de_lista->espacio;
-				 list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
+				//no estoy sacando las paginas //las paginas siguen asociadas al segmento
+				heap_de_lista_anterior->espacio+=sizeof(heap_metadata)+heap_de_lista->espacio;
+				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
+				heap_metadata_nuevo->is_free=true;
+				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
+				reemplazar_heap_en_memoria(heap_de_lista_anterior,segmento_buscado,heap_metadata_nuevo);
+				list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
 			}
-			//las paginas siguen asociadas al segmento
-
-		}else{
-			contador_index--;
 		}
-
+		contador_index--;
 	}//termina el while
 	//cambiar todos los indices
 	for(int i=0;i<list_size(segmento_buscado->info_heaps);i++)
@@ -1514,6 +1535,7 @@ muse_void* deserializar_muse_void(void* magic){
 	puntero += mv->size_paquete;
 	return mv;
 }
+
 
 // Sobre asignacion de memoria
 // crear un segmento:
