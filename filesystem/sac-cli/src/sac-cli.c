@@ -153,39 +153,33 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	int _tam;
 
-//	void* peticion = serializar_path(path, READDIR);
-//	memcpy(&_tam, peticion+4, 4);
-//	send(_socket, peticion, _tam+4,0);
-//	free(peticion);
-	int oper = READDIR;
-	send(_socket,&oper,4,0);
+	void* peticion = serializar_path(path, READDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
 
-//	operaciones op = recibir_op(_socket);
-//	void* _respuesta;
-//	int tam, cant, error;
-//	if(op == ERROR){
-//		recv(_socket,&error,4,0);
-//		return -1;
-//	}
-//	else{
-//		recv(_socket,&tam,4,0);
-//		_respuesta = malloc(tam);
-//		recv(_socket,_respuesta,tam,0);
-//		recv(_socket,&cant,4,0);
-//		t_list* dirents = list_create();
-//		dirents = deserializar_lista_ent_dir(_respuesta,cant);
-//		cargar_dirents_en_buffer(dirents, buf, filler, cant);
-		filler( buf, ".", NULL, 0 );  // Current Directory
-		filler( buf, "..", NULL, 0 ); // Parent Directory
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, cant, error;
+	if(op == ERROR){
+		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		recv(_socket,&tam,4,0);
+		_respuesta = malloc(tam);
+		recv(_socket,_respuesta,tam,0);
+		recv(_socket,&cant,4,0);
+		t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
+		cargar_dirents_en_buffer(dirents, buf, filler, cant);
 		return 0;
-//	}
+	}
 }
 
-void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
-		int cant){
+void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,int cant){
 	char* elem;
-	filler( buf, ".", NULL, 0 );  // Current Directory
-	filler( buf, "..", NULL, 0 ); // Parent Directory
+//	filler( buf, ".", NULL, 0 );  // Current Directory
+//	filler( buf, "..", NULL, 0 ); // Parent Directory
 
 	for(int i=0; i<cant; i++){    // All Other Directories
 		elem = list_get(lista,i);
@@ -379,7 +373,7 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.1.108", 8080);
+	_socket = conectar_socket_a("127.0.0.1", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

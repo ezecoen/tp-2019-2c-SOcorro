@@ -224,7 +224,6 @@ void* serializar_lista_ent_dir(t_list* lista){
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
-
 	memcpy(magic+puntero, &op, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);
@@ -235,6 +234,7 @@ void* serializar_lista_ent_dir(t_list* lista){
 		char* elemento = list_get(lista, j);
 		int tam_elem = char_length(elemento);
 		memcpy(magic+puntero, &tam_elem, 4);
+		printf("%s",elemento);
 		puntero += 4;
 		memcpy(magic+puntero, elemento, tam_elem);
 		puntero += tam_elem;
@@ -246,16 +246,13 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	t_list* lista = list_create();
 	int tam_elem;
 	char* elem;
-
+	int puntero = 0;
 	for(int i=0; i<tam_lista; i++){
-		int puntero = 0;
-
 		memcpy(&tam_elem, magic+puntero,4);
 		puntero += 4;
 		elem = malloc(tam_elem);
 		memcpy(elem,magic+puntero,tam_elem);
 		puntero += tam_elem;
-
 		list_add(lista,elem);
 	}
 	return lista;
