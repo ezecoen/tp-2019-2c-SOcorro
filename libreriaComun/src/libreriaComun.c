@@ -213,26 +213,6 @@ void* serializar_path(const char* path, operaciones comando){
 	puntero += size_path;
 	return magic;
 }
-char* recibir_path(int cliente){
-	int tam;
-	recv(cliente,&tam,4,0);
-	void* magic = malloc(tam);
-	recv(cliente,&magic,tam,0);
-	char* path = deserializar_path(magic);
-	free(magic);
-	return path;
-}
-char* deserializar_path (void* magic){
-	char* path;
-	int size_path;
-	uint32_t puntero = 0;
-	memcpy(&size_path,magic+puntero,4);
-	puntero += 4;
-	path = malloc(size_path);
-	memcpy(path, magic+puntero, size_path);
-	puntero += size_path;
-	return path;
-}
 
 //void reddir_destroy (t_readdir* estructura){
 //	free(estructura->path);
@@ -314,7 +294,7 @@ void* serializar_getattr(t_getattr* stat){
 	memcpy(magic+puntero, &stat->modif_time, sizeof(uint64_t));
 	puntero += sizeof(uint64_t);
 	memcpy(magic+puntero, &stat->tipo, sizeof(uint8_t));
-	puntero += sizeof(uint32_t);
+	puntero += sizeof(uint8_t);
 	return magic;
 }
 

@@ -84,14 +84,16 @@ void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
 void _readdir(int cliente);
-
+int dame_el_numero_de_bloque_de_nodo(char* nombre);
 void crear_nodo(const char* path);
 nodo* dame_el_primer_nodo_libre();
+char* dame_el_nombre(char** nombres,int quien);
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
+int es_virgen;
 t_log* logger;
 FILE* fs;
 int tam_del_fs;

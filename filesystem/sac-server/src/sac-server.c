@@ -4,24 +4,24 @@
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
+	es_virgen = 0;
 	if(argc != 2){
 		perror("falta el archivo del fileSystem");
 		return -1;
 	}
 	logger = log_create("loger","sac-server",1,LOG_LEVEL_TRACE);
-	if(el_fs_esta_formateado(argv[1])){
-		load_fs(argv[1]);
-		log_info(logger,"El fileSystem esta cargado");
-
-	}else{
+	if(!el_fs_esta_formateado(argv[1])){
 		init_fs(argv[1]);
-		log_info(logger,"El fileSystem fue creado");
+		log_info(logger,"El fileSystem fue cargado");
 	}
-
+	load_fs(argv[1]);
+	log_info(logger,"El fileSystem fue creado");
 	int _servidor = crear_servidor(8080);
-	while(1){
-		esperar_conexion(_servidor);
-	}
+//	while(1){
+//		esperar_conexion(_servidor);
+		int cliente = aceptar_cliente(servidor);
+		atender_cliente(cliente);
+//	}
 
 
 
@@ -39,8 +39,11 @@ int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	nodo->estado=1;
 	nodo->fecha_de_creacion = timestamp();
 	nodo->fecha_de_modificacion = timestamp();
-	strcpy(nodo->nombre_de_archivo,nombre);
-//	nodo->bloque_padre
+	char** list = string_split(nombre,"/");
+	char* nom_padre = dame_el_nombre(list,0);
+	char* nom_mio = dame_el_nombre(list,1);
+	strcpy(nodo->nombre_de_archivo,nom_mio);
+	nodo->bloque_padre = dame_el_numero_de_bloque_de_nodo(nom_padre);
 	return 1;
 }
 int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
@@ -52,9 +55,30 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	nodo->estado=2;
 	nodo->fecha_de_creacion = timestamp();
 	nodo->fecha_de_modificacion = timestamp();
-	strcpy(nodo->nombre_de_archivo,nombre);
-//	nodo->bloque_padre
+	char** list = string_split(nombre,"/");
+	char* nom_padre = dame_el_nombre(list,0);
+	char* nom_mio = dame_el_nombre(list,1);
+	strcpy(nodo->nombre_de_archivo,nom_mio);
+	nodo->bloque_padre = dame_el_numero_de_bloque_de_nodo(nom_padre);
 	return 1;
+}
+char* dame_el_nombre(char** nombres,int quien){
+	int i;
+	for(i = 0;nombres[i]!=NULL;i++){
+
+	}
+	if(quien == 1){// me piden mi nombre
+		if(i==0){
+			return "/";
+		}
+		return nombres[i-1];
+	}else{// me piden mi padre
+		if(i<2){
+			return "/";
+		}
+		return nombres[i-2];
+	}
+
 }
 t_getattr* _getattr(char* nombre){
 	nodo* _nodo = dame_el_nodo_de(nombre);
@@ -75,6 +99,7 @@ bool el_fs_esta_formateado(char* fs){
 	return rta;
 }
 void init_fs(char* fs){
+	es_virgen=1;
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
 	tam_del_fs = fileSize(fs);
 	tam_de_bitmap = tam_del_fs/4096/8/4096;
@@ -94,7 +119,9 @@ void load_fs(char* fs){
 		tam_de_bitmap++;
 	}
 	int disco_fd = open(fs,O_RDWR|O_CREAT,0777);
-	primer_bloque_de_disco = mmap(NULL,tam_del_fs,PROT_READ | PROT_WRITE,MAP_FILE | MAP_SHARED,disco_fd,0);
+	if(!es_virgen){
+		primer_bloque_de_disco = mmap(NULL,tam_del_fs,PROT_READ | PROT_WRITE,MAP_FILE | MAP_SHARED,disco_fd,0);
+	}
 	_header = levantar_header(primer_bloque_de_disco);
 	log_info(logger,"Cargando el header");
 	bitarray = levantar_bit_array(primer_bloque_de_disco+1);
@@ -137,16 +164,27 @@ t_bitarray* init_set_bitmap(){
 }
 void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 	for(int i = 0;i<1024;i++){
-		nodo* nodo_vacio = (nodo*) _bloque;
-		nodo_vacio->bloque_padre=0;
-		nodo_vacio->estado=0;
-		nodo_vacio->fecha_de_creacion=0;
-		nodo_vacio->fecha_de_modificacion=0;
-		for(int i = 0;i<71;i++){
-			nodo_vacio->nombre_de_archivo[i] = '-';
-		}
-		nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
-		nodo_vacio->tamanio_de_archivo=0;
+		if(i == 0){
+			nodo* nodo_vacio = (nodo*) _bloque;
+			nodo_vacio->bloque_padre=0;
+			nodo_vacio->estado=2;
+			nodo_vacio->fecha_de_creacion=timestamp();
+			nodo_vacio->fecha_de_modificacion=timestamp();
+			strcpy(nodo_vacio->nombre_de_archivo,"/");
+			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
+			nodo_vacio->tamanio_de_archivo=0;
+		}else{
+			nodo* nodo_vacio = (nodo*) _bloque;
+			nodo_vacio->bloque_padre=0;
+			nodo_vacio->estado=0;
+			nodo_vacio->fecha_de_creacion=0;
+			nodo_vacio->fecha_de_modificacion=0;
+			for(int i = 0;i<71;i++){
+				nodo_vacio->nombre_de_archivo[i] = '-';
+			}
+			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
+			nodo_vacio->tamanio_de_archivo=0;
+			}
 		_bloque++;
 	}
 }
@@ -219,9 +257,22 @@ nodo* dame_el_primer_nodo_libre(){
 
 }
 nodo* dame_el_nodo_de(const char* _nombre){
+	char** list = string_split(_nombre,"/");
+	char* nom_mio = dame_el_nombre(list,1);
 	for(int i = 0;i<1024;i++){
-		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,_nombre)){
+		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,nom_mio)){
 			return (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+		}
+	}
+	return -1;
+}
+int dame_el_numero_de_bloque_de_nodo(char* nombre){
+	for(int i = 0;i<1024;i++){
+		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,nombre)){
+			if(i==0){
+				return 0;
+			}
+			return 1+tam_de_bitmap+i;
 		}
 	}
 	return -1;
@@ -269,27 +320,37 @@ void atender_cliente(int cliente){
 	void* magic;
 	char* path_pedido;
 
-	int cli = recv(cliente,&cli,4,MSG_WAITALL);
+	int cli;
+	recv(cliente,&cli,4,MSG_WAITALL);
+	log_info(logger,"%d",cli);
 	if(cli != INIT_CLI){
 		perror("Se conecto un rancio");
 		close(cliente);
 		return;
 	}
-
+	log_info(logger,"Se conecto un sac-clie");
 	operaciones operacion;
-
-	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+	while(recv(cliente,&operacion,sizeof(int),MSG_WAITALL)>0){
 
 		switch(operacion){
 		case GETATTR:
 			log_info(logger,"Llego la instruccion GETATTR");
-			path_pedido = recibir_path(cliente);
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			free(magic);
 			t_getattr* attr = _getattr(path_pedido);
+			free(path_pedido);
 			if(attr == -1){
-				send(cliente,(void*)ERROR,4,0);
+				int err = ERROR;
+				send(cliente,&err,4,0);
 			}else{
 				magic = serializar_getattr(attr);
-				send(cliente,magic,(int)magic+4,0);
+				int tam;
+				memcpy(&tam,magic+4,sizeof(int));
+				send(cliente,magic,tam,0);
 			}
 			break;
 		case READDIR:
@@ -303,12 +364,21 @@ void atender_cliente(int cliente){
 			break;
 		case MKNOD:
 			log_info(logger,"Llego la instruccion MKNOD");
-			path_pedido = recibir_path(cliente);
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			free(magic);
 			res = _mknod(path_pedido);
+			free(path_pedido);
 			if(res == -1){
 //				mandar error
+				int err = ERROR;
+				send(cliente,&err,4,0);
 			}else{
-				send(cliente,(void*)MKNOD,4,0);
+				int a = MKNOD;
+				send(cliente,&a,4,0);
 
 			}
 			break;
@@ -318,15 +388,22 @@ void atender_cliente(int cliente){
 //			que esten a nuestro alcance por lo menos)
 
 //			mandar socket respuesta con el valor de la respuesta
-			break;
 		case MKDIR:
 			log_info(logger,"Llego la instruccion MKDIR");
-			char* path = recibir_path(cliente);
-			int resultado = _mkdir(path);
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			free(magic);
+			int resultado = _mkdir(path_pedido);
+			free(path_pedido);
 			if(resultado == -1){
-//				mandar error
+				int err = ERROR;
+				send(cliente,&err,4,0);
 			}else{
-				send(cliente,(void*)MKDIR,4,0);
+				int a = MKDIR;
+				send(cliente,&a,4,0);
 			}
 //			aca habria que delvolver lo que paso (devolver ENOSPC si hubo error de espacio, devolver 0 si
 //			estuvo ok) <-- eso habria que hacerlo adentro de la funcion _mknod, no aca, ademas hay que ver
@@ -352,17 +429,9 @@ void _readdir(int cliente){
 //	el socket,deberia pasarme el socket por parametro o deberia hacer
 //	el recv antes y mandarme el tamanio por parametro
 
-	uint32_t _tam;
-	recv(cliente,&_tam,4,0);
-	void* magic = malloc(_tam);
-	recv(cliente,&magic,_tam,0);
-	char* path_pedido = deserializar_path(magic);
-	free(magic);
 //	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
 //	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
 //									las entradas de directorio o un error (si no existe devolver -ENOENT)
 
-
-	free(path_pedido);
 }
 
