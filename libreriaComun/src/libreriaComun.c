@@ -70,8 +70,8 @@ void mandar(uint32_t tipo,void* algo,uint32_t _socket){
 uint32_t char_length(char* string){
 	return strlen(string)+1;
 }
-uint32_t recibir_op(uint32_t sock){
-	uint32_t cod;
+int recibir_op(int sock){
+	int cod;
 	recv(sock,&cod,4,MSG_WAITALL);
 	return cod;
 }
@@ -199,14 +199,14 @@ uint32_t length_de_char_asterisco(char** arrays){
 
 void* serializar_path(const char* path, operaciones comando){
 	int size_path = char_length(path);
-	int bytes = sizeof(int) + size_path + sizeof(int)*2;
+	int bytes = sizeof(int)*2 + size_path;
 	int puntero=0;
 	void* magic = malloc(bytes);
 
 	memcpy(magic+puntero, &comando, sizeof(int));
 	puntero += sizeof(int);
-	memcpy(magic+puntero, &bytes, sizeof(int));
-	puntero += sizeof(int);
+//	memcpy(magic+puntero, &bytes, sizeof(int));
+//	puntero += sizeof(int);
 	memcpy(magic+puntero, &size_path, sizeof(int));
 	puntero += sizeof(int);
 	memcpy(magic+puntero, path, size_path);
@@ -326,6 +326,6 @@ t_getattr* deserializar_getattr(void* magic){
 	memcpy(&resp->modif_time, magic+puntero, 8);
 	puntero += 8;
 	memcpy(&resp->tipo, magic+puntero, 1);
-	puntero += 4;
+	puntero += 1;
 	return resp;
 }
