@@ -85,20 +85,21 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam,0);
+	send(_socket, peticion, _tam+8,0);
 	free(peticion);
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, error;
 	if(op == ERROR){
-		recv(_socket,&error,4,0);
-		return -error;
+//		recv(_socket,&error,4,0);
+		return -ENOENT;
 	}
 	else{
-		recv(_socket,&tam,4,0);
+		recv(_socket,&tam,4,MSG_WAITALL);
+		tam-=8;
 		_respuesta = malloc(tam);
-		recv(_socket,_respuesta,tam,0);
+		recv(_socket,_respuesta,tam,MSG_WAITALL);
 		t_getattr* atributos = deserializar_getattr(_respuesta);
 		stbuf->st_size = (long int)atributos->size;
 		struct timespec time;
@@ -152,28 +153,32 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	int _tam;
 
-	void* peticion = serializar_path(path, READDIR);
-	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam,0);
-	free(peticion);
+//	void* peticion = serializar_path(path, READDIR);
+//	memcpy(&_tam, peticion+4, 4);
+//	send(_socket, peticion, _tam+4,0);
+//	free(peticion);
+	int oper = READDIR;
+	send(_socket,&oper,4,0);
 
-	operaciones op = recibir_op(_socket);
-	void* _respuesta;
-	int tam, cant, error;
-	if(op == ERROR){
-		recv(_socket,&error,4,0);
-		return -error;
-	}
-	else{
-		recv(_socket,&tam,4,0);
-		_respuesta = malloc(tam);
-		recv(_socket,_respuesta,tam,0);
-		recv(_socket,&cant,4,0);
-		t_list* dirents = list_create();
-		dirents = deserializar_lista_ent_dir(_respuesta,cant);
-		cargar_dirents_en_buffer(dirents, buf, filler, cant);
+//	operaciones op = recibir_op(_socket);
+//	void* _respuesta;
+//	int tam, cant, error;
+//	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+//		return -1;
+//	}
+//	else{
+//		recv(_socket,&tam,4,0);
+//		_respuesta = malloc(tam);
+//		recv(_socket,_respuesta,tam,0);
+//		recv(_socket,&cant,4,0);
+//		t_list* dirents = list_create();
+//		dirents = deserializar_lista_ent_dir(_respuesta,cant);
+//		cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		filler( buf, ".", NULL, 0 );  // Current Directory
+		filler( buf, "..", NULL, 0 ); // Parent Directory
 		return 0;
-	}
+//	}
 }
 
 void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
@@ -217,15 +222,15 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 
 	void* peticion = serializar_path(path, MKNOD);
 	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam,0);
+	send(_socket, peticion, _tam+8,0);
 	free(peticion);
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, error;
 	if(op == ERROR){
-		recv(_socket,&error,4,0);
-		return -error;
+//		recv(_socket,&error,4,0);
+		return -1;
 	}
 	else{
 		return 0;
@@ -268,15 +273,15 @@ static int sac_mkdir(const char *path, mode_t mode)
 
 	void* peticion = serializar_path(path, MKDIR);
 	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam,0);
+	send(_socket, peticion, _tam+8,0);
 	free(peticion);
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, error;
 	if(op == ERROR){
-		recv(_socket,&error,4,0);
-		return -error;
+//		recv(_socket,&error,4,0);
+		return -1;
 	}
 	else{
 		return 0;
@@ -374,8 +379,9 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-//	_socket = conectar_socket_a("127.0.0.1", 8080);
-
+	_socket = conectar_socket_a("192.168.1.108", 8080);
+	int cod = INIT_CLI;
+	send(_socket,&cod, 4,0);
 
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 

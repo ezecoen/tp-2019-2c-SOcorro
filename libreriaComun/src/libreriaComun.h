@@ -70,7 +70,7 @@ uint32_t tamanoDireccion;
 void mandar(uint32_t tipo,void* algo,uint32_t _socket);
 char* recibir_char(uint32_t _socket);
 void mandar_char(char* _char, uint32_t _socket,uint32_t comando);
-uint32_t recibir_op(uint32_t sock);
+int recibir_op(int sock);
 t_error* crear_error(char* descripcion);
 void error_destroy(t_error* error);
 void* serializar_paquete_error(t_error* error);
