@@ -9,8 +9,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <sys/fcntl.h>
 #include <arpa/inet.h>
 #include <math.h>
+#include <errno.h>
+#include <sys/stat.h>
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdbool.h>
@@ -18,6 +21,7 @@
 #include <commons/log.h>
 #include <string.h>
 #include <stdbool.h>
+#include <sys/mman.h>
 //ESTRUCTURAS
 typedef struct programa_t{
 	char* id_programa;

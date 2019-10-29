@@ -9,6 +9,13 @@ int main(int argc, char **argv) {
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
+	char* sample = string_new();
+	string_append(&sample,"hola sample");
+	if(swap != MAP_FAILED){
+		memcpy(swap,sample,1000);
+		printf("%s",(char*)swap);
+	}
+	perror("error: ");
 	return 0;
 
 //	programa_t* programa = malloc(sizeof(programa_t));
@@ -78,7 +85,7 @@ int main(int argc, char **argv) {
 void init_estructuras(char* path){
 	iniciar_memoria_virtual(path);
 	upcm = malloc(configuracion->tam_mem);
-	swap = malloc(configuracion->tam_swap);//provisorio
+//	swap = malloc(configuracion->tam_swap);//provisorio
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
@@ -92,7 +99,6 @@ void init_estructuras(char* path){
 	posicion_puntero_clock = 0;
 }
 void iniciar_memoria_virtual(char* path){
-	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!!!!!!!!!!!
 	log_info(logg,"almost");
 	int i =strlen(path);
 	for(;i>=0;i--)
@@ -108,7 +114,10 @@ void iniciar_memoria_virtual(char* path){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-	fopen(path_swap,"wb");
+	int fd = fopen(path_swap,"w+");
+
+	swap = mmap(NULL,configuracion->tam_swap,PROT_READ|PROT_WRITE,MAP_FILE|MAP_PRIVATE,fd,0);
+
 }
 int log_2(double n){
 	//testea2
