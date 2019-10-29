@@ -2,24 +2,24 @@
 
 int main(int argc, char **argv) {
 //	INICIANDO
-
-	//path_de_config = string_duplicate("/home/utnso/tp-2019-2c-SOcorro/memoria/muse/muse.config");
+	printf("argv0 = %s\n",argv[0]);
+	printf("argv1 = %s\n",argv[1]);
 	path_de_config = string_duplicate(argv[1]);
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
-	init_estructuras();
+	init_estructuras(argv[1]);
 
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"asdasd");
-	list_add(tabla_de_programas,programa);
-
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"asdasd1");
-	list_add(tabla_de_programas,programa1);
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"asdasd");
+//	list_add(tabla_de_programas,programa);
+//
+//	programa_t* programa1 = malloc(sizeof(programa_t));
+//	programa1->tabla_de_segmentos = list_create();
+//	programa1->id_programa = string_new();
+//	string_append(&programa1->id_programa,"asdasd1");
+//	list_add(tabla_de_programas,programa1);
 
 //	programa_t* programa2 = malloc(sizeof(programa_t));
 //	programa2->tabla_de_segmentos = list_create();
@@ -28,42 +28,42 @@ int main(int argc, char **argv) {
 //	list_add(tabla_de_programas,programa2);
 //
 //	//	prueba creo segmento 1
-	muse_alloc_t* mat = crear_muse_alloc(100,"asdasd");
-	int result = muse_alloc(mat);
-	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
-	fflush(stdout);
+//	muse_alloc_t* mat = crear_muse_alloc(100,"asdasd");
+//	int result = muse_alloc(mat);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
+//	fflush(stdout);
+////
+////	//	prueba creo segmento 2
+//	muse_alloc_t* mat1 = crear_muse_alloc(500,"asdasd1");
+//	int result1 = muse_alloc(mat1);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
+////	//	prueba creo segmento 3
+//	muse_alloc_t* mat2 = crear_muse_alloc(250,"asdasd");
+//	int result2 = muse_alloc(mat2);
+//	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
+////	//	prueba uso segmento 3
+//	muse_alloc_t* mat3 = crear_muse_alloc(1000,"asdasd1");
+//	int result3 = muse_alloc(mat3);
+//	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
 //
-//	//	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(500,"asdasd1");
-	int result1 = muse_alloc(mat1);
-	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
-//	//	prueba creo segmento 3
-	muse_alloc_t* mat2 = crear_muse_alloc(250,"asdasd");
-	int result2 = muse_alloc(mat2);
-	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
-//	//	prueba uso segmento 3
-	muse_alloc_t* mat3 = crear_muse_alloc(1000,"asdasd1");
-	int result3 = muse_alloc(mat3);
-	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
-
-
-//	Pruebas clock modificado
-	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
-		_bit->ocupado = true;
-		_bit->bit_modificado = true;
-		_bit->bit_uso = true;
-		return _bit;
-	}
-	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
-//	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
-//	_bit->bit_uso = true;
-//	_bit->bit_modificado = true;
-//	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
-//	_bit2->bit_uso = false;
-//	_bit2->bit_modificado = true;
-	posicion_puntero_clock = 4;
-	t_bit_memoria* _b = ejecutar_clock_modificado();
-	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
+//
+////	Pruebas clock modificado
+//	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
+//		_bit->ocupado = true;
+//		_bit->bit_modificado = true;
+//		_bit->bit_uso = true;
+//		return _bit;
+//	}
+//	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
+////	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
+////	_bit->bit_uso = true;
+////	_bit->bit_modificado = true;
+////	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
+////	_bit2->bit_uso = false;
+////	_bit2->bit_modificado = true;
+//	posicion_puntero_clock = 4;
+//	t_bit_memoria* _b = ejecutar_clock_modificado();
+//	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
 	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -73,9 +73,10 @@ int main(int argc, char **argv) {
 
 	return EXIT_SUCCESS;
 }
-void init_estructuras(){
+void init_estructuras(char** argv){
 	upcm = malloc(configuracion->tam_mem);
 	swap = malloc(configuracion->tam_swap);//provisorio
+	iniciar_memoria_virtual(argv);
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
@@ -87,6 +88,15 @@ void init_estructuras(){
 
 	init_bitarray();
 	posicion_puntero_clock = 0;
+}
+void iniciar_memoria_virtual(char** argv){
+	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!!!!!!!!!!!
+	char* aux = string_substring_until(argv[1],strlen(argv[1])-12);
+	path_swap = string_new();
+	string_append(&path_swap,aux);
+	string_append(&path_swap,"/");
+	log_info(logg,"path swap: %s",path_swap);
+	//fopen()
 }
 int log_2(double n){
 	//testea2
@@ -126,32 +136,6 @@ s_config* leer_config(char* path){
 
 	config_destroy(g_config);
 	return configuracion;
-}
-void dec_a_bin(char destino[],int dec,int tam){
-	//testea2
-	if (dec >= 0 && dec <= 2147483647){
-		for(int i = tam-1; i >= 0; i--){
-			if (dec % 2 == 0){
-				destino[i] = '0';
-			}
-			else{
-				destino[i] = '1';
-			}
-			dec = dec / 2;
-		}
-	}
-	destino[tam] = '\0';
-}
-int bin_a_dec(char* binario){
-	//testea2
-	char *p = binario;
-	int   r = 0;
-
-	while (p && *p ) {
-		r <<= 1;
-		r += (unsigned int)((*p++) & 0x01);
-	}
-	return (int)r;
 }
 int redondear_double_arriba(double d){
 	//testea2
@@ -671,7 +655,6 @@ int muse_free(muse_free_t* datos){
 
 	int nro_de_pagina = datos->direccion / configuracion->tam_pag;
 	pagina* pagina_del_heap = list_get(segmento_buscado->paginas,nro_de_pagina);
-	int offset_de_datos = datos->direccion % configuracion->tam_pag;
 	heap_lista* heap_lista_encontrado = NULL;
 	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
@@ -758,7 +741,6 @@ int muse_free(muse_free_t* datos){
 }
 
 void* muse_get(muse_get_t* datos){
-	void* resultado_get = NULL;
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado!=NULL){

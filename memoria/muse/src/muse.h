@@ -159,6 +159,7 @@ typedef enum t_comando_muse{
 
 //VARIABLES GLOBALES
 char* path_de_config;
+char* path_swap;
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
@@ -182,13 +183,11 @@ t_log* logg;
 
 //FUNCIONES
 void init_estructuras();
-void free_final();
+void iniciar_memoria_virtual(char** argv);
+int log_2(double d);
 void iniciar_log(char* path);
 s_config* leer_config(char* path);
-void dec_a_bin(char destino[],int decimal, int tam);
-int bin_a_dec(char* binario);
 int redondear_double_arriba(double d);
-int log_2(double d);
 int muse_alloc(muse_alloc_t* datos);
 uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior);
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio);
