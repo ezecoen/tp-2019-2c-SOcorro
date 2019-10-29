@@ -200,8 +200,6 @@ void* obtener_puntero_a_marco(t_bit_memoria* bit_marco);
 t_bit_memoria* ejecutar_clock_modificado();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
-int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pag,uint32_t offset);
-void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset);
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);

@@ -320,7 +320,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 				pagina* pagina_final = list_get(segmento_buscado->paginas,num_pagina_final);
 				void* marco_final = obtener_puntero_a_marco(pagina_final->bit_marco);
-				memcpy(marco_final+offset_inicial,heap_final,tamanio_a_copiar);
+				memcpy(marco_final+offset_final,heap_final,tamanio_a_copiar);
 
 				pagina* pagina_final2 = list_get(segmento_buscado->paginas,num_pagina_final+1);
 				void* marco_final2 = obtener_puntero_a_marco(pagina_final2->bit_marco);
@@ -659,75 +659,44 @@ t_bit_memoria* buscar_0_1(){
 	posicion_puntero_clock = puntero_al_iniciar;
 	return bit_nulo;
 }
-int no_obtener_direccion_virtual(uint32_t num_segmento,uint32_t num_pagina, uint32_t offset){
-	//testea2
-	//num_seg-num_pag-offset-\0
-	char resultado[DIR_TAM_DIRECCION+1];
-	char char_segmento[DIR_TAM_PAGINA+1];
-	char char_pagina[DIR_TAM_PAGINA+1];
-	char char_offset[DIR_TAM_DESPLAZAMIENTO+1];
-	dec_a_bin(char_segmento,num_segmento,DIR_TAM_PAGINA);
-	dec_a_bin(char_pagina,num_pagina,DIR_TAM_PAGINA);
-	dec_a_bin(char_offset,offset,DIR_TAM_DESPLAZAMIENTO);
-	resultado[DIR_TAM_DIRECCION]='\0';//xq string termina con \0
 
-	int j=1;
-//	EJEMPLO:
-//	  SEG     PAG   OFF
-//	   2   |   5   | 0
-//	0000 10|00 0101|0000|\0
-//	TAM_DIR = 16, TAM_SEG=TAM_PAG=6,TAM_DESP=4
-//
-	for(int i =1;i<=DIR_TAM_DESPLAZAMIENTO;i++,j++){
-		resultado[DIR_TAM_DIRECCION-j]=char_offset[DIR_TAM_DESPLAZAMIENTO-i];
-	}
-	for(int i =1;i<=DIR_TAM_PAGINA;i++,j++){
-		resultado[DIR_TAM_DIRECCION-j]=char_pagina[DIR_TAM_PAGINA-i];
-	}
-	for(int i =1;i<=DIR_TAM_PAGINA;i++,j++){
-		resultado[DIR_TAM_DIRECCION-j]=char_segmento[DIR_TAM_PAGINA-i];
-	}
-	int resultado_decimal = bin_a_dec(resultado);
-	return resultado_decimal;
-}
 int muse_free(muse_free_t* datos){
 
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
-	if(segmento_buscado==NULL)
-	{
-		//no existe el segmento buscado
+	if(segmento_buscado==NULL){
+		//no existe el segmento buscado o se paso del segmento
 		return 0;
 	}
 
-	int nro_de_pagina = redondear_double_arriba((double)datos->direccion/configuracion->tam_pag);
-	pagina* pagina_del_heap=list_get(segmento_buscado->paginas,nro_de_pagina);
-	int offset_de_datos = datos->direccion%configuracion->tam_pag;
-	heap_lista* heap_lista_encontrado=NULL;
-	for (int i =0;i<list_size(segmento_buscado->info_heaps);i++) {
+	int nro_de_pagina = datos->direccion / configuracion->tam_pag;
+	pagina* pagina_del_heap = list_get(segmento_buscado->paginas,nro_de_pagina);
+	int offset_de_datos = datos->direccion % configuracion->tam_pag;
+	heap_lista* heap_lista_encontrado = NULL;
+	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
 		heap_lista* heap_lista_aux = list_get(segmento_buscado->info_heaps,i);
-		if(heap_lista_aux->direccion_heap_metadata==offset_de_datos) {
-			heap_lista_encontrado = list_get(segmento_buscado->info_heaps,i);
-			heap_lista_encontrado->is_free=false;
+		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == datos->direccion) {
+			heap_lista_encontrado = heap_lista_aux;
+			heap_lista_encontrado->is_free = false;
 			break;
 		}
 	}
-	if(heap_lista_encontrado==NULL)
-	{
+	if(heap_lista_encontrado == NULL){
 		//no se encontro la direccion que se quiere liberar
 		return 0;
 	}
 	//hay que reemplazar el heap,
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
-	heap_metadata_nuevo->is_free= false;
+	heap_metadata_nuevo->is_free = false;
 	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
+	int offset_heap = heap_lista_encontrado->direccion_heap_metadata % configuracion->tam_pag;
 	//verificar donde queda el heap
-	if(offset_de_datos> configuracion->tam_pag-sizeof(heap_metadata)){
+	if(offset_heap > configuracion->tam_pag-sizeof(heap_metadata)){
 		//significa que quedo en el medio
-		int tamanio_a_copiar = configuracion->tam_pag-offset_de_datos;
+		int tamanio_a_copiar = configuracion->tam_pag-offset_heap;
 		void* marco_final = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
-		memcpy(marco_final+offset_de_datos,heap_metadata_nuevo,tamanio_a_copiar);
+		memcpy(marco_final+offset_heap-sizeof(heap_metadata),heap_metadata_nuevo,tamanio_a_copiar);
 
 		pagina* pagina_siguiente= list_get(segmento_buscado->paginas,nro_de_pagina+1);
 		void* marco_final2 = obtener_puntero_a_marco(pagina_siguiente->bit_marco);
@@ -737,7 +706,7 @@ int muse_free(muse_free_t* datos){
 	else{
 		//no quedo en el medio
 		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
-		memcpy(puntero_a_marco+offset_de_datos,heap_metadata_nuevo,sizeof(heap_metadata));
+		memcpy(puntero_a_marco+offset_heap,heap_metadata_nuevo,sizeof(heap_metadata));
 	}
 
 	t_list* heaps_lista =segmento_buscado->info_heaps;
@@ -751,15 +720,16 @@ int muse_free(muse_free_t* datos){
 			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
 			if(heap_de_lista_anterior->is_free){
 				//desde esta pagina habria que liberar
-				int pagina_heap_anterior = redondear_double_arriba((double)heap_de_lista_anterior->direccion_heap_metadata/configuracion->tam_pag);
+				int pagina_heap_anterior = heap_de_lista_anterior->direccion_heap_metadata / configuracion->tam_pag;
 				for(int i = pagina_heap_anterior;i<segmento_buscado->paginas->elements_count;){
 					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
-
+					//no entendi el for aiuda!!
 				}
 				int offset_heap_anterior=heap_de_lista_anterior->direccion_heap_metadata%configuracion->tam_pag;
 				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior-sizeof(heap_metadata);
-			//tengo que remove and free el ultimo heap_lista
-			list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
+				//tengo que remove and free el ultimo heap_lista
+				list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
+				//falta cambiar el size del ultimo heap posta??!!
 			}
 		}else if(heap_de_lista->is_free && contador_index>0) {
 			//miro el de indice anterior
@@ -787,30 +757,6 @@ int muse_free(muse_free_t* datos){
 	return 1;
 }
 
-void no_abrir_direccion_virtual(int direccion,uint32_t* destino_segmento,uint32_t* destino_pagina, uint32_t* destino_offset){
-	//testea2
-	char binario[DIR_TAM_DIRECCION+1];
-	dec_a_bin(binario,direccion,DIR_TAM_DIRECCION+1);
-	char char_segmento[DIR_TAM_PAGINA+1];
-	char char_pagina[DIR_TAM_PAGINA+1];
-	char char_offset[DIR_TAM_DESPLAZAMIENTO+1];
-	char_segmento[DIR_TAM_PAGINA]='\0';
-	char_pagina[DIR_TAM_PAGINA]='\0';
-	char_offset[DIR_TAM_DESPLAZAMIENTO]='\0';
-	int j = 1;
-	for(int i = 0;i<DIR_TAM_PAGINA;i++,j++){
-		char_segmento[i]=binario[j];
-	}
-	for(int i = 0;i<DIR_TAM_PAGINA;i++,j++){
-		char_pagina[i]=binario[j];
-	}
-	for(int i = 0;i<DIR_TAM_DESPLAZAMIENTO;i++,j++){
-		char_offset[i]=binario[j];
-	}
-	*destino_offset = bin_a_dec(char_offset);
-	*destino_pagina = bin_a_dec(char_pagina);
-	*destino_segmento = bin_a_dec(char_segmento);
-}
 void* muse_get(muse_get_t* datos){
 	void* resultado_get = NULL;
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
@@ -834,9 +780,8 @@ void* muse_get(muse_get_t* datos){
 	}
 	else{
 		//seg fault
-		resultado_get = NULL;
+		return NULL;
 	}
-	return resultado_get;
 }
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
 	_Bool buscar_segmento_por_direccion(segmento* seg){
@@ -1160,10 +1105,6 @@ t_bit_memoria* bit_libre_memoria(){
 	return bit_asignado;
 }
 
-void* bit_liberar(t_bit_memoria* bit_a_liberar){
-	t_bit_memoria* _bit = list_find(bitarray->bitarray_memoria,(void*)bit_a_liberar);
-	_bit->ocupado=false;
-}
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id){
 	muse_alloc_t* mat = malloc(sizeof(muse_alloc_t));
 	mat->id = string_duplicate(id);

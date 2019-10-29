@@ -3,7 +3,6 @@
 	<name>muse</name>
 	<comment></comment>
 	<projects>
-		<project>libreriaComun</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

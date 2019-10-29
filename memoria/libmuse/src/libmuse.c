@@ -7,6 +7,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <signal.h>
 
 /**
  * Inicializa la biblioteca de MUSE.
@@ -44,7 +45,7 @@ void muse_close(){
 	close(socket_muse);
 	iniciado = -1;
 	free(muse_id);
-	puts("Chau muse  :´(");
+	puts("Chau muse  :´(\n");
 }
 
 /**
@@ -88,7 +89,7 @@ void muse_free(uint32_t dir){
 	recv(socket_muse,&operacion,4,0);
 	if(operacion == MUSE_ERROR){
 		printf("error al realizar el free para: %d\n",dir);
-		raise(11);
+		raise(SIGSEGV);
 	}
 	else{
 		printf("free realizado para: %d\n",dir);
@@ -126,8 +127,8 @@ int muse_get(void* dst, uint32_t src, size_t n){
 	else if(resultado == MUSE_SEG_FAULT){
 		printf("La cagaste con el get en: %d\n",src);
 		raise(11);
-		return -1;
 	}
+	return -1;//pa q no tire warnin
 }
 /**
  * Copia una cantidad `n` de bytes desde una posición de memoria local a una `dst` en MUSE.
