@@ -224,12 +224,11 @@ void* serializar_lista_ent_dir(t_list* lista){
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
-
-	memcpy(magic+puntero, &op, 4);
+	memcpy(magic+puntero, &op, sizeof(operaciones));
+	puntero += sizeof(operaciones);
+	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);
-	puntero += 4;
-	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	for(int j = 0; j < lista->elements_count; j++){
 		char* elemento = list_get(lista, j);

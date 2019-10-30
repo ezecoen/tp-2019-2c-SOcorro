@@ -108,6 +108,7 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		stbuf->st_mtim = time;
 		if(atributos->tipo == 1){// es un archivo
 			stbuf->st_mode = S_IFREG | 0777;
+
 		}else{// es un directorio
 			stbuf->st_mode = S_IFDIR | 0777;
 		}
@@ -163,14 +164,15 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 	void* _respuesta;
 	int tam, cant, error;
 	if(op == ERROR){
-		recv(_socket,&error,4,0);
+		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{
-		recv(_socket,&tam,4,0);
-		recv(_socket,&cant,4,0);
+		recv(_socket,&cant,4,MSG_WAITALL);
+		recv(_socket,&tam,4,MSG_WAITALL);
+		tam-=12;
 		_respuesta = malloc(tam);
-		recv(_socket,_respuesta,tam,0);
+		recv(_socket,_respuesta,tam,MSG_WAITALL);
 		t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
 		cargar_dirents_en_buffer(dirents, buf, filler, cant);
 		return 0;

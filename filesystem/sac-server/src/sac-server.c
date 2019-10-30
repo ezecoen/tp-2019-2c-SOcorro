@@ -175,7 +175,7 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
-			nodo_vacio->bloque_padre=-1;
+			nodo_vacio->bloque_padre=1;
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
@@ -370,7 +370,9 @@ void atender_cliente(int cliente){
 				send(cliente,&err,4,0);
 			}else{
 				void* magic = serializar_lista_ent_dir(entradas);
-				send(cliente,magic,magic+4,0);
+				int tam;
+				memcpy(&tam,magic+8,sizeof(int));
+				send(cliente,magic,tam,0);
 			}
 			break;
 		case OPEN:
@@ -448,6 +450,9 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 	}
 	for(int i = 0;i<1024;i++){
 		//que pasa si agrego el mio?
+		if(strcmp(tabla_de_nodos[i]->nombre_de_archivo,nom_mio)==0){
+			continue;
+		}
 		if(tabla_de_nodos[i]->bloque_padre == numero_bloque){
 			list_add(entradas,tabla_de_nodos[i]->nombre_de_archivo);
 		}
