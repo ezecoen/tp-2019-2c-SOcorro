@@ -15,7 +15,7 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue cargado");
 	}
 	load_fs(argv[1]);
-	log_info(logger,"El fileSystem fue creado");
+	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 //	while(1){
 //		esperar_conexion(_servidor);
@@ -334,12 +334,12 @@ void atender_cliente(int cliente){
 
 		switch(operacion){
 		case GETATTR:
-			log_info(logger,"Llego la instruccion GETATTR");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
 			free(magic);
 			t_getattr* attr = _getattr(path_pedido);
 			free(path_pedido);
@@ -382,12 +382,12 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion READ");
 			break;
 		case MKNOD:
-			log_info(logger,"Llego la instruccion MKNOD");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion MKNOD de %s",path_pedido);
 			free(magic);
 			res = _mknod(path_pedido);
 			free(path_pedido);
@@ -408,12 +408,12 @@ void atender_cliente(int cliente){
 
 //			mandar socket respuesta con el valor de la respuesta
 		case MKDIR:
-			log_info(logger,"Llego la instruccion MKDIR");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion MKDIR de %s",path_pedido);
 			free(magic);
 			int resultado = _mkdir(path_pedido);
 			free(path_pedido);
