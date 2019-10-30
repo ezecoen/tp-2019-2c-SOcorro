@@ -25,8 +25,11 @@ endif
 # All Target
 all: sac-cli
 
+dependents:
+	-cd /home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug && $(MAKE) all
+
 # Tool invocations
-sac-cli: $(OBJS) $(USER_OBJS)
+sac-cli: $(OBJS) $(USER_OBJS) /home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug/libreriaComun
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
 	gcc  -o "sac-cli" $(OBJS) $(USER_OBJS) $(LIBS)
@@ -39,5 +42,6 @@ clean:
 	-@echo ' '
 
 .PHONY: all clean dependents
+/home/utnso/tp-2019-2c-SOcorro/libreriaComun/Debug/libreriaComun:
 
 -include ../makefile.targets

@@ -234,7 +234,7 @@ void* serializar_lista_ent_dir(t_list* lista){
 		char* elemento = list_get(lista, j);
 		int tam_elem = char_length(elemento);
 		memcpy(magic+puntero, &tam_elem, 4);
-		printf("%s",elemento);
+//		printf("%s",elemento);
 		puntero += 4;
 		memcpy(magic+puntero, elemento, tam_elem);
 		puntero += tam_elem;

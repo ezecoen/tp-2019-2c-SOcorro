@@ -175,7 +175,7 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
-			nodo_vacio->bloque_padre=0;
+			nodo_vacio->bloque_padre=-1;
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
@@ -354,13 +354,13 @@ void atender_cliente(int cliente){
 			}
 			break;
 		case READDIR:
-			log_info(logger,"Llego la instruccion READDIR");
 //			recibo el path
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
 			free(magic);
 //			busco las entradas y las pongo en una lista
 			t_list* entradas = list_create();
