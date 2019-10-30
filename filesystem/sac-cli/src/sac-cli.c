@@ -207,13 +207,19 @@ void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
  */
 static int sac_open(const char *path, struct fuse_file_info *fi) {
-	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
-		return -ENOENT;
+//	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
 
-	if ((fi->flags & 3) != O_RDONLY)
-		return -EACCES;
+	t_open* pedido;
 
-	return 0;
+
+
+//	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
+//		return -ENOENT;
+//
+//	if ((fi->flags & 3) != O_RDONLY)
+//		return -EACCES;
+//
+//	return 0;
 }
 
 
@@ -379,7 +385,7 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.1.108", 8080);
+	_socket = conectar_socket_a("127.0.0.1", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

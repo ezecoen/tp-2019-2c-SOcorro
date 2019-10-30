@@ -435,3 +435,25 @@ void _readdir(int cliente){
 
 }
 
+bool path_abs_es_valido (char* path){
+	uint32_t numero_de_bloque_de_mi_padre;
+	int numero_de_bloque_de_quien_dice_ser_mi_padre;
+	char** lista_paths = string_split(path,"/");
+
+	for(int i=0;lista_paths[i] != NULL;i++){
+		if (i==0){
+			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
+			numero_de_bloque_de_quien_dice_ser_mi_padre = 0;// el padre del primero que esta en la lista deberia ser "/",
+															// "bloque padre: cero si está en el directorio raíz" asi dice
+															// la consigna
+		}
+		else{
+			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
+			numero_de_bloque_de_quien_dice_ser_mi_padre = dame_el_numero_de_bloque_de_nodo(lista_paths[i-1]);
+			if (numero_de_bloque_de_mi_padre != numero_de_bloque_de_quien_dice_ser_mi_padre){
+				return false;
+			}
+		}
+	}
+	return true;
+}

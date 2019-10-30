@@ -220,7 +220,7 @@ void* serializar_path(const char* path, operaciones comando){
 //}
 
 void* serializar_lista_ent_dir(t_list* lista){
-	int _tam = tamanio_de_todos_las_ent_dir(lista) + 12;
+	int _tam = tamanio_de_todos_las_ent_dir(lista);
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
@@ -308,4 +308,34 @@ t_getattr* deserializar_getattr(void* magic){
 	memcpy(&resp->tipo, magic+puntero, 1);
 	puntero += 1;
 	return resp;
+}
+
+t_open* crear_open(char* path, int flags){
+	t_open* pedido = malloc(sizeof(t_open));
+	pedido->size_path = char_length(path);
+	pedido->path = malloc(pedido->size_path);
+	memcpy(pedido->path,path,pedido->size_path);
+
+	if(flags & O_CREAT)
+		pedido->crear = 1;
+	else
+		pedido->crear = 0;
+
+
+	if(flags & O_EXCL)
+			pedido->crear_ensure = 1;
+	else
+		pedido->crear_ensure = 0;
+
+
+	if(flags & O_TRUNC)
+			pedido->truncate = 1;
+	else
+		pedido->truncate = 0;
+
+	return pedido;
+}
+
+void* serialiazar_open(t_open* open){
+
 }
