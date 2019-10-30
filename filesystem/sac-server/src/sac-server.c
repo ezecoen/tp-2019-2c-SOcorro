@@ -175,12 +175,12 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
-			nodo_vacio->bloque_padre=0;
+			nodo_vacio->bloque_padre=-1;
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
 			for(int i = 0;i<71;i++){
-				nodo_vacio->nombre_de_archivo[i] = '-';
+				nodo_vacio->nombre_de_archivo[i] = '0';
 			}
 			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 			nodo_vacio->tamanio_de_archivo=0;
@@ -354,7 +354,24 @@ void atender_cliente(int cliente){
 			}
 			break;
 		case READDIR:
-			log_info(logger,"Llego la instruccion READDIR");
+//			recibo el path
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
+			free(magic);
+//			busco las entradas y las pongo en una lista
+			t_list* entradas = list_create();
+			res = encontrame_las_entradas_de(entradas,path_pedido);
+			if(res == -1){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				void* magic = serializar_lista_ent_dir(entradas);
+				send(cliente,magic,magic+4,0);
+			}
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");
@@ -422,7 +439,21 @@ void atender_cliente(int cliente){
 		}
 	}
 }
-
+int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
+	char** list = string_split(path_pedido,"/");
+	char* nom_mio = dame_el_nombre(list,1);
+	int numero_bloque = dame_el_numero_de_bloque_de_nodo(nom_mio);
+	if(numero_bloque == -1){
+		return -1;
+	}
+	for(int i = 0;i<1024;i++){
+		//que pasa si agrego el mio?
+		if(tabla_de_nodos[i]->bloque_padre == numero_bloque){
+			list_add(entradas,tabla_de_nodos[i]->nombre_de_archivo);
+		}
+	}
+	return 0;
+}
 void _readdir(int cliente){
 
 //	tengo que recivir el tamanio de la estructura entera pero no tengo
