@@ -61,21 +61,23 @@ typedef struct bitarray_nuestro{
 
 typedef struct t_bit_memoria{
 	_Bool ocupado;
-	uint32_t bit_position;
+	uint32_t posicion;
 	_Bool bit_uso;//para clock
 	_Bool bit_modificado;//para clock
 }t_bit_memoria;
+
 typedef struct t_bit_swap{
 	_Bool ocupado;
-	uint32_t bit_position;
+	uint32_t posicion;
 }t_bit_swap;
-
 
 typedef struct pagina{
 	uint32_t num_pagina;
 	_Bool presencia;
 	t_bit_memoria* bit_marco;
+	t_bit_swap* bit_swap;
 }pagina;
+
 typedef struct muse_alloc_t{
 	uint32_t size_id;
 	char* id;
@@ -162,8 +164,6 @@ typedef enum t_comando_muse{
 }t_comando_muse;
 
 //VARIABLES GLOBALES
-char* path_de_config;
-char* path_swap;
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
@@ -198,15 +198,17 @@ segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamani
 segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 _Bool encontrar_ultima_pagina(pagina* pag);
+void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata);
 t_bit_memoria* asignar_marco_nuevo();
-void* obtener_puntero_a_marco(t_bit_memoria* bit_marco);
+void* obtener_puntero_a_marco(pagina* pag);
 t_bit_memoria* ejecutar_clock_modificado();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
+pagina* buscar_pagina_por_bit(t_bit_memoria* bit);
+t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit);
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
-void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 int muse_sync(muse_sync_t* datos);
