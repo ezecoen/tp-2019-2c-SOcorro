@@ -26,12 +26,19 @@
 #include <arpa/inet.h>
 #include <sys/time.h>
 
-typedef enum{
-	EXIT,
-	CHAR,
+typedef enum {
+	INIT_CLI,
+	GETATTR,
+	READDIR,
+	OPEN,
+	READ,
+	MKNOD,
+	MKDIR,
+	CHMOD,
+	UNLINK,
 	ERROR,
-	EXITOSO,
-}t_comando;
+	EXITOSO
+}operaciones;
 
 typedef struct{
 	uint32_t size_descripcion;
@@ -43,19 +50,27 @@ typedef struct{
 	char* descripcion;
 }t_exitoso;
 
+typedef struct{
+	uint32_t size; //4bytes
+	uint64_t modif_time; //8bytes
+	uint8_t tipo; //4bytes
+}t_getattr;
+
 /**
 * @NAME: char_length
 * @DESC: Devuelve el tamaño de un char, incluido el '\0'
 */
+int servidor;
+t_log* logger;
 uint32_t char_length(char* string);
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
 uint32_t tamanoDireccion;
-uint32_t servidor;
 void mandar(uint32_t tipo,void* algo,uint32_t _socket);
 char* recibir_char(uint32_t _socket);
 void mandar_char(char* _char, uint32_t _socket,uint32_t comando);
+int recibir_op(int sock);
 t_error* crear_error(char* descripcion);
 void error_destroy(t_error* error);
 void* serializar_paquete_error(t_error* error);
@@ -65,6 +80,15 @@ void exitoso_destroy(t_exitoso* exitoso);
 void* serializar_paquete_exitoso(t_exitoso* exitoso);
 t_exitoso* deserializar_paquete_exitoso(void* magic);
 uint64_t timestamp();
-uint32_t aceptar_cliente(uint32_t servidor);
-uint32_t crear_servidor(uint32_t puerto);
+int aceptar_cliente(int servidor);
+int crear_servidor(int puerto);
+uint32_t length_de_char_asterisco(char** arrays);
+
+void* serializar_path(const char* path, operaciones comando);
+char* deserializar_path (void* magic);
+void* serializar_lista_ent_dir(t_list* lista);
+t_list* deserializar_lista_ent_dir (void* magic, int tam_lista);
+int tamanio_de_todos_las_ent_dir(t_list* lista);
+char* recibir_path(int socket_cliente);
+
 #endif /* LIBRERIA_COMUN_H_ */

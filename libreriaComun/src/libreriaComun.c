@@ -8,7 +8,7 @@
 //	void* buffer = malloc(pack_size);
 //	recv(socket,buffer,pack_size,0);
 
-uint32_t crear_servidor(uint32_t puerto){
+int crear_servidor(int puerto){
 	/*== creamos el socket ==*/
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
@@ -22,7 +22,7 @@ uint32_t crear_servidor(uint32_t puerto){
 		perror("Fallo el binde0 del servidor");
 		return 1;
 	}
-	printf("Estoy escuchando en el puerto %d\n",puerto);
+	log_info(logger,"Estoy escuchando en el puerto %d\n",puerto);
 	listen(servidor,SOMAXCONN);
 	return servidor;
 }
@@ -70,8 +70,8 @@ void mandar(uint32_t tipo,void* algo,uint32_t _socket){
 uint32_t char_length(char* string){
 	return strlen(string)+1;
 }
-uint32_t recibir_op(uint32_t sock){
-	uint32_t cod;
+int recibir_op(int sock){
+	int cod;
 	recv(sock,&cod,4,MSG_WAITALL);
 	return cod;
 }
@@ -159,18 +159,17 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
 	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0)
 	{
-		//puts("Error al conectar");
+		perror("Error de connect");
 //		log_error(logg,"Error al conectar a ip %s y puerto %d",ip,puerto);
 		return -1;
 	}
 	return cliente;
 }
-uint32_t aceptar_cliente(uint32_t servidor){
+int aceptar_cliente(int servidor){
 	struct sockaddr_in direccion_cliente;
 	uint32_t tamanio_direccion = sizeof(struct sockaddr_in);
 	uint32_t cliente;
 	cliente = accept(servidor,(void*) &direccion_cliente,&tamanio_direccion);
-	puts("conexion recibida!");
 	return cliente;
 }
 uint64_t timestamp(){
@@ -181,4 +180,129 @@ uint64_t timestamp(){
 	return a;
 }
 
+uint32_t length_de_char_asterisco(char** arrays){
+	uint32_t i = 0;
+	while(arrays[i] != NULL){
+		i++;
+	}
+	return i;
+}
 
+//t_readdir* crear_readdir (char* path){
+//	int size_path = char_length(path);
+//	t_readdir* estruc = malloc(sizeof(t_readdir));
+//	estruc->path = malloc(size_path);
+//	estruc->size_path = size_path;
+//	memcpy(estruc->path, path, estruc->size_path);
+//	return estruc;
+//}
+
+void* serializar_path(const char* path, operaciones comando){
+	int size_path = char_length(path);
+	int bytes = sizeof(int)*2 + size_path;
+	int puntero=0;
+	void* magic = malloc(bytes);
+
+	memcpy(magic+puntero, &comando, sizeof(int));
+	puntero += sizeof(int);
+//	memcpy(magic+puntero, &bytes, sizeof(int));
+//	puntero += sizeof(int);
+	memcpy(magic+puntero, &size_path, sizeof(int));
+	puntero += sizeof(int);
+	memcpy(magic+puntero, path, size_path);
+	puntero += size_path;
+	return magic;
+}
+
+//void reddir_destroy (t_readdir* estructura){
+//	free(estructura->path);
+//	free(estructura);
+//}
+
+void* serializar_lista_ent_dir(t_list* lista){
+	int _tam = tamanio_de_todos_las_ent_dir(lista) + 12;
+	void* magic = malloc(_tam);
+	int puntero = 0;
+	operaciones op = READDIR;
+	memcpy(magic+puntero, &op, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &_tam, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &lista->elements_count, 4);
+	puntero += 4;
+	for(int j = 0; j < lista->elements_count; j++){
+		char* elemento = list_get(lista, j);
+		int tam_elem = char_length(elemento);
+		memcpy(magic+puntero, &tam_elem, 4);
+		printf("%s",elemento);
+		puntero += 4;
+		memcpy(magic+puntero, elemento, tam_elem);
+		puntero += tam_elem;
+	}
+	return magic;
+}
+
+t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
+	t_list* lista = list_create();
+	int tam_elem;
+	char* elem;
+	int puntero = 0;
+	for(int i=0; i<tam_lista; i++){
+		memcpy(&tam_elem, magic+puntero,4);
+		puntero += 4;
+		elem = malloc(tam_elem);
+		memcpy(elem,magic+puntero,tam_elem);
+		puntero += tam_elem;
+		list_add(lista,elem);
+	}
+	return lista;
+}
+
+int tamanio_de_todos_las_ent_dir(t_list* lista){
+	int tam = 0;
+	char* elem;
+
+	for(int i=0;i<lista->elements_count;i++){
+		elem = list_get(lista,i);
+		tam += char_length(elem)+4;
+	}
+	return tam;
+}
+
+t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	resp->size = size;
+	resp->modif_time = modif_time;
+	resp->tipo = tipo;
+	return resp;
+}
+
+void* serializar_getattr(t_getattr* stat){
+	int _tam = sizeof(int)*2 + sizeof(uint64_t) + sizeof(uint32_t) + sizeof(uint8_t);
+	void* magic = malloc(_tam);
+	int puntero = 0;
+	operaciones op = GETATTR;
+	memcpy(magic+puntero, &op, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &_tam, 4);
+	puntero += 4;
+	memcpy(magic+puntero, &stat->size, sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, &stat->modif_time, sizeof(uint64_t));
+	puntero += sizeof(uint64_t);
+	memcpy(magic+puntero, &stat->tipo, sizeof(uint8_t));
+	puntero += sizeof(uint8_t);
+	return magic;
+}
+
+t_getattr* deserializar_getattr(void* magic){
+	t_getattr* resp = malloc(sizeof(t_getattr));
+	int puntero = 0;
+	memcpy(&resp->size, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->modif_time, magic+puntero, 8);
+	puntero += 8;
+	memcpy(&resp->tipo, magic+puntero, 1);
+	puntero += 1;
+	return resp;
+}

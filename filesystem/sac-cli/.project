@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>muse</name>
+	<name>sac-cli</name>
 	<comment></comment>
 	<projects>
+		<project>libreriaComun</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

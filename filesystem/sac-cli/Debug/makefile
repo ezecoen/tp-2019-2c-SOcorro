@@ -23,19 +23,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libreriaComun
+all: sac-cli
 
 # Tool invocations
-libreriaComun: $(OBJS) $(USER_OBJS)
+sac-cli: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc  -o "libreriaComun" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc  -o "sac-cli" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) libreriaComun
+	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) sac-cli
 	-@echo ' '
 
 .PHONY: all clean dependents
