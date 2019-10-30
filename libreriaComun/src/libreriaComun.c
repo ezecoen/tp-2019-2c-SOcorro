@@ -220,10 +220,11 @@ void* serializar_path(const char* path, operaciones comando){
 //}
 
 void* serializar_lista_ent_dir(t_list* lista){
-	int _tam = tamanio_de_todos_las_ent_dir(lista);
+	int _tam = tamanio_de_todos_las_ent_dir(lista) + 12;
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
+
 	memcpy(magic+puntero, &op, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);
@@ -234,7 +235,6 @@ void* serializar_lista_ent_dir(t_list* lista){
 		char* elemento = list_get(lista, j);
 		int tam_elem = char_length(elemento);
 		memcpy(magic+puntero, &tam_elem, 4);
-//		printf("%s",elemento);
 		puntero += 4;
 		memcpy(magic+puntero, elemento, tam_elem);
 		puntero += tam_elem;
@@ -247,12 +247,14 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	int tam_elem;
 	char* elem;
 	int puntero = 0;
+
 	for(int i=0; i<tam_lista; i++){
 		memcpy(&tam_elem, magic+puntero,4);
 		puntero += 4;
 		elem = malloc(tam_elem);
 		memcpy(elem,magic+puntero,tam_elem);
 		puntero += tam_elem;
+
 		list_add(lista,elem);
 	}
 	return lista;
@@ -334,5 +336,28 @@ t_open* crear_open(char* path, int flags){
 }
 
 void* serialiazar_open(t_open* open){
+	int bytes = sizeof(int)*2 + sizeof(int)*4 + open->size_path;
+	operaciones op = OPEN;
+	void* magic = malloc(bytes);
+	int puntero = 0;
 
+	memcpy(magic+puntero,&bytes,4);
+	puntero += 4;
+	memcpy(magic+puntero,&op,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->size_path,4);
+	puntero += 4;
+	memcpy(magic+puntero,open->path,open->size_path);
+	puntero += open->size_path;
+	memcpy(magic+puntero,&open->crear,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->crear_ensure,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->truncate,4);
+	puntero += 4;
+
+	return magic;
+}
+
+t_open* deserializar_open(void* magic){
 }
