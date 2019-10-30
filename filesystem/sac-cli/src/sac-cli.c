@@ -84,6 +84,10 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0 || strcmp(path,"/cmov") == 0){
+		return -ENOENT;
+	}
+
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -171,10 +175,16 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 		recv(_socket,&cant,4,MSG_WAITALL);
 		recv(_socket,&tam,4,MSG_WAITALL);
 		tam-=12;
-		_respuesta = malloc(tam);
-		recv(_socket,_respuesta,tam,MSG_WAITALL);
-		t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
-		cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		if(tam!=0){
+			_respuesta = malloc(tam);
+			recv(_socket,_respuesta,tam,MSG_WAITALL);
+			t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
+			cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		}
+		else{
+			t_list* lista = list_create();
+			cargar_dirents_en_buffer(lista,buf,filler,cant);
+		}
 		return 0;
 	}
 }
@@ -203,14 +213,14 @@ void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,i
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
  */
-static int sac_open(const char *path, struct fuse_file_info *fi) {
+//static int sac_open(const char *path, struct fuse_file_info *fi) {
 //	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
-	int tam;
-
-	t_open* pedido = crear_open(path,fi->flags);
-	void* magic = serialiazar_open(pedido);
-	memcpy(&tam,magic+4,4);
-	send(_socket,magic,tam,0);
+//	int tam;
+//
+//	t_open* pedido = crear_open(path,fi->flags);
+//	void* magic = serialiazar_open(pedido);
+//	memcpy(&tam,magic+4,4);
+//	send(_socket,magic,tam,0);
 
 
 
@@ -222,7 +232,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 //		return -EACCES;
 //
 //	return 0;
-}
+//}
 
 
 static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
@@ -339,9 +349,7 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	return size;
 }
 
-static int sac_opendir (const char *, struct fuse_file_info *){
-
-}
+//static int sac_opendir (const char *, struct fuse_file_info *)
 
 
 /*
@@ -353,8 +361,8 @@ static int sac_opendir (const char *, struct fuse_file_info *){
 static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
-		.open = sac_open,
-		.opendir = sac_opendir,
+//		.open = sac_open,
+//		.opendir = sac_opendir,
 		.read = sac_read,
 		.mknod = sac_mknod,
 		.mkdir = sac_mkdir,
