@@ -1,6 +1,7 @@
 #include "sac-cli.h"
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
+#include "dirent.h"
 
 
 
@@ -83,6 +84,10 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0 || strcmp(path,"/cmov") == 0){
+		return -ENOENT;
+	}
+
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -107,6 +112,7 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		stbuf->st_mtim = time;
 		if(atributos->tipo == 1){// es un archivo
 			stbuf->st_mode = S_IFREG | 0777;
+
 		}else{// es un directorio
 			stbuf->st_mode = S_IFDIR | 0777;
 		}
@@ -153,36 +159,37 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	int _tam;
 
-//	void* peticion = serializar_path(path, READDIR);
-//	memcpy(&_tam, peticion+4, 4);
-//	send(_socket, peticion, _tam+4,0);
-//	free(peticion);
-	int oper = READDIR;
-	send(_socket,&oper,4,0);
+	void* peticion = serializar_path(path, READDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0); //tam es el tamanio del char solo
+	free(peticion);
 
-//	operaciones op = recibir_op(_socket);
-//	void* _respuesta;
-//	int tam, cant, error;
-//	if(op == ERROR){
-//		recv(_socket,&error,4,0);
-//		return -1;
-//	}
-//	else{
-//		recv(_socket,&tam,4,0);
-//		_respuesta = malloc(tam);
-//		recv(_socket,_respuesta,tam,0);
-//		recv(_socket,&cant,4,0);
-//		t_list* dirents = list_create();
-//		dirents = deserializar_lista_ent_dir(_respuesta,cant);
-//		cargar_dirents_en_buffer(dirents, buf, filler, cant);
-		filler( buf, ".", NULL, 0 );  // Current Directory
-		filler( buf, "..", NULL, 0 ); // Parent Directory
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int tam, cant, error;
+	if(op == ERROR){
+		recv(_socket,&error,4,MSG_WAITALL);
+		return -1;
+	}
+	else{
+		recv(_socket,&cant,4,MSG_WAITALL);
+		recv(_socket,&tam,4,MSG_WAITALL);
+		tam-=12;
+		if(tam!=0){
+			_respuesta = malloc(tam);
+			recv(_socket,_respuesta,tam,MSG_WAITALL);
+			t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
+			cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		}
+		else{
+			t_list* lista = list_create();
+			cargar_dirents_en_buffer(lista,buf,filler,cant);
+		}
 		return 0;
-//	}
+	}
 }
 
-void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
-		int cant){
+void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,int cant){
 	char* elem;
 	filler( buf, ".", NULL, 0 );  // Current Directory
 	filler( buf, "..", NULL, 0 ); // Parent Directory
@@ -206,15 +213,26 @@ void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
  */
-static int sac_open(const char *path, struct fuse_file_info *fi) {
-	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
-		return -ENOENT;
+//static int sac_open(const char *path, struct fuse_file_info *fi) {
+//	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
+//	int tam;
+//
+//	t_open* pedido = crear_open(path,fi->flags);
+//	void* magic = serialiazar_open(pedido);
+//	memcpy(&tam,magic+4,4);
+//	send(_socket,magic,tam,0);
 
-	if ((fi->flags & 3) != O_RDONLY)
-		return -EACCES;
 
-	return 0;
-}
+
+
+//	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
+//		return -ENOENT;
+//
+//	if ((fi->flags & 3) != O_RDONLY)
+//		return -EACCES;
+//
+//	return 0;
+//}
 
 
 static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
@@ -331,6 +349,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 	return size;
 }
 
+//static int sac_opendir (const char *, struct fuse_file_info *)
+
 
 /*
  * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
@@ -341,7 +361,8 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
-		.open = sac_open,
+//		.open = sac_open,
+//		.opendir = sac_opendir,
 		.read = sac_read,
 		.mknod = sac_mknod,
 		.mkdir = sac_mkdir,
@@ -379,7 +400,7 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.1.108", 8080);
+	_socket = conectar_socket_a("192.168.43.213", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

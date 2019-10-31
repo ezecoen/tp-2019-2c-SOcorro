@@ -15,7 +15,7 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue cargado");
 	}
 	load_fs(argv[1]);
-	log_info(logger,"El fileSystem fue creado");
+	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 //	while(1){
 //		esperar_conexion(_servidor);
@@ -175,12 +175,12 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
-			nodo_vacio->bloque_padre=0;
+			nodo_vacio->bloque_padre=1;
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
 			for(int i = 0;i<71;i++){
-				nodo_vacio->nombre_de_archivo[i] = '-';
+				nodo_vacio->nombre_de_archivo[i] = '0';
 			}
 			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 			nodo_vacio->tamanio_de_archivo=0;
@@ -334,12 +334,12 @@ void atender_cliente(int cliente){
 
 		switch(operacion){
 		case GETATTR:
-			log_info(logger,"Llego la instruccion GETATTR");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
 			free(magic);
 			t_getattr* attr = _getattr(path_pedido);
 			free(path_pedido);
@@ -354,7 +354,26 @@ void atender_cliente(int cliente){
 			}
 			break;
 		case READDIR:
-			log_info(logger,"Llego la instruccion READDIR");
+//			recibo el path
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
+			free(magic);
+//			busco las entradas y las pongo en una lista
+			t_list* entradas = list_create();
+			res = encontrame_las_entradas_de(entradas,path_pedido);
+			if(res == -1){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				void* magic = serializar_lista_ent_dir(entradas);
+				int tam;
+				memcpy(&tam,magic+8,sizeof(int));
+				send(cliente,magic,tam,0);
+			}
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");
@@ -363,12 +382,12 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion READ");
 			break;
 		case MKNOD:
-			log_info(logger,"Llego la instruccion MKNOD");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion MKNOD de %s",path_pedido);
 			free(magic);
 			res = _mknod(path_pedido);
 			free(path_pedido);
@@ -389,12 +408,12 @@ void atender_cliente(int cliente){
 
 //			mandar socket respuesta con el valor de la respuesta
 		case MKDIR:
-			log_info(logger,"Llego la instruccion MKDIR");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion MKDIR de %s",path_pedido);
 			free(magic);
 			int resultado = _mkdir(path_pedido);
 			free(path_pedido);
@@ -422,7 +441,24 @@ void atender_cliente(int cliente){
 		}
 	}
 }
-
+int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
+	char** list = string_split(path_pedido,"/");
+	char* nom_mio = dame_el_nombre(list,1);
+	int numero_bloque = dame_el_numero_de_bloque_de_nodo(nom_mio);
+	if(numero_bloque == -1){
+		return -1;
+	}
+	for(int i = 0;i<1024;i++){
+		//que pasa si agrego el mio?
+		if(strcmp(tabla_de_nodos[i]->nombre_de_archivo,nom_mio)==0){
+			continue;
+		}
+		if(tabla_de_nodos[i]->bloque_padre == numero_bloque){
+			list_add(entradas,tabla_de_nodos[i]->nombre_de_archivo);
+		}
+	}
+	return 0;
+}
 void _readdir(int cliente){
 
 //	tengo que recivir el tamanio de la estructura entera pero no tengo
@@ -435,3 +471,25 @@ void _readdir(int cliente){
 
 }
 
+bool path_abs_es_valido (char* path){
+	uint32_t numero_de_bloque_de_mi_padre;
+	int numero_de_bloque_de_quien_dice_ser_mi_padre;
+	char** lista_paths = string_split(path,"/");
+
+	for(int i=0;lista_paths[i] != NULL;i++){
+		if (i==0){
+			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
+			numero_de_bloque_de_quien_dice_ser_mi_padre = 0;// el padre del primero que esta en la lista deberia ser "/",
+															// "bloque padre: cero si está en el directorio raíz" asi dice
+															// la consigna
+		}
+		else{
+			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
+			numero_de_bloque_de_quien_dice_ser_mi_padre = dame_el_numero_de_bloque_de_nodo(lista_paths[i-1]);
+			if (numero_de_bloque_de_mi_padre != numero_de_bloque_de_quien_dice_ser_mi_padre){
+				return false;
+			}
+		}
+	}
+	return true;
+}

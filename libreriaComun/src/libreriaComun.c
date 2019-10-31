@@ -224,12 +224,11 @@ void* serializar_lista_ent_dir(t_list* lista){
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
-
-	memcpy(magic+puntero, &op, 4);
+	memcpy(magic+puntero, &op, sizeof(operaciones));
+	puntero += sizeof(operaciones);
+	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);
-	puntero += 4;
-	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	for(int j = 0; j < lista->elements_count; j++){
 		char* elemento = list_get(lista, j);
@@ -246,10 +245,9 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	t_list* lista = list_create();
 	int tam_elem;
 	char* elem;
+	int puntero = 0;
 
 	for(int i=0; i<tam_lista; i++){
-		int puntero = 0;
-
 		memcpy(&tam_elem, magic+puntero,4);
 		puntero += 4;
 		elem = malloc(tam_elem);
@@ -308,4 +306,57 @@ t_getattr* deserializar_getattr(void* magic){
 	memcpy(&resp->tipo, magic+puntero, 1);
 	puntero += 1;
 	return resp;
+}
+
+t_open* crear_open(char* path, int flags){
+	t_open* pedido = malloc(sizeof(t_open));
+	pedido->size_path = char_length(path);
+	pedido->path = malloc(pedido->size_path);
+	memcpy(pedido->path,path,pedido->size_path);
+
+	if(flags & O_CREAT)
+		pedido->crear = 1;
+	else
+		pedido->crear = 0;
+
+
+	if(flags & O_EXCL)
+			pedido->crear_ensure = 1;
+	else
+		pedido->crear_ensure = 0;
+
+
+	if(flags & O_TRUNC)
+			pedido->truncate = 1;
+	else
+		pedido->truncate = 0;
+
+	return pedido;
+}
+
+void* serialiazar_open(t_open* open){
+	int bytes = sizeof(int)*2 + sizeof(int)*4 + open->size_path;
+	operaciones op = OPEN;
+	void* magic = malloc(bytes);
+	int puntero = 0;
+
+	memcpy(magic+puntero,&bytes,4);
+	puntero += 4;
+	memcpy(magic+puntero,&op,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->size_path,4);
+	puntero += 4;
+	memcpy(magic+puntero,open->path,open->size_path);
+	puntero += open->size_path;
+	memcpy(magic+puntero,&open->crear,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->crear_ensure,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->truncate,4);
+	puntero += 4;
+
+	return magic;
+}
+
+t_open* deserializar_open(void* magic){
 }
