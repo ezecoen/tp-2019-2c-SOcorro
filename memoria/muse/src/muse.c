@@ -57,24 +57,24 @@ int main(int argc, char **argv) {
 	printf("\nDireccion virtual de mat3: %d",result3);
 	fflush(stdout);
 
-//	Pruebas clock modificado
-	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
-		_bit->ocupado = true;
-		_bit->bit_modificado = true;
-		_bit->bit_uso = true;
-		return _bit;
-	}
-	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
-//	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
-//	_bit->bit_uso = true;
-//	_bit->bit_modificado = true;
-//	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
-//	_bit2->bit_uso = false;
-//	_bit2->bit_modificado = true;
-	posicion_puntero_clock = 4;
-	t_bit_memoria* _b = ejecutar_clock_modificado(list_create());
-	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->posicion,_b->bit_uso,_b->bit_modificado);
-	return 0;
+////	Pruebas clock modificado
+//	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
+//		_bit->ocupado = true;
+//		_bit->bit_modificado = true;
+//		_bit->bit_uso = true;
+//		return _bit;
+//	}
+//	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
+////	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
+////	_bit->bit_uso = true;
+////	_bit->bit_modificado = true;
+////	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
+////	_bit2->bit_uso = false;
+////	_bit2->bit_modificado = true;
+//	posicion_puntero_clock = 4;
+//	t_bit_memoria* _b = ejecutar_clock_modificado(list_create());
+//	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->posicion,_b->bit_uso,_b->bit_modificado);
+//	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -114,9 +114,9 @@ void iniciar_memoria_virtual(char* path_swap){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-//	int fd = open(path_swap,O_RDWR);
-
-//	swap = mmap(NULL,configuracion->tam_swap,PROT_READ|PROT_WRITE,MAP_FILE|MAP_PRIVATE,fd,0);
+	int fd = open(path_swap,O_RDWR,0);
+	//no funciona!!
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 }
 int log_2(double n){
@@ -548,20 +548,19 @@ uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior){
 	return segmento_anterior->base_logica+segmento_anterior->tamanio;
 }
 
-pagina* ultima_pagina_por_numero(segmento* seg)
-{	pagina* pag=NULL;
+pagina* ultima_pagina_por_numero(segmento* seg){
+	pagina* pag=NULL;
 	if(list_is_empty(seg->paginas)){
-		return pag; //vacia?
+			return pag; //vacia?
 		}
 	pag->num_pagina=0;
 	for(int i=0;i<list_size(seg->paginas)-1;i++) {
 	pagina* p = list_get(seg->paginas,i);
-		if(p->num_pagina > pag->num_pagina)
-		{
+		if(p->num_pagina > pag->num_pagina){
 			pag = p;
 		}
 	}
-return pag;
+	return pag;
 }
 
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio){
@@ -614,7 +613,6 @@ t_bit_memoria* asignar_marco_nuevo(){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
-	bit_libre->bit_uso = true;//porque se esta trayendo rait nau
 	return bit_libre;
 }
 t_bit_memoria* ejecutar_clock_modificado(){
@@ -637,7 +635,8 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	pagina_a_sacar->bit_swap = pasar_marco_a_swap(pagina_a_sacar->bit_marco);
 	pagina_a_sacar->bit_marco = NULL;
 	pagina_a_sacar->presencia = false;
-	bit_return->bit_modificado = false;//lo dejo en (0,0) listo para usar
+	bit_return->bit_modificado = false;//lo dejo en (1,0) listo para usar
+	bit_return->bit_uso = true;
 	return bit_return;
 }
 t_bit_memoria* ejecutar_clock_modificado_2vuelta(){
@@ -748,7 +747,7 @@ int muse_free(muse_free_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
-		return 0;
+		return -1;
 	}
 
 	heap_lista* heap_lista_encontrado = NULL;
@@ -765,14 +764,13 @@ int muse_free(muse_free_t* datos){
 		//no se encontro la direccion que se quiere liberar
 		//segmentation fault??
 		//muse segmentation f
-		return 0;
+		return -1;
 	}
 	//hay que reemplazar el heap posta,
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 	heap_metadata_nuevo->is_free = true;
 	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
 	reemplazar_heap_en_memoria(heap_lista_encontrado,segmento_buscado,heap_metadata_nuevo);
-	//hay que ver que este la pagina en memoria ??
 
 	//recorro todos los heaps_lista viendo cuales tengo que juntar
 	t_list* heaps_lista =segmento_buscado->info_heaps;
@@ -820,7 +818,7 @@ int muse_free(muse_free_t* datos){
 		heap_de_lista->indice=i;
 	}
 
-//	retorna 0 si falla
+//	retorna -1 si falla
 	return 1;
 }
 
@@ -841,7 +839,6 @@ void* muse_get(muse_get_t* datos){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
 			void* puntero_a_marco = obtener_puntero_a_marco(pag);
 			memcpy(super_void+puntero,puntero_a_marco,sizeof(configuracion->tam_pag));
-			//ver si las pags estan en memoria!
 		}
 		return super_void;
 	}
@@ -995,8 +992,8 @@ void ocupate_de_este(int socket){
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
 				resultado = muse_free(dmft);
-				if(resultado == 0){
-					operacion_respuesta = MUSE_ERROR;
+				if(resultado == -1){
+					operacion_respuesta = MUSE_SEG_FAULT;
 				}
 				else{
 					operacion_respuesta = MUSE_EXITOSO;

@@ -7,8 +7,6 @@
 #include "prueba.h"
 #include <unistd.h>
 
-int BIT = 14;
-
 int main(void) {
 	iniciar_log();
 	leer_config();
