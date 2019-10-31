@@ -750,6 +750,12 @@ int muse_free(muse_free_t* datos){
 		return -1;
 	}
 
+	if(segmento_buscado->mmapeado){
+			//si esta mmpapeado, no se puede liberar
+			return -1;
+		}
+
+
 	heap_lista* heap_lista_encontrado = NULL;
 	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
@@ -890,54 +896,45 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 
 	// del segundo heap me importa si tiene espacio
 	heap_lista* heap_dst = NULL;
+	heap_lista* heap_lista_siguiente = NULL;
+	//la dire es abs
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	if(list_size(segmento_buscado->info_heaps)>0){
 		for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 			// por cada heap_lista, veo si la direccion que me mandaron
 			// pertenece a ese ->datos
 			heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
-			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) < datos->direccion &&
-					heap_aux->direccion_heap_metadata+
-					sizeof(heap_metadata)+heap_aux->espacio > datos->direccion) {
+			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) < direccion_al_segmento &&
+					heap_aux->direccion_heap_metadata+sizeof(heap_metadata)+heap_aux->espacio
+					> direccion_al_segmento) {
 				//significa que la dire nueva esta entre un heap y el siguiente
-				//deberia ver si entra en el espacio entre la dire que me dieron,
-				// y la dire del heap siguiente!
-				int offset_pag = datos->direccion%configuracion->tam_pag;
-				int cantidad_paginas = datos->direccion/configuracion->tam_pag;
-				//empieza ahi .. deberia ver cuanto mas espacio tiene despues de este punto
-				if(heap_aux->espacio > datos->size_paquete){
-					//entra el paquete sin pisar nada importante..
-					// deberia ver que onda las paginas
-					// si entra en una, o mas o si estan en memoria
-
-					heap_dst = heap_aux;
-				}{
-
+				heap_dst=heap_aux;
+				//habria que corroborar que no fuera el ultimo !!
+				heap_lista_siguiente = list_get(segmento_buscado->info_heaps,i+1);
 				break;
 			}
-			//no esta en este heap + datos
+			//no esta en esta
 		}
 	}
-
 	if(heap_dst == NULL){
 	//no se encontro la direccion que se quiere liberar
 		return -1;
 	}
-
 	if(heap_dst->espacio<datos->size_paquete) {
 	//no entra
 		return -1;
 	}
+	int offset_al_heap = direccion_al_segmento-heap_dst->direccion_heap_metadata;
+	if(offset_al_heap+datos->size_paquete>heap_lista_siguiente->direccion_heap_metadata) {
+		//va a pisar el heap_lista_siguiente
+		return -1;
+	}
 
-	//si entra
-	//deberia guardar la info que recupero del muse_get .. un super void
-	// y eso pegarlo en la nueva direccion de destino
-	// la direccion es local, asi que solo pego eso sobre .. los datos anteriores..
-	// como que los pego detras del heap_lista_encontrado
-	memccpy(heap_dst->direccion_heap_metadata+sizeof(heap_metadata),
-			,datos->size_paquete);
+	//
 
 	return 0;
 }
+
 int muse_map(muse_map_t* datos){
 /**
 * Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes
