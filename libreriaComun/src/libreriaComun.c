@@ -258,6 +258,11 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	}
 	return lista;
 }
+void lista_ent_dir_destroy(t_list* lista){
+	for(int i = 1;i<lista->elements_count;i+=2){
+		free(lista[i]->head->data);
+	}
+}
 
 int tamanio_de_todos_las_ent_dir(t_list* lista){
 	int tam = 0;
@@ -308,6 +313,10 @@ t_getattr* deserializar_getattr(void* magic){
 	return resp;
 }
 
+void getattr_destroy(t_getattr* getattr){
+	free(getattr);
+}
+
 t_open* crear_open(char* path, int flags){
 	t_open* pedido = malloc(sizeof(t_open));
 	pedido->size_path = char_length(path);
@@ -340,9 +349,9 @@ void* serialiazar_open(t_open* open){
 	void* magic = malloc(bytes);
 	int puntero = 0;
 
-	memcpy(magic+puntero,&bytes,4);
-	puntero += 4;
 	memcpy(magic+puntero,&op,4);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4);
 	puntero += 4;
 	memcpy(magic+puntero,&open->size_path,4);
 	puntero += 4;
@@ -359,4 +368,27 @@ void* serialiazar_open(t_open* open){
 }
 
 t_open* deserializar_open(void* magic){
+	int puntero = 0;
+	t_open* resp = malloc(sizeof(t_open));
+	int tam;
+
+	memcpy(&tam, magic+puntero, 4);
+	puntero += 4;
+	resp->path = malloc(tam);
+	memcpy(resp->path, magic+puntero, tam);
+	puntero += tam;
+	memcpy(&resp->crear, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->crear_ensure, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->truncate, magic+puntero, 4);
+	puntero += 4;
+
+	return resp;
 }
+void open_destroy(t_open* open){
+	free(open->path);
+	free(open);
+}
+
+
