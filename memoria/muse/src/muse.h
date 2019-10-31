@@ -41,7 +41,7 @@ typedef struct heap_metadata{
 }__attribute__((packed)) heap_metadata ;
 
 typedef struct heap_lista{
-	int direccion_heap_metadata;
+	int direccion_heap_metadata; //con respecto al segmento
 	int espacio;
 	_Bool is_free;
 	int indice;

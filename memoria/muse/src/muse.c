@@ -93,7 +93,6 @@ void init_estructuras(char* path){
 }
 void iniciar_memoria_virtual(char* path){
 	// aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!!!!!!!!!!!!!
-	log_info(logg,"almost");
 	int i =strlen(path);
 	for(;i>=0;i--)
 	{
@@ -685,7 +684,7 @@ int muse_free(muse_free_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
-		return 0;
+		return -1;
 	}
 
 	heap_lista* heap_lista_encontrado = NULL;
@@ -702,7 +701,7 @@ int muse_free(muse_free_t* datos){
 		//no se encontro la direccion que se quiere liberar
 		//segmentation fault??
 		//muse segmentation f
-		return 0;
+		return -1;
 	}
 	//hay que reemplazar el heap posta,
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
@@ -757,8 +756,8 @@ int muse_free(muse_free_t* datos){
 		heap_de_lista->indice=i;
 	}
 
-//	retorna 0 si falla
-	return 1;
+//	retorna -1 si falla
+	return 0;
 }
 
 void* muse_get(muse_get_t* datos){
@@ -816,17 +815,101 @@ void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint
 
 	return NULL;
 }
-int muse_cpy(muse_cpy_t* datos){
-//	devuelve 0 si falla
+int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void* es source
+	// de la direccion solo me importa el tamano y los datos
+
+
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado==NULL){
+		//no existe el segmento buscado o se paso del segmento
+		return -1;
+	}
+
+	// del segundo heap me importa si tiene espacio
+	heap_lista* heap_dst = NULL;
+	if(list_size(segmento_buscado->info_heaps)>0){
+		for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
+			// por cada heap_lista, veo si la direccion que me mandaron
+			// pertenece a ese ->datos
+			heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
+			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) < datos->direccion &&
+					heap_aux->direccion_heap_metadata+
+					sizeof(heap_metadata)+heap_aux->espacio > datos->direccion) {
+				//significa que la dire nueva esta entre un heap y el siguiente
+				//deberia ver si entra en el espacio entre la dire que me dieron,
+				// y la dire del heap siguiente!
+				int offset_pag = datos->direccion%configuracion->tam_pag;
+				int cantidad_paginas = datos->direccion/configuracion->tam_pag;
+				//empieza ahi .. deberia ver cuanto mas espacio tiene despues de este punto
+				if(heap_aux->espacio > datos->size_paquete){
+					//entra el paquete sin pisar nada importante..
+					// deberia ver que onda las paginas
+					// si entra en una, o mas o si estan en memoria
+
+					heap_dst = heap_aux;
+				}{
+
+				break;
+			}
+			//no esta en este heap + datos
+		}
+	}
+
+	if(heap_dst == NULL){
+	//no se encontro la direccion que se quiere liberar
+		return -1;
+	}
+
+	if(heap_dst->espacio<datos->size_paquete) {
+	//no entra
+		return -1;
+	}
+
+	//si entra
+	//deberia guardar la info que recupero del muse_get .. un super void
+	// y eso pegarlo en la nueva direccion de destino
+	// la direccion es local, asi que solo pego eso sobre .. los datos anteriores..
+	// como que los pego detras del heap_lista_encontrado
+	memccpy(heap_dst->direccion_heap_metadata+sizeof(heap_metadata),
+			,datos->size_paquete);
+
 	return 0;
 }
 int muse_map(muse_map_t* datos){
+/**
+* Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes
+* el archivo del `path` dado.
+* @param path Path a un archivo en el FileSystem de MUSE a mappear.
+* @param length Cantidad de bytes de memoria a usar para mappear el archivo.
+* @param flags
+*          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
+*          MAP_SHARED      El segmento asociado al archivo es compartido.
+* @return Retorna la posición de memoria de MUSE mappeada.
+* @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
+* @note: muse_free no libera la memoria mappeada. @see muse_unmap
+*/
 	return 0;
 }
 int muse_sync(muse_sync_t* datos){
+/**
+* Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+* @param addr Dirección a memoria mappeada.
+* @param len Cantidad de bytes a escribir.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+* @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+*/
 	return 0;
 }
 int muse_unmap(muse_unmap_t* datos){
+/**
+* Borra el mappeo a un archivo hecho por muse_map.
+* @param dir Dirección a memoria mappeada.
+* @param
+* @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
+* @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+*/
 	return 0;
 }
 int muse_close(char* id_cliente){
