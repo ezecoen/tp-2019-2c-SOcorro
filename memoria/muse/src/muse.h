@@ -202,6 +202,7 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 t_bit_memoria* asignar_marco_nuevo();
 void* obtener_puntero_a_marco(pagina* pag);
 t_bit_memoria* ejecutar_clock_modificado();
+t_bit_memoria* ejecutar_clock_modificado_2vuelta();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
 pagina* buscar_pagina_por_bit(t_bit_memoria* bit);

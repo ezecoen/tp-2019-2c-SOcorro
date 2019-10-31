@@ -66,7 +66,7 @@ uint32_t muse_alloc(uint32_t tam){
 		printf("Direccion recibida en libmuse: %d\n",direccion);
 	}
 	else{
-		//si hay error q pasa??
+		direccion = NULL;
 	}
 	free(magic);
 	muse_alloc_destroy(mat);

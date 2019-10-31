@@ -42,18 +42,20 @@ int main(int argc, char **argv) {
 	printf("\nDireccion virtual de mat: %d",result);
 	fflush(stdout);
 //	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(1000,"prog1");
+	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog1");
 	int result1 = muse_alloc(mat1);
 	printf("\nDireccion virtual de mat1: %d",result1);
+	fflush(stdout);
 //	prueba creo segmento 3
 	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog2");
 	int result2 = muse_alloc(mat2);
 	printf("\nDireccion virtual de mat2: %d",result2);
+	fflush(stdout);
 //	prueba uso segmento 3
 	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog2");
 	int result3 = muse_alloc(mat3);
 	printf("\nDireccion virtual de mat3: %d",result3);
-
+	fflush(stdout);
 
 //	Pruebas clock modificado
 	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
@@ -612,6 +614,7 @@ t_bit_memoria* asignar_marco_nuevo(){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
+	bit_libre->bit_uso = true;//porque se esta trayendo rait nau
 	return bit_libre;
 }
 t_bit_memoria* ejecutar_clock_modificado(){
@@ -626,7 +629,7 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	if(bit_return==NULL){
 		bit_return = buscar_0_1();
 		if(bit_return == NULL){
-			bit_return = ejecutar_clock_modificado();
+			bit_return = ejecutar_clock_modificado_2vuelta();
 		}
 	}
 
@@ -635,6 +638,13 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	pagina_a_sacar->bit_marco = NULL;
 	pagina_a_sacar->presencia = false;
 	bit_return->bit_modificado = false;//lo dejo en (0,0) listo para usar
+	return bit_return;
+}
+t_bit_memoria* ejecutar_clock_modificado_2vuelta(){
+	t_bit_memoria* bit_return = buscar_0_0();
+	if(bit_return==NULL){
+		bit_return = buscar_0_1();
+	}
 	return bit_return;
 }
 t_bit_memoria* buscar_0_0(){
@@ -685,13 +695,15 @@ t_bit_memoria* buscar_0_1(){
 }
 pagina* buscar_pagina_por_bit(t_bit_memoria* bit){
 	pagina* pagina_return;
-	_Bool buscar_bit(pagina* pag){
-		return pag->bit_marco->posicion == bit->posicion
-				&& pag->bit_marco->bit_uso == bit->bit_uso
-				&& pag->bit_marco->bit_modificado == bit->bit_modificado;
+	void buscar_bit(pagina* pag){
+		if(pag->presencia){
+			if(pag->bit_marco->posicion == bit->posicion){
+				pagina_return = pag;
+			}
+		}
 	}
 	void iteracion2(segmento* seg){
-		pagina_return = list_find(seg->paginas,(void*)buscar_bit);
+		list_iterate(seg->paginas,(void*)buscar_bit);
 	}
 	void iteracion(programa_t* programa){
 		list_iterate(programa->tabla_de_segmentos,(void*)iteracion2);
@@ -704,6 +716,7 @@ t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit){
 	t_bit_swap* bit_swap = bit_libre_memoria_virtual();
 	void* puntero_a_swap = swap + bit_swap->posicion * configuracion->tam_pag;
 	memcpy(puntero_a_swap,puntero_a_marco,configuracion->tam_pag);
+	bit_swap->ocupado = true;
 	return bit_swap;
 }
 void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata){
