@@ -9,8 +9,10 @@ int main(int argc, char **argv) {
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
-//	char* sample = string_new();
-//	string_append(&sample,"hola sample");
+	char* sample = string_new();
+	string_append(&sample,"hola sample");
+	memcpy(upcm+5,sample,strlen(sample)+1);
+
 //	if(swap != MAP_FAILED){
 //		memcpy(swap,sample,1000);
 //		printf("%s",(char*)swap);
@@ -18,44 +20,44 @@ int main(int argc, char **argv) {
 //	perror("error: ");
 //	return 0;
 
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"prog0");
-	list_add(tabla_de_programas,programa);
-
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"prog1");
-	list_add(tabla_de_programas,programa1);
-
-	programa_t* programa2 = malloc(sizeof(programa_t));
-	programa2->tabla_de_segmentos = list_create();
-	programa2->id_programa = string_new();
-	string_append(&programa2->id_programa,"prog2");
-	list_add(tabla_de_programas,programa2);
-
-//	prueba creo segmento 1
-	muse_alloc_t* mat = crear_muse_alloc(4086,"prog0");
-	int result = muse_alloc(mat);
-	printf("\nDireccion virtual de mat: %d",result);
-	fflush(stdout);
-//	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog1");
-	int result1 = muse_alloc(mat1);
-	printf("\nDireccion virtual de mat1: %d",result1);
-	fflush(stdout);
-//	prueba creo segmento 3
-	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog2");
-	int result2 = muse_alloc(mat2);
-	printf("\nDireccion virtual de mat2: %d",result2);
-	fflush(stdout);
-//	prueba uso segmento 3
-	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog2");
-	int result3 = muse_alloc(mat3);
-	printf("\nDireccion virtual de mat3: %d",result3);
-	fflush(stdout);
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"prog0");
+//	list_add(tabla_de_programas,programa);
+//
+//	programa_t* programa1 = malloc(sizeof(programa_t));
+//	programa1->tabla_de_segmentos = list_create();
+//	programa1->id_programa = string_new();
+//	string_append(&programa1->id_programa,"prog1");
+//	list_add(tabla_de_programas,programa1);
+//
+//	programa_t* programa2 = malloc(sizeof(programa_t));
+//	programa2->tabla_de_segmentos = list_create();
+//	programa2->id_programa = string_new();
+//	string_append(&programa2->id_programa,"prog2");
+//	list_add(tabla_de_programas,programa2);
+//
+////	prueba creo segmento 1
+//	muse_alloc_t* mat = crear_muse_alloc(4086,"prog0");
+//	int result = muse_alloc(mat);
+//	printf("\nDireccion virtual de mat: %d",result);
+//	fflush(stdout);
+////	prueba creo segmento 2
+//	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog1");
+//	int result1 = muse_alloc(mat1);
+//	printf("\nDireccion virtual de mat1: %d",result1);
+//	fflush(stdout);
+////	prueba creo segmento 3
+//	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog2");
+//	int result2 = muse_alloc(mat2);
+//	printf("\nDireccion virtual de mat2: %d",result2);
+//	fflush(stdout);
+////	prueba uso segmento 3
+//	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog2");
+//	int result3 = muse_alloc(mat3);
+//	printf("\nDireccion virtual de mat3: %d",result3);
+//	fflush(stdout);
 
 ////	Pruebas clock modificado
 //	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
@@ -825,27 +827,27 @@ int muse_free(muse_free_t* datos){
 void* muse_get(muse_get_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	void* resultado_get = NULL;
 	if(segmento_buscado!=NULL){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
 		int direccion_final = datos->direccion+datos->tamanio;
 		int offset_final = direccion_final % configuracion->tam_pag;
-		int offset_inicial = datos->tamanio % configuracion->tam_pag;
+		int offset_inicial = datos->direccion % configuracion->tam_pag;
 		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
 		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
 		int pagina_inicial = datos->direccion / configuracion->tam_pag;
+		resultado_get = malloc(datos->tamanio);
 		void* super_void = malloc(tamanio_de_todas_las_paginas);
 		int puntero = 0;
 		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
 			void* puntero_a_marco = obtener_puntero_a_marco(pag);
-			memcpy(super_void+puntero,puntero_a_marco,sizeof(configuracion->tam_pag));
+			memcpy(super_void+puntero,puntero_a_marco,configuracion->tam_pag);
+			int a = 2;
 		}
-		return super_void;
+		memcpy(resultado_get,super_void+offset_inicial,datos->tamanio);
 	}
-	else{
-		//seg fault
-		return NULL;
-	}
+	return resultado_get;
 }
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
 	_Bool buscar_segmento_por_direccion(segmento* seg){
@@ -937,7 +939,7 @@ void ocupate_de_este(int socket){
 	char* id_cliente;
 	void* respuesta;
 	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
-		printf("Nuevo pedido de %d\n",socket);
+		printf("- Nuevo pedido de %d\n",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
 				//recibo int pid, crep el char* id y se lo mando
@@ -1018,6 +1020,9 @@ void ocupate_de_este(int socket){
 					memcpy(&tamanio_respuesta,respuesta+4,4);
 					send(socket,respuesta,tamanio_respuesta,0);
 					printf("enviando resolucion del get a: %d\n",socket);
+					char* buff = malloc(20);
+					memcpy(buff,resultado_get,20);
+					printf("buff: %s\n",buff);
 					free(resultado_get);
 					free(respuesta);
 					muse_void_destroy(mv);

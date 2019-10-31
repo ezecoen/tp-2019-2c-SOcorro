@@ -67,6 +67,7 @@ uint32_t muse_alloc(uint32_t tam){
 	}
 	else{
 		direccion = NULL;
+		//probar si se manda el null
 	}
 	free(magic);
 	muse_alloc_destroy(mat);
@@ -117,9 +118,11 @@ int muse_get(void* dst, uint32_t src, size_t n){
 		uint32_t size_resultado;
 		recv(socket_muse,&size_resultado,4,0);
 		void* resultado = malloc(size_resultado);
+		recv(socket_muse,resultado,size_resultado,0);
 		muse_void* mv = deserializar_muse_void(resultado);
 		memcpy(dst,mv->paquete,mv->size_paquete);
 		printf("get realizado, resultado en %p\n",dst);
+		printf("Buffer en libmuse: %s\n",(char*)mv->paquete);
 		free(resultado);
 		muse_void_destroy(mv);
 		return 0;
