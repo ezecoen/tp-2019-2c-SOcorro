@@ -759,10 +759,11 @@ int muse_free(muse_free_t* datos){
 
 
 	heap_lista* heap_lista_encontrado = NULL;
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
 		heap_lista* heap_lista_aux = list_get(segmento_buscado->info_heaps,i);
-		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == datos->direccion) {
+		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == direccion_al_segmento) {
 			heap_lista_encontrado = heap_lista_aux;
 			heap_lista_encontrado->is_free = true;
 			break;
@@ -833,15 +834,16 @@ int muse_free(muse_free_t* datos){
 void* muse_get(muse_get_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
 	if(segmento_buscado!=NULL){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
-		int direccion_final = datos->direccion+datos->tamanio;
+		int direccion_final = direccion_al_segmento+datos->tamanio;
 		int offset_final = direccion_final % configuracion->tam_pag;
-		int offset_inicial = datos->direccion % configuracion->tam_pag;
+		int offset_inicial = direccion_al_segmento % configuracion->tam_pag;
 		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
 		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
-		int pagina_inicial = datos->direccion / configuracion->tam_pag;
+		int pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
 		resultado_get = malloc(datos->tamanio);
 		void* super_void = malloc(tamanio_de_todas_las_paginas);
 		int puntero = 0;
@@ -849,7 +851,6 @@ void* muse_get(muse_get_t* datos){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
 			void* puntero_a_marco = obtener_puntero_a_marco(pag);
 			memcpy(super_void+puntero,puntero_a_marco,configuracion->tam_pag);
-			int a = 2;
 		}
 		memcpy(resultado_get,super_void+offset_inicial,datos->tamanio);
 	}
