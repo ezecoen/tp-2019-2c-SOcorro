@@ -111,10 +111,10 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		time.tv_sec = (__time_t)(atributos->modif_time/1000);
 		stbuf->st_mtim = time;
 		if(atributos->tipo == 1){// es un archivo
-			stbuf->st_mode = S_IFREG | 0777;
+			stbuf->st_mode = S_IFREG | 0333;
 
 		}else{// es un directorio
-			stbuf->st_mode = S_IFDIR | 0777;
+			stbuf->st_mode = S_IFDIR | 0333;
 		}
 		return 0;
 	}
@@ -348,6 +348,23 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 	return size;
 }
+int sac_write (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
+	t_write* wwrite = crear_write(path,buf,tam,offset);
+	void* magic = serializar_write(wwrite);
+	send(_socket,magic,(int)magic+4,0);
+	free(magic);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
 
 //static int sac_opendir (const char *, struct fuse_file_info *)
 
@@ -367,7 +384,8 @@ static struct fuse_operations sac_oper = {
 		.mknod = sac_mknod,
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
-		.unlink = sac_unlink
+		.unlink = sac_unlink,
+		.write = sac_write
 };
 
 
@@ -400,7 +418,7 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.43.213", 8080);
+	_socket = conectar_socket_a("127.0.0.1", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

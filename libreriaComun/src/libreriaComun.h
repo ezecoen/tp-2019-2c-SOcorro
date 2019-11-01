@@ -39,6 +39,7 @@ typedef enum {
 	CHMOD,
 	UNLINK,
 	ERROR,
+	WRITE,
 	EXITOSO
 }operaciones;
 
@@ -65,6 +66,14 @@ typedef struct{
 	int crear_ensure;
 	int truncate;
 }t_open;
+
+typedef struct{
+	char* path;
+	uint32_t size_path;
+	char* buff;
+	uint32_t size_buff;
+	uint32_t offset;
+}t_write;
 
 /**
 * @NAME: char_length

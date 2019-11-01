@@ -435,12 +435,43 @@ void atender_cliente(int cliente){
 		case UNLINK:
 			log_info(logger,"Llego la instruccion UNLINK");
 			break;
+		case WRITE:
+			log_info(logger,"Llego la instruccion WRITE");
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			t_write* wwrite = deserializar_write(magic);
+			char** list = string_split(path_pedido,"/");
+			char* nom_mio = dame_el_nombre(list,1);
+			nodo* mi_nodo = dame_el_nodo_de(nom_mio);
+			escribime_en(wwrite,mi_nodo);
+//			len = strlen(DEFAULT_FILE_CONTENT);
+//			if (offset < len) {
+//				if (offset + size > len)
+//					size = len - offset;
+//			memcpy(buf, DEFAULT_FILE_CONTENT + offset, size);
+//			}else{
+//
+//			}
+			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");
 			break;
 		}
 	}
 }
+int escribime_en(t_write* wwrite, nodo* nodo){
+	if()//todo
+}
+bloque* dame_el_bloque_para_escribir_de(nodo* mi_nodo){
+	if(no_tengo_bloques_asignados(mi_nodo) || el_ultimo){
+		asignar_bloque(mi_nodo);
+		return dame_el_bloque_para_escribir_de(mi_nodo);
+	}else{
+		return (bloque*)primer_bloque_de_disco+1+tam_de_bitmap+bloque_para_escribir(mi_nodo->punteros_indirectos);
+	}
+}
+
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 	char** list = string_split(path_pedido,"/");
 	char* nom_mio = dame_el_nombre(list,1);
