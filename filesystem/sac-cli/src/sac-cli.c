@@ -111,10 +111,10 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		time.tv_sec = (__time_t)(atributos->modif_time/1000);
 		stbuf->st_mtim = time;
 		if(atributos->tipo == 1){// es un archivo
-			stbuf->st_mode = S_IFREG | 0777;
+			stbuf->st_mode = S_IFREG | 0333;
 
 		}else{// es un directorio
-			stbuf->st_mode = S_IFDIR | 0777;
+			stbuf->st_mode = S_IFDIR | 0333;
 		}
 		return 0;
 	}
