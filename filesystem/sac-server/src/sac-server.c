@@ -4,6 +4,7 @@
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
+	diccionario_de_path = dictionary_create();
 	es_virgen = 0;
 	if(argc != 2){
 		perror("falta el archivo del fileSystem");
@@ -29,38 +30,63 @@ int main(int argc,char* argv[]) {
 
 	return 0;
 }
-
 int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
-	nodo* nodo = dame_el_primer_nodo_libre();
-	if(nodo == -1){
-		//no hay mas nodos
+	nodo* nodo = dame_el_primer_nodo_libre(nombre);
+	if(nodo == -1){//no hay mas nodos
 		return -1;
+	}else if(nodo == -2){
+		return -2;
 	}
 	nodo->estado=1;
 	nodo->fecha_de_creacion = timestamp();
 	nodo->fecha_de_modificacion = timestamp();
 	char** list = string_split(nombre,"/");
-	char* nom_padre = dame_el_nombre(list,0);
+	char* path_padre = dame_path_padre(nombre);
+	int padre = dictionary_get(diccionario_de_path,path_padre);
 	char* nom_mio = dame_el_nombre(list,1);
 	strcpy(nodo->nombre_de_archivo,nom_mio);
-	nodo->bloque_padre = dame_el_numero_de_bloque_de_nodo(nom_padre);
+	if(padre!=0){
+		nodo->bloque_padre = padre+1+tam_de_bitmap;
+	}else{
+		nodo->bloque_padre = padre;
+	}
 	return 1;
 }
 int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
-	nodo* nodo = dame_el_primer_nodo_libre();
-	if(nodo == -1){
-		//no hay mas nodos
+	nodo* nodo = dame_el_primer_nodo_libre(nombre);
+	if(nodo == -1){//no hay mas nodos
 		return -1;
+	}else if(nodo == -2){ //el nodo ya existe
+		return -2;
 	}
 	nodo->estado=2;
 	nodo->fecha_de_creacion = timestamp();
 	nodo->fecha_de_modificacion = timestamp();
 	char** list = string_split(nombre,"/");
-	char* nom_padre = dame_el_nombre(list,0);
+	char* path_padre = dame_path_padre(nombre);
+	int padre = dictionary_get(diccionario_de_path,path_padre);//BLOQUE PADRE
 	char* nom_mio = dame_el_nombre(list,1);
 	strcpy(nodo->nombre_de_archivo,nom_mio);
-	nodo->bloque_padre = dame_el_numero_de_bloque_de_nodo(nom_padre);
+	if(padre!=0){
+		nodo->bloque_padre = padre+1+tam_de_bitmap;
+	}else{
+		nodo->bloque_padre = padre;
+	}
 	return 1;
+}
+char* dame_path_padre(char* nombre){
+	char* path_padre;
+	char* hijo_a_sacar = string_new();
+	char** split = string_split(nombre,"/");
+	int i;
+	for(i=0;split[i]!=NULL;i++){
+
+	}
+	string_append(&hijo_a_sacar,"/");
+	string_append(&hijo_a_sacar,split[i-1]);
+	int len = strlen(nombre)+1-(strlen(hijo_a_sacar)+1);
+	path_padre = string_substring_until(nombre,len);
+	return path_padre;
 }
 char* dame_el_nombre(char** nombres,int quien){
 	int i;
@@ -133,6 +159,9 @@ void levantar_tabla_de_nodo(bloque* bloque){
 	tabla_de_nodos = (nodo**)malloc(sizeof(nodo*)*1024);
 	for(int i = 0;i<1024;i++){
 		tabla_de_nodos[i] = (nodo*) bloque;
+		if(tabla_de_nodos[i]->estado != 0){
+			dictionary_put(diccionario_de_path,tabla_de_nodos[i]->nombre_de_archivo,i);
+		}
 		bloque++;
 	}
 }
@@ -229,26 +258,15 @@ void printear(bloque* bloq){
 		printf("%c",bloq->bytes[i]);
 	}
 }
-void crear_nodo(const char* path){
-	if(strlen(path)<71){
-		log_error(logger,"Error al crear el nodo, nombre muy largo");
-//		devolver el error a sac-cli
-		return;
+nodo* dame_el_primer_nodo_libre(char* nombre){
+	if(dictionary_has_key(diccionario_de_path,nombre)){
+		return -2;
 	}
-	nodo* nodo = dame_el_primer_nodo_libre();;
-	nodo->estado=2;
-	nodo->fecha_de_creacion = timestamp();
-	nodo->bloque_padre=0; //0 si es el root
-	nodo->fecha_de_modificacion=timestamp();
-	strcpy(nodo->nombre_de_archivo,path);
-	nodo->tamanio_de_archivo=0;
-	nodo->punteros_indirectos;
-}
-nodo* dame_el_primer_nodo_libre(){
 	for(int i = 0;i<1024;i++){
 		if(tabla_de_nodos[i]->estado == 0){
 			// el indice de la tabla de nodos es el numero de nodo
 			nodo* bloque_del_nodo = (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+			dictionary_put(diccionario_de_path,nombre,(void*)i);
 			return bloque_del_nodo;
 		}
 	}
@@ -257,23 +275,10 @@ nodo* dame_el_primer_nodo_libre(){
 
 }
 nodo* dame_el_nodo_de(const char* _nombre){
-	char** list = string_split(_nombre,"/");
-	char* nom_mio = dame_el_nombre(list,1);
-	for(int i = 0;i<1024;i++){
-		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,nom_mio)){
-			return (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
-		}
-	}
-	return -1;
-}
-int dame_el_numero_de_bloque_de_nodo(char* nombre){
-	for(int i = 0;i<1024;i++){
-		if(!strcmp(tabla_de_nodos[i]->nombre_de_archivo,nombre)){
-			if(i==0){
-				return 0;
-			}
-			return 1+tam_de_bitmap+i;
-		}
+	int numero_nodo;
+	if(dictionary_has_key(diccionario_de_path,_nombre)){
+		numero_nodo = (int)dictionary_get(diccionario_de_path,_nombre);
+		return (nodo*)primer_bloque_de_disco+1+tam_de_bitmap+numero_nodo;
 	}
 	return -1;
 }
@@ -309,8 +314,9 @@ void esperar_conexion(int servidor){
 }
 void* armar_error(int error_code){
 	void* err = malloc(sizeof(int)*2);
-	memcpy(err,ERROR,4);
-	memcpy(err+4,error_code,4);
+	operaciones op = ERROR;
+	memcpy(err,&op,4);
+	memcpy(err+4,&error_code,4);
 	return err;
 }
 void atender_cliente(int cliente){
@@ -391,8 +397,11 @@ void atender_cliente(int cliente){
 			free(magic);
 			res = _mknod(path_pedido);
 			free(path_pedido);
-			if(res == -1){
+			if(res == -1){ // no hay mas nodos
 //				mandar error
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else if(res == -2){//el nodo con ese path ya existe
 				int err = ERROR;
 				send(cliente,&err,4,0);
 			}else{
@@ -435,25 +444,59 @@ void atender_cliente(int cliente){
 		case UNLINK:
 			log_info(logger,"Llego la instruccion UNLINK");
 			break;
+		case WRITE:
+			log_info(logger,"Llego la instruccion WRITE");
+//			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+//			magic = malloc(_tam);
+//			recv(cliente,magic,_tam,MSG_WAITALL);
+//			t_write* wwrite = deserializar_write(magic);
+//			char** list = string_split(path_pedido,"/");
+//			char* nom_mio = dame_el_nombre(list,1);
+//			nodo* mi_nodo = dame_el_nodo_de(nom_mio);
+//			escribime_en(wwrite,mi_nodo);
+//			len = strlen(DEFAULT_FILE_CONTENT);
+//			if (offset < len) {
+//				if (offset + size > len)
+//					size = len - offset;
+//			memcpy(buf, DEFAULT_FILE_CONTENT + offset, size);
+//			}else{
+//
+//			}
+			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");
 			break;
 		}
 	}
 }
+//int escribime_en(t_write* wwrite, nodo* nodo){
+//	if()//todo
+//}
+//bloque* dame_el_bloque_para_escribir_de(nodo* mi_nodo){
+//	if(no_tengo_bloques_asignados(mi_nodo) || el_ultimo){
+//		asignar_bloque(mi_nodo);
+//		return dame_el_bloque_para_escribir_de(mi_nodo);
+//	}else{
+//		return (bloque*)primer_bloque_de_disco+1+tam_de_bitmap+bloque_para_escribir(mi_nodo->punteros_indirectos);
+//	}
+//}
+
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
-	char** list = string_split(path_pedido,"/");
-	char* nom_mio = dame_el_nombre(list,1);
-	int numero_bloque = dame_el_numero_de_bloque_de_nodo(nom_mio);
-	if(numero_bloque == -1){
+	if(!dictionary_has_key(diccionario_de_path,path_pedido)){
 		return -1;
 	}
+	int nodo = dictionary_get(diccionario_de_path,path_pedido);
+	int bloque_padre;
+	if(nodo == 0){
+		bloque_padre=0;
+	}else{
+		bloque_padre = nodo+1+tam_de_bitmap;
+	}
 	for(int i = 0;i<1024;i++){
-		//que pasa si agrego el mio?
-		if(strcmp(tabla_de_nodos[i]->nombre_de_archivo,nom_mio)==0){
+		if(string_contains(tabla_de_nodos[i]->nombre_de_archivo,"/")){
 			continue;
 		}
-		if(tabla_de_nodos[i]->bloque_padre == numero_bloque){
+		if(tabla_de_nodos[i]->bloque_padre == bloque_padre){
 			list_add(entradas,tabla_de_nodos[i]->nombre_de_archivo);
 		}
 	}
@@ -469,27 +512,4 @@ void _readdir(int cliente){
 //	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
 //									las entradas de directorio o un error (si no existe devolver -ENOENT)
 
-}
-
-bool path_abs_es_valido (char* path){
-	uint32_t numero_de_bloque_de_mi_padre;
-	int numero_de_bloque_de_quien_dice_ser_mi_padre;
-	char** lista_paths = string_split(path,"/");
-
-	for(int i=0;lista_paths[i] != NULL;i++){
-		if (i==0){
-			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
-			numero_de_bloque_de_quien_dice_ser_mi_padre = 0;// el padre del primero que esta en la lista deberia ser "/",
-															// "bloque padre: cero si está en el directorio raíz" asi dice
-															// la consigna
-		}
-		else{
-			numero_de_bloque_de_mi_padre = dame_el_nodo_de(lista_paths[i])->bloque_padre;
-			numero_de_bloque_de_quien_dice_ser_mi_padre = dame_el_numero_de_bloque_de_nodo(lista_paths[i-1]);
-			if (numero_de_bloque_de_mi_padre != numero_de_bloque_de_quien_dice_ser_mi_padre){
-				return false;
-			}
-		}
-	}
-	return true;
 }
