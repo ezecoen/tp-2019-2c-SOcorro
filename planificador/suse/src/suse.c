@@ -15,20 +15,35 @@ int main(void) {
 
 	int servidor = crearServidor();
 
-	while(1){
-		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
-	}
+//	while(1){
+//		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
+//	}
+//
+//	pthread_t hiloDePrueba;
+//	if(pthread_create(&hiloDePrueba, NULL, (void*)funcionDePrueba, NULL) != 0){
+//		log_error(log, "Erroe creando el hilo de prueba");
+//	}
+
+//	pthread_detach(hiloDePrueba);
 
 	for(int i = 0; i<4; i++){
-		sem_wait(&cont_multiprogramacion);
-		crearHilo(i+1);
-		usleep(5000000);
-	}
+			sem_wait(&cont_multiprogramacion);
+			crearHilo(i+1);
+			usleep(5000000);
+		}
 
 	for(;;);
 
 	return 0;
 
+}
+
+void funcionDePrueba(){
+	for(int i = 0; i<4; i++){
+		sem_wait(&cont_multiprogramacion);
+		crearHilo(i+1);
+		usleep(5000000);
+	}
 }
 
 void iniciar_log(){

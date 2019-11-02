@@ -51,6 +51,7 @@ void crearHiloPlanificador();
 void crearHiloDeServidor();
 void escucharServidor(int);
 void ocupateDeEste(uint32_t);
+void funcionDePrueba();
 int crearServidor();
 int aceptarConexion(int);
 int randomEntre1y10(int);
