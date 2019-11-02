@@ -58,6 +58,7 @@ void iniciar_memoria_virtual(char* path_swap){
 	int fd = open(path_swap,O_RDWR,0);
 	//no funciona!!
 	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+	free(aux);
 
 }
 int log_2(double n){
@@ -837,6 +838,7 @@ void* muse_get(muse_get_t* datos){
 			memcpy(super_void+puntero,puntero_a_marco,configuracion->tam_pag);
 		}
 		memcpy(resultado_get,super_void+offset_inicial,datos->tamanio);
+		free(super_void);
 	}
 	return resultado_get;
 }
@@ -857,19 +859,6 @@ pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag) {
 	return pagina_buscada;
 }
 
-void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset){
-//hay que buscar la pagina, buscar el heap_metadata en el que esta la direccion buscada, ver el tamanio y si no se pasa=>traerla
-	_Bool numero_de_pagina(pagina* pag){
-		return pag->num_pagina == dir_pagina;
-	}
-	pagina* pagina_buscada = list_find(segmento_buscado->paginas,(void*)numero_de_pagina);
-	if(!pagina_buscada->presencia){//=> la traigo a memoria
-		ejecutar_clock_modificado();//hay q codearlo
-	}
-	//aca ya tendria en memoria la pagina. podria necesitar mas... hay q pensarlo
-
-	return NULL;
-}
 int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void* es lo que hay que pegar
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
@@ -1215,10 +1204,12 @@ void ocupate_de_este(int socket){
 					uint32_t tamanio_respuesta;
 					memcpy(&tamanio_respuesta,respuesta+4,4);
 					send(socket,respuesta,tamanio_respuesta,0);
+					//^^error de valgrind q no pude arreglar?? igual no rompe
 					printf("enviando resolucion del get a: %d\n",socket);
 					char* buff = malloc(20);
-					memcpy(buff,resultado_get,20);
-					printf("buff: %s\n",buff);
+					memcpy(buff,resultado_get,20);	//pa probar
+					printf("buff: %s\n",buff);		//pa probar
+					free(buff);						//pa probar
 					free(resultado_get);
 					free(respuesta);
 					muse_void_destroy(mv);

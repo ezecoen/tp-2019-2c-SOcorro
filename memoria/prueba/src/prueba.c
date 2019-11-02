@@ -17,11 +17,14 @@ int main(void) {
 		int direccion = muse_alloc(1000);
 		printf("Direccion recibida en prueba: %d\n",direccion);
 		int direccion1 = muse_alloc(500);
+		printf("Direccion recibida en prueba: %d\n",direccion1);
 		void* buffer = malloc(20);
 		char* print = malloc(20);
 		muse_get(buffer,direccion,20);
 		memcpy(print,buffer,20);
 		printf("Buffer en prueba: %s\n",print);
+		free(buffer);
+		free(print);
 		muse_close();
 	}
 	return EXIT_SUCCESS;
