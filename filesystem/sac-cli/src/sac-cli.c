@@ -183,8 +183,7 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 			recv(_socket,_respuesta,tam,MSG_WAITALL);
 			dirents = deserializar_lista_ent_dir(_respuesta,cant);
 			cargar_dirents_en_buffer(dirents, buf, filler, cant);
-			lista_ent_dir_destroy(dirents);
-			free(dirents);
+			list_destroy(dirents);
 			free(_respuesta);
 		}
 		else{
@@ -224,6 +223,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 //	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
 	int tam;
+	int fd;
 //
 	t_open* pedido = crear_open(path,fi->flags);
 	void* magic = serialiazar_open(pedido);
@@ -234,7 +234,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 
 
-	return 0;
+	return fd;
 }
 
 
@@ -346,7 +346,7 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
-//		.open = sac_open,
+		.open = sac_open,
 //		.opendir = sac_opendir,
 		.read = sac_read,
 		.mknod = sac_mknod,
@@ -385,14 +385,13 @@ static struct fuse_opt fuse_options[] = {
 
 int main(int argc, char *argv[]) {
 
-   /*============= MAIN DE PRUEBA =============/*
-
+   /*============= MAIN DE PRUEBA =============*/
 
 
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.43.213", 8080);
+	_socket = conectar_socket_a("127.0.0.1", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

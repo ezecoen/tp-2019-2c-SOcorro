@@ -258,11 +258,6 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	}
 	return lista;
 }
-void lista_ent_dir_destroy(t_list* lista){
-	for(int i = 1;i<lista->elements_count;i+=2){
-		free(lista[i]->head->data);
-	}
-}
 
 int tamanio_de_todos_las_ent_dir(t_list* lista){
 	int tam = 0;

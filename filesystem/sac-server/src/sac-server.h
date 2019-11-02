@@ -62,6 +62,11 @@ typedef struct{
 	void* argumentos;
 }operacion;
 
+typedef struct{
+	uint32_t fd;
+	uint32_t ptr_a_nodo;
+}t_filedes;
+
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
 int crear_servidor(int puerto);
@@ -91,6 +96,7 @@ char* dame_el_nombre(char** nombres,int quien);
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
+
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;
@@ -102,4 +108,5 @@ bloque* primer_bloque_de_disco;
 t_bitarray* bitarray;
 header* _header;
 nodo** tabla_de_nodos;
+t_list* tabla_file_descriptors;
 #endif /* SAC_SERVER_H_ */
