@@ -19,13 +19,13 @@ int main(void) {
 		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
 	}
 
-//	for(int i = 0; i<4; i++){
-//		sem_wait(&cont_multiprogramacion);
-//		crearHilo(i+1);
-//		usleep(5000000);
-//	}
-//
-//	for(;;);
+	for(int i = 0; i<4; i++){
+		sem_wait(&cont_multiprogramacion);
+		crearHilo(i+1);
+		usleep(5000000);
+	}
+
+	for(;;);
 
 	return 0;
 
