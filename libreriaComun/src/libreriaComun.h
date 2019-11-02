@@ -102,7 +102,6 @@ uint64_t timestamp();
 int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint32_t length_de_char_asterisco(char** arrays);
-
 void* serializar_path(const char* path, operaciones comando);
 char* deserializar_path (void* magic);
 void* serializar_lista_ent_dir(t_list* lista);
