@@ -25,6 +25,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <sys/time.h>
+#include <fcntl.h>
+
 
 typedef enum {
 	INIT_CLI,
@@ -37,6 +39,7 @@ typedef enum {
 	CHMOD,
 	UNLINK,
 	ERROR,
+	WRITE,
 	EXITOSO
 }operaciones;
 
@@ -55,6 +58,22 @@ typedef struct{
 	uint64_t modif_time; //8bytes
 	uint8_t tipo; //4bytes
 }t_getattr;
+
+typedef struct{
+	uint32_t size_path;
+	char* path;
+	int crear;
+	int crear_ensure;
+	int truncate;
+}t_open;
+
+typedef struct{
+	char* path;
+	uint32_t size_path;
+	char* buff;
+	uint32_t size_buff;
+	uint32_t offset;
+}t_write;
 
 /**
 * @NAME: char_length
@@ -90,5 +109,9 @@ void* serializar_lista_ent_dir(t_list* lista);
 t_list* deserializar_lista_ent_dir (void* magic, int tam_lista);
 int tamanio_de_todos_las_ent_dir(t_list* lista);
 char* recibir_path(int socket_cliente);
+t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo);
+void* serializar_getattr(t_getattr* stat);
+t_getattr* deserializar_getattr(void* magic);
+t_open* crear_open(char* path, int flags);
 
 #endif /* LIBRERIA_COMUN_H_ */

@@ -2,60 +2,63 @@
 
 int main(int argc, char **argv) {
 //	INICIANDO
-	printf("argv0 = %s\n",argv[0]);
-	printf("argv1 = %s\n",argv[1]);
-	path_de_config = string_duplicate(argv[1]);
-	path_swap = string_duplicate(argv[0]);
+//	printf("argv0 = %s\n",argv[0]);
+//	printf("argv1 = %s\n",argv[1]);
+	char* path_de_config = string_duplicate(argv[1]);
+	char* path_swap = string_duplicate(argv[0]);
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
 	char* sample = string_new();
 	string_append(&sample,"hola sample");
-	if(swap != MAP_FAILED){
-		memcpy(swap,sample,1000);
-		printf("%s",(char*)swap);
-	}
-	perror("error: ");
-	return 0;
+	memcpy(upcm+5,sample,strlen(sample)+1);
+
+//	if(swap != MAP_FAILED){
+//		memcpy(swap,sample,1000);
+//		printf("%s",(char*)swap);
+//	}
+//	perror("error: ");
+//	return 0;
 
 //	programa_t* programa = malloc(sizeof(programa_t));
 //	programa->tabla_de_segmentos = list_create();
 //	programa->id_programa = string_new();
-//	string_append(&programa->id_programa,"asdasd");
+//	string_append(&programa->id_programa,"prog0");
 //	list_add(tabla_de_programas,programa);
 //
 //	programa_t* programa1 = malloc(sizeof(programa_t));
 //	programa1->tabla_de_segmentos = list_create();
 //	programa1->id_programa = string_new();
-//	string_append(&programa1->id_programa,"asdasd1");
+//	string_append(&programa1->id_programa,"prog1");
 //	list_add(tabla_de_programas,programa1);
-
+//
 //	programa_t* programa2 = malloc(sizeof(programa_t));
 //	programa2->tabla_de_segmentos = list_create();
 //	programa2->id_programa = string_new();
-//	string_append(&programa2->id_programa,"asdasd2");
+//	string_append(&programa2->id_programa,"prog2");
 //	list_add(tabla_de_programas,programa2);
 //
-//	//	prueba creo segmento 1
-//	muse_alloc_t* mat = crear_muse_alloc(100,"asdasd");
+////	prueba creo segmento 1
+//	muse_alloc_t* mat = crear_muse_alloc(4086,"prog0");
 //	int result = muse_alloc(mat);
-//	printf("\nDireccion virtual de %d|%d|%d: %d",0,0,0,result);
+//	printf("\nDireccion virtual de mat: %d",result);
 //	fflush(stdout);
-////
-////	//	prueba creo segmento 2
-//	muse_alloc_t* mat1 = crear_muse_alloc(500,"asdasd1");
+////	prueba creo segmento 2
+//	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog1");
 //	int result1 = muse_alloc(mat1);
-//	printf("\nDireccion virtual de %d|%d|%d: %d",1,0,0,result1);
-////	//	prueba creo segmento 3
-//	muse_alloc_t* mat2 = crear_muse_alloc(250,"asdasd");
+//	printf("\nDireccion virtual de mat1: %d",result1);
+//	fflush(stdout);
+////	prueba creo segmento 3
+//	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog2");
 //	int result2 = muse_alloc(mat2);
-//	printf("\nDireccion virtual de %d|%d|%d: %d",2,0,0,result2);
-////	//	prueba uso segmento 3
-//	muse_alloc_t* mat3 = crear_muse_alloc(1000,"asdasd1");
+//	printf("\nDireccion virtual de mat2: %d",result2);
+//	fflush(stdout);
+////	prueba uso segmento 3
+//	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog2");
 //	int result3 = muse_alloc(mat3);
-//	printf("\nDireccion virtual de %d|%d|%d: %d\n",2,18,0,result3);
-//
-//
+//	printf("\nDireccion virtual de mat3: %d",result3);
+//	fflush(stdout);
+
 ////	Pruebas clock modificado
 //	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
 //		_bit->ocupado = true;
@@ -71,9 +74,9 @@ int main(int argc, char **argv) {
 ////	_bit2->bit_uso = false;
 ////	_bit2->bit_modificado = true;
 //	posicion_puntero_clock = 4;
-//	t_bit_memoria* _b = ejecutar_clock_modificado();
-//	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->bit_position,_b->bit_uso,_b->bit_modificado);
-	return 0;
+//	t_bit_memoria* _b = ejecutar_clock_modificado(list_create());
+//	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->posicion,_b->bit_uso,_b->bit_modificado);
+//	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -85,38 +88,34 @@ int main(int argc, char **argv) {
 void init_estructuras(char* path){
 	iniciar_memoria_virtual(path);
 	upcm = malloc(configuracion->tam_mem);
-//	swap = malloc(configuracion->tam_swap);//provisorio
+	swap = malloc(configuracion->tam_swap);//provisorio
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
+	tabla_de_mapeo = list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
 	CANT_PAGINAS_MEMORIA_VIRTUAL = configuracion->tam_swap/configuracion->tam_pag;
-
-	DIR_TAM_DESPLAZAMIENTO = log_2((double)configuracion->tam_pag);
-	DIR_TAM_DIRECCION = 32;
-	DIR_TAM_PAGINA = DIR_TAM_DIRECCION - DIR_TAM_DESPLAZAMIENTO;
 
 	init_bitarray();
 	posicion_puntero_clock = 0;
 }
-void iniciar_memoria_virtual(char* path){
-	log_info(logg,"almost");
-	int i =strlen(path);
+void iniciar_memoria_virtual(char* path_swap){
+	int i =strlen(path_swap);
 	for(;i>=0;i--)
 	{
-		if (path[i]=='/')
+		if (path_swap[i]=='/')
 		{
 			break;
 		}
 	}
-	char* aux = string_substring_until(path,i);
+	char* aux = string_substring_until(path_swap,i);
 	path_swap = string_new();
 	string_append(&path_swap,aux);
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-	int fd = fopen(path_swap,"w+");
-
-	swap = mmap(NULL,configuracion->tam_swap,PROT_READ|PROT_WRITE,MAP_FILE|MAP_PRIVATE,fd,0);
+	int fd = open(path_swap,O_RDWR,0);
+	//no funciona!!
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 
 }
 int log_2(double n){
@@ -227,22 +226,23 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				pag->num_pagina = i;
 				pag->presencia = true;
 				pag->bit_marco = asignar_marco_nuevo();
+				pag->bit_swap = NULL;
 				if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 					heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 					heap_nuevo->is_free = false;
 					heap_nuevo->size = datos->tamanio;
-					void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+					void* puntero_a_marco = obtener_puntero_a_marco(pag);
 					memcpy(puntero_a_marco,heap_nuevo,sizeof(heap_metadata));
 					free(heap_nuevo);
 				}
 				if(i == cantidad_de_paginas-2){
 					if(hay_que_entrar_en_la_anteultima_pag){
-						void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+						void* puntero_a_marco = obtener_puntero_a_marco(pag);
 						memcpy(puntero_a_marco+offset_heap,heap_al_final,heap_en_ante_ultima_pagina);
 					}
 				}
 				if(i == cantidad_de_paginas-1){
-					void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+					void* puntero_a_marco = obtener_puntero_a_marco(pag);
 					if(hay_que_entrar_en_la_anteultima_pag){
 						memcpy(puntero_a_marco,heap_al_final+heap_en_ante_ultima_pagina,heap_en_ultima_pagina);
 					}
@@ -291,11 +291,11 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				int tamanio_a_copiar = configuracion->tam_pag-offset_inicial;
 
 				pagina* pagina_inicial = list_get(segmento_buscado->paginas,num_pagina_inicial);
-				void* marco_inicial = obtener_puntero_a_marco(pagina_inicial->bit_marco);
+				void* marco_inicial = obtener_puntero_a_marco(pagina_inicial);
 				memcpy(marco_inicial+offset_inicial,heap_inicial,tamanio_a_copiar);
 
 				pagina* pagina_inicial2 = list_get(segmento_buscado->paginas,num_pagina_inicial+1);
-				void* marco_inicial2 = obtener_puntero_a_marco(pagina_inicial2->bit_marco);
+				void* marco_inicial2 = obtener_puntero_a_marco(pagina_inicial2);
 				memcpy(marco_inicial2,heap_inicial+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
 
 				direccion_return = segmento_buscado->base_logica + pagina_inicial2->num_pagina*configuracion->tam_pag
@@ -304,7 +304,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			else{
 				//no queda en la mitad :D
 				pagina* pagina_inicial = list_get(segmento_buscado->paginas,num_pagina_inicial);
-				void* marco_inicial = obtener_puntero_a_marco(pagina_inicial->bit_marco);
+				void* marco_inicial = obtener_puntero_a_marco(pagina_inicial);
 				memcpy(marco_inicial+offset_inicial,heap_inicial,sizeof(heap_metadata));
 				direccion_return = segmento_buscado->base_logica + pagina_inicial->num_pagina*configuracion->tam_pag
 						+ offset_inicial+sizeof(heap_metadata);
@@ -324,17 +324,17 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				int tamanio_a_copiar = configuracion->tam_pag-offset_final;
 
 				pagina* pagina_final = list_get(segmento_buscado->paginas,num_pagina_final);
-				void* marco_final = obtener_puntero_a_marco(pagina_final->bit_marco);
+				void* marco_final = obtener_puntero_a_marco(pagina_final);
 				memcpy(marco_final+offset_final,heap_final,tamanio_a_copiar);
 
 				pagina* pagina_final2 = list_get(segmento_buscado->paginas,num_pagina_final+1);
-				void* marco_final2 = obtener_puntero_a_marco(pagina_final2->bit_marco);
+				void* marco_final2 = obtener_puntero_a_marco(pagina_final2);
 				memcpy(marco_final2,heap_final+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
 			}
 			else{
 				//no queda en la mitad :D
 				pagina* pagina_final = list_get(segmento_buscado->paginas,num_pagina_final);
-				void* marco_final = obtener_puntero_a_marco(pagina_final->bit_marco);
+				void* marco_final = obtener_puntero_a_marco(pagina_final);
 				memcpy(marco_final+offset_inicial,heap_final,sizeof(heap_metadata));
 			}
 			heap_lista_encontrado->espacio = datos->tamanio;
@@ -349,7 +349,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 			free(heap_inicial);
 			free(heap_final);
-			//HICE HASTA ACA IGUAL HAY QUE REVISAR!!!!!!!!!!!!!!!!!!!
 		}
 		else{
 			//no entra en ningun segmento existente
@@ -378,10 +377,11 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					nuevo_ultimo_heap->size = espacio_libre_ultima_pag;
 
 					for(int i = 0;i<paginas_necesarias;i++){
-						pagina* pagina_nueva = malloc(sizeof(pagina*));
+						pagina* pagina_nueva = malloc(sizeof(pagina));
 						pagina_nueva->num_pagina = ultima_pagina->num_pagina+1+i;
 						pagina_nueva->presencia = true;
-						pagina_nueva->bit_marco = asignar_marco_nuevo();
+						pagina_nueva->bit_marco = asignar_marco_nuevo(tabla_de_segmentos);
+						pagina_nueva->bit_swap = NULL;
 						list_add(ultimo_segmento->paginas,pagina_nueva);
 
 					} //termina el for
@@ -395,22 +395,22 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 					//verificar donde queda el heap nuevo
 					int nuevo_offset_heap_al_marco = heap_lista_nuevo->direccion_heap_metadata%configuracion->tam_pag;
-					int num_pagina_final = redondear_double_arriba((double)heap_lista_nuevo->direccion_heap_metadata / configuracion->tam_pag);
+					int num_pagina_final = heap_lista_nuevo->direccion_heap_metadata / configuracion->tam_pag;
 					if(nuevo_offset_heap_al_marco > configuracion->tam_pag-sizeof(heap_metadata)){
 						//significa que quedo en el medio
 						int tamanio_a_copiar = configuracion->tam_pag-nuevo_offset_heap_al_marco;
 						pagina* pagina_final = list_get(ultimo_segmento->paginas,num_pagina_final);
-						void* marco_final = obtener_puntero_a_marco(pagina_final->bit_marco);
+						void* marco_final = obtener_puntero_a_marco(pagina_final);
 						memcpy(marco_final+nuevo_offset_heap_al_marco,nuevo_ultimo_heap,tamanio_a_copiar);
 
 						pagina* pagina_final2 = list_get(ultimo_segmento->paginas,num_pagina_final+1);
-						void* marco_final2 = obtener_puntero_a_marco(pagina_final2->bit_marco);
+						void* marco_final2 = obtener_puntero_a_marco(pagina_final2);
 						memcpy(marco_final2,nuevo_ultimo_heap+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
 					}
 					else{
 							//no quedo en el medio
 						pagina* pagina_final = list_get(ultimo_segmento->paginas,num_pagina_final);
-						void* puntero_a_marco_nueva_ultima_pagina = obtener_puntero_a_marco(pagina_final->bit_marco);
+						void* puntero_a_marco_nueva_ultima_pagina = obtener_puntero_a_marco(pagina_final);
 						memcpy(puntero_a_marco_nueva_ultima_pagina+nuevo_offset_heap_al_marco,nuevo_ultimo_heap,sizeof(heap_metadata));
 					}
 
@@ -421,17 +421,17 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						//queda en el medio
 						int tamanio_a_copiar = configuracion->tam_pag-viejo_offset_heap_al_marco;
 						pagina* pagina_final = list_get(ultimo_segmento->paginas,num_pagina_final_vieja);
-						void* marco_final = obtener_puntero_a_marco(pagina_final->bit_marco);
+						void* marco_final = obtener_puntero_a_marco(pagina_final);
 						memcpy(marco_final+viejo_offset_heap_al_marco,ultimo_heap,tamanio_a_copiar);
 
 						pagina* pagina_final2 = list_get(ultimo_segmento->paginas,num_pagina_final_vieja+1);
-						void* marco_final2 = obtener_puntero_a_marco(pagina_final2->bit_marco);
+						void* marco_final2 = obtener_puntero_a_marco(pagina_final2);
 						memcpy(marco_final2,ultimo_heap+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
 					}
 					else{
 						//no queda en el medio
 						pagina* pagina_final = list_get(ultimo_segmento->paginas,num_pagina_final_vieja);
-						void* puntero_a_marco_vieja_ultima_pagina = obtener_puntero_a_marco(pagina_final->bit_marco);
+						void* puntero_a_marco_vieja_ultima_pagina = obtener_puntero_a_marco(pagina_final);
 						memcpy(puntero_a_marco_vieja_ultima_pagina+viejo_offset_heap_al_marco,ultimo_heap,sizeof(heap_metadata));
 					}
 					direccion_return = ultimo_segmento->base_logica+sizeof(heap_metadata)+lista_ultimo_heap->direccion_heap_metadata;
@@ -488,23 +488,24 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						pagina* pag = malloc(sizeof(pagina));
 						pag->num_pagina = i;
 						pag->presencia = true;
-						pag->bit_marco = asignar_marco_nuevo();
+						pag->bit_marco = asignar_marco_nuevo(tabla_de_segmentos);
+						pag->bit_swap = NULL;
 						if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 							heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 							heap_nuevo->is_free = false;
 							heap_nuevo->size = datos->tamanio;
-							void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+							void* puntero_a_marco = obtener_puntero_a_marco(pag);
 							memcpy(puntero_a_marco,heap_nuevo,sizeof(heap_metadata));
 							free(heap_nuevo);
 						}
 						if(i == cantidad_de_paginas-2){
 							if(hay_que_entrar_en_la_anteultima_pag){
-								void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+								void* puntero_a_marco = obtener_puntero_a_marco(pag);
 								memcpy(puntero_a_marco+offset_heap,heap_al_final,heap_en_ante_ultima_pagina);
 							}
 						}
 						if(i == cantidad_de_paginas-1){//se agrega el heap siguiente al final
-							void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
+							void* puntero_a_marco = obtener_puntero_a_marco(pag);
 							if(hay_que_entrar_en_la_anteultima_pag){
 								memcpy(puntero_a_marco,heap_al_final+heap_en_ante_ultima_pagina,heap_en_ultima_pagina);
 							}
@@ -517,7 +518,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					free(heap_al_final);
 					segmento_nuevo->paginas = paginas;
 					segmento_nuevo->num_segmento = list_size(tabla_de_segmentos);
-					segmento_nuevo->base_logica = base_logica_segmento_nuevo(ultimo_segmento);
+					segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 					list_add(tabla_de_segmentos,segmento_nuevo);
 					direccion_return = segmento_nuevo->base_logica+sizeof(heap_metadata);//es el principio del segmento nuevo
 				}
@@ -542,24 +543,25 @@ void* list_last_element(t_list* lista){
 	return (list_get(lista,lista->elements_count-1));
 }
 
-uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior){
+uint32_t base_logica_segmento_nuevo(t_list* tabla_de_segmentos){
+	segmento* segmento_anterior = list_find(tabla_de_segmentos,(void*)list_last_element);
+	//revisar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!??????????
 	return segmento_anterior->base_logica+segmento_anterior->tamanio;
 }
 
-pagina* ultima_pagina_por_numero(segmento* seg)
-{	pagina* pag=NULL;
+pagina* ultima_pagina_por_numero(segmento* seg){
+	pagina* pag=NULL;
 	if(list_is_empty(seg->paginas)){
-		return pag; //vacia?
+			return pag; //vacia?
 		}
 	pag->num_pagina=0;
 	for(int i=0;i<list_size(seg->paginas)-1;i++) {
 	pagina* p = list_get(seg->paginas,i);
-		if(p->num_pagina > pag->num_pagina)
-		{
+		if(p->num_pagina > pag->num_pagina){
 			pag = p;
 		}
 	}
-return pag;
+	return pag;
 }
 
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio){
@@ -587,8 +589,21 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	//return pag->ultimo_heap_metadata_libre!=-1;
 	//si es != -1 entonces es la ultima pagina del segmento
 //}
-void* obtener_puntero_a_marco(t_bit_memoria* bit_marco){
-	return upcm + bit_marco->bit_position * configuracion->tam_pag;
+void* obtener_puntero_a_marco(pagina* pag){
+	//fijarse si esta en memoria o en swap
+	if(pag->presencia == false){
+		void* pagina_a_sacar = malloc(configuracion->tam_pag);
+		memcpy(pagina_a_sacar,swap+pag->bit_swap->posicion*configuracion->tam_pag,configuracion->tam_pag);
+		//copio lo que esta en swap a un puntero temporal
+		pag->bit_swap->ocupado = false;//saco el bit del bitmap_memoria_virutal
+		pag->bit_swap = NULL;
+		t_bit_memoria* _bit = ejecutar_clock_modificado();
+		pag->bit_marco = _bit;
+		pag->presencia = true;
+		//ahora tengo q pegar la pagina en memoria
+		memcpy(upcm+_bit->posicion*configuracion->tam_pag,pagina_a_sacar,configuracion->tam_pag);
+	}
+	return upcm + pag->bit_marco->posicion * configuracion->tam_pag;
 }
 
 t_bit_memoria* asignar_marco_nuevo(){
@@ -602,7 +617,9 @@ t_bit_memoria* asignar_marco_nuevo(){
 	return bit_libre;
 }
 t_bit_memoria* ejecutar_clock_modificado(){
-	//(uso,modificado) hay que pensar como hacer para mover el "puntero" del algoritmo
+	//si lo que quiero es poner en memoria un bit que esta en swap, primero tengo que
+	//sacar el bit de swap asi cuando se ejecuta el clock tengo lugar para pasarlo a swap
+	//(uso,modificado)
 	//primero hay que buscar si hay alguna pagina de memoria en (0,0) -> en el bitarray_memoria
 	//si no se encuentra hay que buscar el (0,1) y pasando los (1,x) a (0,x)
 	//si no se encuentra repetir los pasos devuelta
@@ -611,11 +628,23 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	if(bit_return==NULL){
 		bit_return = buscar_0_1();
 		if(bit_return == NULL){
-			bit_return = ejecutar_clock_modificado();
+			bit_return = ejecutar_clock_modificado_2vuelta();
 		}
 	}
-	bit_return->bit_modificado = false;//lo dejo en (0,0) listo para usar
-	//falta pasar la pagina a sacar a area de swap!!
+
+	pagina* pagina_a_sacar = buscar_pagina_por_bit(bit_return);
+	pagina_a_sacar->bit_swap = pasar_marco_a_swap(pagina_a_sacar->bit_marco);
+	pagina_a_sacar->bit_marco = NULL;
+	pagina_a_sacar->presencia = false;
+	bit_return->bit_modificado = false;//lo dejo en (1,0) listo para usar
+	bit_return->bit_uso = true;
+	return bit_return;
+}
+t_bit_memoria* ejecutar_clock_modificado_2vuelta(){
+	t_bit_memoria* bit_return = buscar_0_0();
+	if(bit_return==NULL){
+		bit_return = buscar_0_1();
+	}
 	return bit_return;
 }
 t_bit_memoria* buscar_0_0(){
@@ -625,6 +654,7 @@ t_bit_memoria* buscar_0_0(){
 	for(int i = 0; i < bitarray->size_memoria-puntero_al_iniciar; i++){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(!_bit->bit_modificado && !_bit->bit_uso){
+			posicion_puntero_clock ++;
 			return _bit;
 		}
 		posicion_puntero_clock ++;
@@ -645,6 +675,7 @@ t_bit_memoria* buscar_0_1(){
 	for(int i = 0; i < bitarray->size_memoria-puntero_al_iniciar; i++){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(_bit->bit_modificado && !_bit->bit_uso){
+			posicion_puntero_clock ++;
 			return _bit;
 		}
 		if(_bit->bit_uso){
@@ -664,26 +695,51 @@ t_bit_memoria* buscar_0_1(){
 	posicion_puntero_clock = puntero_al_iniciar;
 	return bit_nulo;
 }
-
-void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata)
-{	//verificar donde queda el heap nuevo
+pagina* buscar_pagina_por_bit(t_bit_memoria* bit){
+	pagina* pagina_return;
+	void buscar_bit(pagina* pag){
+		if(pag->presencia){
+			if(pag->bit_marco->posicion == bit->posicion){
+				pagina_return = pag;
+			}
+		}
+	}
+	void iteracion2(segmento* seg){
+		list_iterate(seg->paginas,(void*)buscar_bit);
+	}
+	void iteracion(programa_t* programa){
+		list_iterate(programa->tabla_de_segmentos,(void*)iteracion2);
+	}
+	list_iterate(tabla_de_programas,(void*)iteracion);
+	return pagina_return;
+}
+t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit){
+	void* puntero_a_marco = upcm + bit->posicion * configuracion->tam_pag;
+	t_bit_swap* bit_swap = bit_libre_memoria_virtual();
+	void* puntero_a_swap = swap + bit_swap->posicion * configuracion->tam_pag;
+	memcpy(puntero_a_swap,puntero_a_marco,configuracion->tam_pag);
+	bit_swap->ocupado = true;
+	return bit_swap;
+}
+void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata){
+	//verificar donde queda el heap nuevo
 	int nuevo_offset_heap_al_marco = heap_de_lista->direccion_heap_metadata%configuracion->tam_pag;
 	int num_pagina_del_heap = heap_de_lista->direccion_heap_metadata / configuracion->tam_pag;
 	if(nuevo_offset_heap_al_marco > configuracion->tam_pag-sizeof(heap_metadata)){
 		//significa que quedo en el medio
 		int tamanio_a_copiar = configuracion->tam_pag-nuevo_offset_heap_al_marco;
 		pagina* pagina_de_heap = list_get(seg->paginas,num_pagina_del_heap);
-		void* marco1 = obtener_puntero_a_marco(pagina_de_heap->bit_marco);
+		void* marco1 = obtener_puntero_a_marco(pagina_de_heap);
 		memcpy(marco1+nuevo_offset_heap_al_marco,nuevo_heap_metadata,tamanio_a_copiar);
 
 		pagina* pagina_de_heap2 = list_get(seg->paginas,num_pagina_del_heap+1);
-		void* marco2 = obtener_puntero_a_marco(pagina_de_heap2->bit_marco);
+		void* marco2 = obtener_puntero_a_marco(pagina_de_heap2);
 		memcpy(marco2,nuevo_heap_metadata+tamanio_a_copiar,sizeof(heap_metadata)-tamanio_a_copiar);
 	}
 	else{
 			//no quedo en el medio
 		pagina* pagina_del_heap = list_get(seg->paginas,num_pagina_del_heap);
-		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap->bit_marco);
+		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap);
 		memcpy(puntero_a_marco+nuevo_offset_heap_al_marco,nuevo_heap_metadata,sizeof(heap_metadata));
 	}
 }
@@ -694,14 +750,21 @@ int muse_free(muse_free_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
-		return 0;
+		return -1;
 	}
 
+	if(segmento_buscado->mmapeado){
+			//si esta mmpapeado, no se puede liberar
+			return -1;
+		}
+
+
 	heap_lista* heap_lista_encontrado = NULL;
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 		//por cada heap_lista, ver si es el heap que busco
 		heap_lista* heap_lista_aux = list_get(segmento_buscado->info_heaps,i);
-		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == datos->direccion) {
+		if(heap_lista_aux->direccion_heap_metadata+sizeof(heap_metadata) == direccion_al_segmento) {
 			heap_lista_encontrado = heap_lista_aux;
 			heap_lista_encontrado->is_free = true;
 			break;
@@ -711,14 +774,13 @@ int muse_free(muse_free_t* datos){
 		//no se encontro la direccion que se quiere liberar
 		//segmentation fault??
 		//muse segmentation f
-		return 0;
+		return -1;
 	}
 	//hay que reemplazar el heap posta,
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 	heap_metadata_nuevo->is_free = true;
 	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
 	reemplazar_heap_en_memoria(heap_lista_encontrado,segmento_buscado,heap_metadata_nuevo);
-	//hay que ver que este la pagina en memoria ??
 
 	//recorro todos los heaps_lista viendo cuales tengo que juntar
 	t_list* heaps_lista =segmento_buscado->info_heaps;
@@ -766,34 +828,34 @@ int muse_free(muse_free_t* datos){
 		heap_de_lista->indice=i;
 	}
 
-//	retorna 0 si falla
+//	retorna -1 si falla
 	return 1;
 }
 
 void* muse_get(muse_get_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
+	void* resultado_get = NULL;
 	if(segmento_buscado!=NULL){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
-		int direccion_final = datos->direccion+datos->tamanio;
+		int direccion_final = direccion_al_segmento+datos->tamanio;
 		int offset_final = direccion_final % configuracion->tam_pag;
-		int offset_inicial = datos->tamanio % configuracion->tam_pag;
+		int offset_inicial = direccion_al_segmento % configuracion->tam_pag;
 		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
 		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
-		int pagina_inicial = datos->direccion / configuracion->tam_pag;
+		int pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
+		resultado_get = malloc(datos->tamanio);
 		void* super_void = malloc(tamanio_de_todas_las_paginas);
 		int puntero = 0;
 		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
-			void* puntero_a_marco = obtener_puntero_a_marco(pag->bit_marco);
-			memcpy(super_void+puntero,puntero_a_marco,sizeof(configuracion->tam_pag));
+			void* puntero_a_marco = obtener_puntero_a_marco(pag);
+			memcpy(super_void+puntero,puntero_a_marco,configuracion->tam_pag);
 		}
-		return super_void;
+		memcpy(resultado_get,super_void+offset_inicial,datos->tamanio);
 	}
-	else{
-		//seg fault
-		return NULL;
-	}
+	return resultado_get;
 }
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
 	_Bool buscar_segmento_por_direccion(segmento* seg){
@@ -825,16 +887,174 @@ void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint
 
 	return NULL;
 }
-int muse_cpy(muse_cpy_t* datos){
-//	devuelve 0 si falla
+int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void* es source
+	// de la direccion solo me importa el tamano y los datos
+
+
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado==NULL){
+		//no existe el segmento buscado o se paso del segmento
+		return -1;
+	}
+
+	// del segundo heap me importa si tiene espacio
+	heap_lista* heap_dst = NULL;
+	heap_lista* heap_lista_siguiente = NULL;
+	//la dire es abs
+	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
+	if(list_size(segmento_buscado->info_heaps)>0){
+		for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
+			// por cada heap_lista, veo si la direccion que me mandaron
+			// pertenece a ese ->datos
+			heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
+			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) < direccion_al_segmento &&
+					heap_aux->direccion_heap_metadata+sizeof(heap_metadata)+heap_aux->espacio
+					> direccion_al_segmento) {
+				//significa que la dire nueva esta entre un heap y el siguiente
+				heap_dst=heap_aux;
+				//habria que corroborar que no fuera el ultimo !!
+				heap_lista_siguiente = list_get(segmento_buscado->info_heaps,i+1);
+				break;
+			}
+			//no esta en esta
+		}
+	}
+	if(heap_dst == NULL){
+	//no se encontro la direccion que se quiere liberar
+		return -1;
+	}
+	if(heap_dst->espacio<datos->size_paquete) {
+	//no entra
+		return -1;
+	}
+	int offset_al_heap = direccion_al_segmento-heap_dst->direccion_heap_metadata;
+	if(offset_al_heap+datos->size_paquete>heap_lista_siguiente->direccion_heap_metadata) {
+		//va a pisar el heap_lista_siguiente
+		return -1;
+	}
+
+	//
+
 	return 0;
 }
+
+/**
+* Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes
+* el archivo del `path` dado.
+* @param path Path a un archivo en el FileSystem de MUSE a mappear.
+* @param length Cantidad de bytes de memoria a usar para mappear el archivo.
+* @param flags
+*          MAP_PRIVATE     Solo un proceso/hilo puede mappear el archivo.
+*          MAP_SHARED      El segmento asociado al archivo es compartido.
+* @return Retorna la posición de memoria de MUSE mappeada.
+* @note: Si `length` sobrepasa el tamaño del archivo, toda extensión deberá estar llena de "\0".
+* @note: muse_free no libera la memoria mappeada. @see muse_unmap
+*/
 int muse_map(muse_map_t* datos){
-	return 0;
+	//espacio_disponible
+	if(lugar_disponible>=datos->tamanio){
+		lugar_disponible -= datos->tamanio;
+		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+		segmento* segmento_nuevo = malloc(sizeof(segmento));
+		segmento_nuevo->num_segmento = tabla_de_segmentos->elements_count;
+		segmento_nuevo->mmapeado = true;
+		segmento_nuevo->tamanio = datos->tamanio;
+		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
+
+		//list_add(segmento_nuevo->info_heaps,heap_nuevo);
+
+		if(datos->flag != MAP_PRIVATE){
+			segmento_nuevo->compartido = true;
+			t_list* tabla_de_paginas = buscar_mapeo_existente(datos->path);
+			if(tabla_de_paginas!=NULL){
+				//comparto la tabla de paginas :D
+				segmento_nuevo->paginas = tabla_de_paginas;
+				list_add(tabla_de_segmentos,segmento_nuevo);
+				return segmento_nuevo->base_logica;
+			}
+		}
+		//tengo que crear el el mapeo de cero
+		t_list* tabla_de_paginas = list_create();
+		int cantidad_de_paginas = redondear_double_arriba((double)datos->tamanio/configuracion->tam_pag);
+		int bytes_totales = cantidad_de_paginas * configuracion->tam_pag;
+		int padding = bytes_totales-datos->tamanio;
+		void* void_padding = generar_padding(padding);
+
+		void* buffer = malloc(bytes_totales);
+		FILE* archivo = fopen(datos->path,"rb");
+		fread(buffer,datos->tamanio,1,archivo);
+		fclose(archivo);
+		int puntero = 0;
+		for(int i = 0; i < cantidad_de_paginas;
+				i++,puntero+=configuracion->tam_pag,bytes_totales-=configuracion->tam_pag){
+			pagina* pag = malloc(sizeof(pagina));
+			pag->num_pagina = i;
+			pag->bit_marco = asignar_marco_nuevo();
+			pag->presencia = true;
+			pag->bit_swap = NULL;
+			void* puntero_a_marco = obtener_puntero_a_marco(pag);
+			if(bytes_totales >= configuracion->tam_pag){
+				memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag);
+			}
+			else{
+				if(bytes_totales != 0){
+					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag-padding);
+					memcpy(puntero_a_marco+configuracion->tam_pag-padding,void_padding,padding);
+				}
+			}
+			list_add(tabla_de_paginas,pag);
+		}
+
+		list_add(tabla_de_segmentos,segmento_nuevo);
+		return segmento_nuevo->base_logica;
+	}
+	else{
+		//no hay lugar
+		return -1;
+	}
 }
+t_list* buscar_mapeo_existente(char* path){
+	//me fijo si ya existe ese mapeo, si ya existe y es MAP_SHARED,
+	//me traigo un puntero a su tabla de pags y aumento el contador en el segmento
+	t_list* tabla_de_paginas = NULL;
+	void iteracion(mapeo_t* mapeo){
+		if(string_equals_ignore_case(mapeo->path,path)){
+			tabla_de_paginas = mapeo->paginas;
+			mapeo->contador++;
+		}
+	}
+	list_iterate(tabla_de_mapeo,(void*)iteracion);
+	return tabla_de_paginas;
+}
+void* generar_padding(int padding){
+	void* void_return = malloc(padding);
+	char* barra0 = malloc(1);
+	char xd = '\0';
+	memcpy(barra0,&xd,1);
+	for(int i = 0;i<padding;i++){
+		memcpy(void_return,(void*)barra0,1);
+	}
+	return void_return;
+}
+/**
+* Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
+* @param addr Dirección a memoria mappeada.
+* @param len Cantidad de bytes a escribir.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+* @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
+*/
 int muse_sync(muse_sync_t* datos){
 	return 0;
 }
+/**
+* Borra el mappeo a un archivo hecho por muse_map.
+* @param dir Dirección a memoria mappeada.
+* @param
+* @note Esto implicará que todas las futuras utilizaciones de direcciones basadas en `dir` serán accesos inválidos.
+* @note Solo se deberá cerrar el archivo mappeado una vez que todos los hilos hayan liberado la misma cantidad de muse_unmap que muse_map.
+* @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
+*/
 int muse_unmap(muse_unmap_t* datos){
 	return 0;
 }
@@ -906,7 +1126,7 @@ void ocupate_de_este(int socket){
 	char* id_cliente;
 	void* respuesta;
 	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
-		printf("Nuevo pedido de %d\n",socket);
+		printf("- Nuevo pedido de %d\n",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
 				//recibo int pid, crep el char* id y se lo mando
@@ -961,8 +1181,8 @@ void ocupate_de_este(int socket){
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
 				resultado = muse_free(dmft);
-				if(resultado == 0){
-					operacion_respuesta = MUSE_ERROR;
+				if(resultado == -1){
+					operacion_respuesta = MUSE_SEG_FAULT;
 				}
 				else{
 					operacion_respuesta = MUSE_EXITOSO;
@@ -987,6 +1207,9 @@ void ocupate_de_este(int socket){
 					memcpy(&tamanio_respuesta,respuesta+4,4);
 					send(socket,respuesta,tamanio_respuesta,0);
 					printf("enviando resolucion del get a: %d\n",socket);
+					char* buff = malloc(20);
+					memcpy(buff,resultado_get,20);
+					printf("buff: %s\n",buff);
 					free(resultado_get);
 					free(respuesta);
 					muse_void_destroy(mv);
@@ -1080,7 +1303,7 @@ void init_bitarray(){
 	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA; i++){
 		t_bit_memoria* bit = malloc(sizeof(t_bit_memoria));
 		bit->ocupado = false;
-		bit->bit_position = i;
+		bit->posicion = i;
 		bit->bit_modificado = false;
 		bit->bit_uso = 0;
 		list_add(bitarray->bitarray_memoria,bit);
@@ -1089,7 +1312,7 @@ void init_bitarray(){
 	bitarray->bitarray_memoria_virtual = list_create();
 	for(uint32_t i = 0; i<CANT_PAGINAS_MEMORIA_VIRTUAL; i++){
 		t_bit_swap* bit = malloc(sizeof(t_bit_swap));
-		bit->bit_position = i;
+		bit->posicion = i;
 		bit->ocupado = false;
 		list_add(bitarray->bitarray_memoria_virtual,bit);
 	}

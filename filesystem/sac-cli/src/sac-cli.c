@@ -1,6 +1,7 @@
 #include "sac-cli.h"
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
 #include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
+#include "dirent.h"
 
 
 
@@ -83,6 +84,10 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0 || strcmp(path,"/cmov") == 0){
+		return -ENOENT;
+	}
+
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -106,10 +111,13 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		time.tv_sec = (__time_t)(atributos->modif_time/1000);
 		stbuf->st_mtim = time;
 		if(atributos->tipo == 1){// es un archivo
-			stbuf->st_mode = S_IFREG | 0777;
+			stbuf->st_mode = S_IFREG | 0333;
+
 		}else{// es un directorio
-			stbuf->st_mode = S_IFDIR | 0777;
+			stbuf->st_mode = S_IFDIR | 0333;
 		}
+		free(_respuesta);
+		getattr_destroy(atributos);
 		return 0;
 	}
 //	st_mtime;
@@ -155,31 +163,41 @@ static int sac_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_
 
 	void* peticion = serializar_path(path, READDIR);
 	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam+8,0);
+	send(_socket, peticion, _tam+8,0); //tam es el tamanio del char solo
 	free(peticion);
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
 	int tam, cant, error;
+	t_list* dirents;
 	if(op == ERROR){
-		recv(_socket,&error,4,0);
+		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{
-		recv(_socket,&tam,4,0);
-		_respuesta = malloc(tam);
-		recv(_socket,_respuesta,tam,0);
-		recv(_socket,&cant,4,0);
-		t_list* dirents = deserializar_lista_ent_dir(_respuesta,cant);
-		cargar_dirents_en_buffer(dirents, buf, filler, cant);
+		recv(_socket,&cant,4,MSG_WAITALL);
+		recv(_socket,&tam,4,MSG_WAITALL);
+		tam-=12;
+		if(tam!=0){
+			_respuesta = malloc(tam);
+			recv(_socket,_respuesta,tam,MSG_WAITALL);
+			dirents = deserializar_lista_ent_dir(_respuesta,cant);
+			cargar_dirents_en_buffer(dirents, buf, filler, cant);
+			list_destroy(dirents);
+			free(_respuesta);
+		}
+		else{
+			filler( buf, ".", NULL, 0 );  // Current Directory
+			filler( buf, "..", NULL, 0 ); // Parent Directory
+		}
 		return 0;
 	}
 }
 
 void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,int cant){
 	char* elem;
-//	filler( buf, ".", NULL, 0 );  // Current Directory
-//	filler( buf, "..", NULL, 0 ); // Parent Directory
+	filler( buf, ".", NULL, 0 );  // Current Directory
+	filler( buf, "..", NULL, 0 ); // Parent Directory
 
 	for(int i=0; i<cant; i++){    // All Other Directories
 		elem = list_get(lista,i);
@@ -200,14 +218,23 @@ void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler,i
  * 	@RETURN
  * 		O archivo fue encontrado. -EACCES archivo no es accesible
  */
+
 static int sac_open(const char *path, struct fuse_file_info *fi) {
-	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
-		return -ENOENT;
 
-	if ((fi->flags & 3) != O_RDONLY)
-		return -EACCES;
+//	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
+	int tam;
+	int fd;
+//
+	t_open* pedido = crear_open(path,fi->flags);
+	void* magic = serialiazar_open(pedido);
+	memcpy(&tam,magic+4,4);
+	send(_socket,magic,tam,0);
+	open_destroy(pedido);
+	free(magic);
 
-	return 0;
+
+
+	return fd;
 }
 
 
@@ -220,8 +247,7 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	free(peticion);
 
 	operaciones op = recibir_op(_socket);
-	void* _respuesta;
-	int tam, error;
+//	int error;
 	if(op == ERROR){
 //		recv(_socket,&error,4,0);
 		return -1;
@@ -229,15 +255,27 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	else{
 		return 0;
 	}
-
-//	int res;
-//	res = mknod(path, mode, rdev);
-//	if(res == -1)
-//		return -errno;
-//
-//	return 0;
 }
 
+static int sac_mkdir(const char *path, mode_t mode)
+{
+	int _tam;
+
+	void* peticion = serializar_path(path, MKDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+//	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
 
 static int sac_chmod(const char *path, mode_t mode)
 {
@@ -260,35 +298,6 @@ static int sac_unlink(const char *path)
     return 0;
 }
 
-
-static int sac_mkdir(const char *path, mode_t mode)
-{
-	int _tam;
-
-	void* peticion = serializar_path(path, MKDIR);
-	memcpy(&_tam, peticion+4, 4);
-	send(_socket, peticion, _tam+8,0);
-	free(peticion);
-
-	operaciones op = recibir_op(_socket);
-	void* _respuesta;
-	int tam, error;
-	if(op == ERROR){
-//		recv(_socket,&error,4,0);
-		return -1;
-	}
-	else{
-		return 0;
-	}
-
-
-//    int res;
-//
-//    res = mkdir(path, mode);
-//    if(res == -1)
-//        return -errno;
-//    return 0;
-}
 
 /*
  * @DESC
@@ -324,6 +333,25 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 
 	return size;
 }
+int sac_write (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
+	t_write* wwrite = crear_write(path,buf,tam,offset);
+	void* magic = serializar_write(wwrite);
+	send(_socket,magic,(int)magic+4,0);
+	free(magic);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
+
+//static int sac_opendir (const char *, struct fuse_file_info *)
 
 
 /*
@@ -336,11 +364,13 @@ static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
 		.open = sac_open,
+//		.opendir = sac_opendir,
 		.read = sac_read,
 		.mknod = sac_mknod,
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
-		.unlink = sac_unlink
+		.unlink = sac_unlink,
+		.write = sac_write
 };
 
 
@@ -369,7 +399,13 @@ static struct fuse_opt fuse_options[] = {
 
 // Dentro de los argumentos que recibe nuestro programa obligatoriamente
 // debe estar el path al directorio donde vamos a montar nuestro FS
+
+
 int main(int argc, char *argv[]) {
+
+   /*============= MAIN DE PRUEBA =============*/
+
+
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI

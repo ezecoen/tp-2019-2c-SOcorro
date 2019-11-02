@@ -66,7 +66,8 @@ uint32_t muse_alloc(uint32_t tam){
 		printf("Direccion recibida en libmuse: %d\n",direccion);
 	}
 	else{
-		//si hay error q pasa??
+		direccion = NULL;
+		//probar si se manda el null
 	}
 	free(magic);
 	muse_alloc_destroy(mat);
@@ -87,7 +88,7 @@ void muse_free(uint32_t dir){
 	muse_free_destroy(mft);
 	uint32_t operacion;
 	recv(socket_muse,&operacion,4,0);
-	if(operacion == MUSE_ERROR){
+	if(operacion == MUSE_SEG_FAULT){
 		printf("error al realizar el free para: %d\n",dir);
 		raise(SIGSEGV);
 	}
@@ -117,11 +118,13 @@ int muse_get(void* dst, uint32_t src, size_t n){
 		uint32_t size_resultado;
 		recv(socket_muse,&size_resultado,4,0);
 		void* resultado = malloc(size_resultado);
+		recv(socket_muse,resultado,size_resultado,0);
 		muse_void* mv = deserializar_muse_void(resultado);
 		memcpy(dst,mv->paquete,mv->size_paquete);
+		printf("get realizado, resultado en %p\n",dst);
+		printf("Buffer en libmuse: %s\n",(char*)mv->paquete);
 		free(resultado);
 		muse_void_destroy(mv);
-		printf("get realizado, resultado en %p\n",dst);
 		return 0;
 	}
 	else if(resultado == MUSE_SEG_FAULT){

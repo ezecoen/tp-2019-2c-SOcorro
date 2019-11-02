@@ -38,6 +38,12 @@ typedef struct segmento{
 	t_list* info_heaps;
 }segmento;
 
+typedef struct mapeo_t{
+	char* path;
+	uint32_t contador;
+	t_list* paginas;
+}mapeo_t;
+
 typedef struct heap_metadata{
 	uint32_t size;
 	_Bool is_free;
@@ -45,7 +51,7 @@ typedef struct heap_metadata{
 }__attribute__((packed)) heap_metadata ;
 
 typedef struct heap_lista{
-	int direccion_heap_metadata;
+	int direccion_heap_metadata; //con respecto al segmento
 	int espacio;
 	_Bool is_free;
 	int indice;
@@ -61,21 +67,23 @@ typedef struct bitarray_nuestro{
 
 typedef struct t_bit_memoria{
 	_Bool ocupado;
-	uint32_t bit_position;
+	uint32_t posicion;
 	_Bool bit_uso;//para clock
 	_Bool bit_modificado;//para clock
 }t_bit_memoria;
+
 typedef struct t_bit_swap{
 	_Bool ocupado;
-	uint32_t bit_position;
+	uint32_t posicion;
 }t_bit_swap;
-
 
 typedef struct pagina{
 	uint32_t num_pagina;
 	_Bool presencia;
 	t_bit_memoria* bit_marco;
+	t_bit_swap* bit_swap;
 }pagina;
+
 typedef struct muse_alloc_t{
 	uint32_t size_id;
 	char* id;
@@ -162,15 +170,11 @@ typedef enum t_comando_muse{
 }t_comando_muse;
 
 //VARIABLES GLOBALES
-char* path_de_config;
-char* path_swap;
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
 t_list* tabla_de_programas;
-int DIR_TAM_DIRECCION;
-int DIR_TAM_DESPLAZAMIENTO;
-int DIR_TAM_PAGINA;
+t_list* tabla_de_mapeo;
 int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
@@ -193,22 +197,27 @@ void iniciar_log(char* path);
 s_config* leer_config(char* path);
 int redondear_double_arriba(double d);
 int muse_alloc(muse_alloc_t* datos);
-uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior);
+uint32_t base_logica_segmento_nuevo(t_list* tabla_de_segmentos);
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio);
 segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
 _Bool encontrar_ultima_pagina(pagina* pag);
+void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata);
 t_bit_memoria* asignar_marco_nuevo();
-void* obtener_puntero_a_marco(t_bit_memoria* bit_marco);
+void* obtener_puntero_a_marco(pagina* pag);
 t_bit_memoria* ejecutar_clock_modificado();
+t_bit_memoria* ejecutar_clock_modificado_2vuelta();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
+pagina* buscar_pagina_por_bit(t_bit_memoria* bit);
+t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit);
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
-void* traer_datos_de_memoria(segmento* segmento_buscado,uint32_t dir_pagina,uint32_t dir_offset);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
+t_list* buscar_mapeo_existente(char* path);
+void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
 int muse_close(char* id_cliente);
@@ -222,6 +231,7 @@ void destroy_bitarray();
 t_bit_memoria* bit_libre_memoria();
 t_bit_swap* bit_libre_memoria_virtual();
 _Bool bit_libre(t_bit_memoria* bit);
+//serializaciones
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);

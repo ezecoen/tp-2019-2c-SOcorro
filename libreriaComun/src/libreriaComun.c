@@ -8,6 +8,76 @@
 //	void* buffer = malloc(pack_size);
 //	recv(socket,buffer,pack_size,0);
 
+t_write* crear_write(char* path,char*buff,uint32_t tam,uint32_t offset){
+	t_write* _write = malloc(sizeof(t_write));
+	_write->size_path=strlen(path)+1;
+	_write->size_buff=tam;
+	_write->path = malloc(_write->size_path);
+	_write->buff = malloc(_write->size_buff);
+	memcpy(_write->path,path,_write->size_path);
+	memcpy(_write->buff,buff,_write->buff);
+	_write->offset = offset;
+	return _write;
+}
+void* serializar_write(t_write* wwrite){
+	uint32_t bytes = sizeof(uint32_t)*5 + wwrite->size_buff + wwrite->size_path;
+	uint32_t comando = WRITE;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	mempcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	mempcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	mempcpy(magic+puntero,&wwrite->size_path,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	mempcpy(magic+puntero,&wwrite->path,wwrite->size_path);
+	puntero += wwrite->size_path;
+	mempcpy(magic+puntero,&wwrite->size_buff,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	mempcpy(magic+puntero,&wwrite->buff,wwrite->size_buff);
+	puntero += wwrite->size_buff;
+	return magic;
+}
+t_write* deserializar_write(void* magic){
+	t_write* wwrite = malloc(sizeof(t_write));
+	int puntero = 0;
+	memcpy(&wwrite->offset,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(&wwrite->size_buff,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(wwrite->buff,magic+puntero,wwrite->size_buff);
+	puntero+=wwrite->size_buff;
+	memcpy(&wwrite->size_path,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(wwrite->path,magic+puntero,wwrite->size_path);
+	puntero+=wwrite->size_path;
+	return wwrite;
+}
+void* serializar_paquete_error(t_error* error){
+	uint32_t bytes = sizeof(uint32_t)+ char_length(error->descripcion) + sizeof(uint32_t)*2;
+	uint32_t comando = ERROR;
+	uint32_t puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,4);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4);
+	puntero += 4;
+	memcpy(magic+puntero,&error->size_descripcion,4);
+	puntero += 4;
+	memcpy(magic+puntero,error->descripcion,error->size_descripcion);
+	puntero += error->size_descripcion;
+	return magic;
+}
+t_error* deserializar_paquete_error(void* magic){
+	t_error* error = malloc(sizeof(t_error));
+	uint32_t puntero = 0;
+	memcpy(&error->size_descripcion,magic+puntero,4);
+	puntero+=4;
+	error->descripcion = malloc(error->size_descripcion);
+	memcpy(error->descripcion,magic+puntero,error->size_descripcion);
+	puntero+=error->size_descripcion;
+	return error;
+}
 int crear_servidor(int puerto){
 	/*== creamos el socket ==*/
 	direccionServidor.sin_family = AF_INET;
@@ -86,31 +156,6 @@ t_error* crear_error(char* descripcion){
 void error_destroy(t_error* error){
 	free(error->descripcion);
 	free(error);
-}
-void* serializar_paquete_error(t_error* error){
-	uint32_t bytes = sizeof(uint32_t)+ char_length(error->descripcion) + sizeof(uint32_t)*2;
-	uint32_t comando = ERROR;
-	uint32_t puntero = 0;
-	void* magic = malloc(bytes);
-	memcpy(magic+puntero,&comando,4);
-	puntero += 4;
-	memcpy(magic+puntero,&bytes,4);
-	puntero += 4;
-	memcpy(magic+puntero,&error->size_descripcion,4);
-	puntero += 4;
-	memcpy(magic+puntero,error->descripcion,error->size_descripcion);
-	puntero += error->size_descripcion;
-	return magic;
-}
-t_error* deserializar_paquete_error(void* magic){
-	t_error* error = malloc(sizeof(t_error));
-	uint32_t puntero = 0;
-	memcpy(&error->size_descripcion,magic+puntero,4);
-	puntero+=4;
-	error->descripcion = malloc(error->size_descripcion);
-	memcpy(error->descripcion,magic+puntero,error->size_descripcion);
-	puntero+=error->size_descripcion;
-	return error;
 }
 t_exitoso* crear_exitoso(char* descripcion){
 	int size_descripcion = char_length(descripcion);
@@ -224,17 +269,16 @@ void* serializar_lista_ent_dir(t_list* lista){
 	void* magic = malloc(_tam);
 	int puntero = 0;
 	operaciones op = READDIR;
-	memcpy(magic+puntero, &op, 4);
+	memcpy(magic+puntero, &op, sizeof(operaciones));
+	puntero += sizeof(operaciones);
+	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	memcpy(magic+puntero, &_tam, 4);
-	puntero += 4;
-	memcpy(magic+puntero, &lista->elements_count, 4);
 	puntero += 4;
 	for(int j = 0; j < lista->elements_count; j++){
 		char* elemento = list_get(lista, j);
 		int tam_elem = char_length(elemento);
 		memcpy(magic+puntero, &tam_elem, 4);
-		printf("%s",elemento);
 		puntero += 4;
 		memcpy(magic+puntero, elemento, tam_elem);
 		puntero += tam_elem;
@@ -247,12 +291,14 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	int tam_elem;
 	char* elem;
 	int puntero = 0;
+
 	for(int i=0; i<tam_lista; i++){
 		memcpy(&tam_elem, magic+puntero,4);
 		puntero += 4;
 		elem = malloc(tam_elem);
 		memcpy(elem,magic+puntero,tam_elem);
 		puntero += tam_elem;
+
 		list_add(lista,elem);
 	}
 	return lista;
@@ -306,3 +352,83 @@ t_getattr* deserializar_getattr(void* magic){
 	puntero += 1;
 	return resp;
 }
+
+void getattr_destroy(t_getattr* getattr){
+	free(getattr);
+}
+
+t_open* crear_open(char* path, int flags){
+	t_open* pedido = malloc(sizeof(t_open));
+	pedido->size_path = char_length(path);
+	pedido->path = malloc(pedido->size_path);
+	memcpy(pedido->path,path,pedido->size_path);
+
+	if(flags & O_CREAT)
+		pedido->crear = 1;
+	else
+		pedido->crear = 0;
+
+
+	if(flags & O_EXCL)
+			pedido->crear_ensure = 1;
+	else
+		pedido->crear_ensure = 0;
+
+
+	if(flags & O_TRUNC)
+			pedido->truncate = 1;
+	else
+		pedido->truncate = 0;
+
+	return pedido;
+}
+
+void* serialiazar_open(t_open* open){
+	int bytes = sizeof(int)*2 + sizeof(int)*4 + open->size_path;
+	operaciones op = OPEN;
+	void* magic = malloc(bytes);
+	int puntero = 0;
+
+	memcpy(magic+puntero,&op,4);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->size_path,4);
+	puntero += 4;
+	memcpy(magic+puntero,open->path,open->size_path);
+	puntero += open->size_path;
+	memcpy(magic+puntero,&open->crear,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->crear_ensure,4);
+	puntero += 4;
+	memcpy(magic+puntero,&open->truncate,4);
+	puntero += 4;
+
+	return magic;
+}
+
+t_open* deserializar_open(void* magic){
+	int puntero = 0;
+	t_open* resp = malloc(sizeof(t_open));
+	int tam;
+
+	memcpy(&tam, magic+puntero, 4);
+	puntero += 4;
+	resp->path = malloc(tam);
+	memcpy(resp->path, magic+puntero, tam);
+	puntero += tam;
+	memcpy(&resp->crear, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->crear_ensure, magic+puntero, 4);
+	puntero += 4;
+	memcpy(&resp->truncate, magic+puntero, 4);
+	puntero += 4;
+
+	return resp;
+}
+void open_destroy(t_open* open){
+	free(open->path);
+	free(open);
+}
+
+

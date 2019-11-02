@@ -6,8 +6,7 @@
 #include <commons/string.h>
 #include "prueba.h"
 #include <unistd.h>
-
-int BIT = 14;
+#include <string.h>
 
 int main(void) {
 	iniciar_log();
@@ -17,8 +16,14 @@ int main(void) {
 	if(init==0){
 		int direccion = muse_alloc(1000);
 		printf("Direccion recibida en prueba: %d\n",direccion);
+		int direccion1 = muse_alloc(500);
+		void* buffer = malloc(20);
+		char* print = malloc(20);
+		muse_get(buffer,direccion,20);
+		memcpy(print,buffer,20);
+		printf("Buffer en prueba: %s\n",print);
+		muse_close();
 	}
-	muse_close();
 	return EXIT_SUCCESS;
 }
 void iniciar_log(){//0 es archivo, 1 es consola
