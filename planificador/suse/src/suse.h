@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <../hilolay/hilolay.h>
 #include <semaphore.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -48,7 +49,9 @@ void printearNumeroDeHilo(tcb*);
 void crearHilo(int);
 void crearHiloPlanificador();
 void crearHiloDeServidor();
-void montarServidor();
+void escucharServidor(int);
+void ocupateDeEste(uint32_t);
+int crearServidor();
 int aceptarConexion(int);
 int randomEntre1y10(int);
 p_config* leer_config();

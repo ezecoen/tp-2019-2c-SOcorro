@@ -314,8 +314,9 @@ void esperar_conexion(int servidor){
 }
 void* armar_error(int error_code){
 	void* err = malloc(sizeof(int)*2);
-	memcpy(err,ERROR,4);
-	memcpy(err+4,error_code,4);
+	operaciones op = ERROR;
+	memcpy(err,&op,4);
+	memcpy(err+4,&error_code,4);
 	return err;
 }
 void atender_cliente(int cliente){

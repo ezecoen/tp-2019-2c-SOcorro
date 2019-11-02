@@ -2,7 +2,10 @@
 
 int main(void) {
 
+	//Inicializo variables globales
 	numeroDePrograma = 0;
+
+	iniciar_log();
 
 	configuracion = leer_config();
 
@@ -10,16 +13,17 @@ int main(void) {
 
 	inicializarEstadosComunes();//Inicializo las listas de New - Block - Exit
 
-	iniciar_log();
+	int servidor = crearServidor();
 
-	crearHiloDeServidor();//Con esto empiezo a escuchar los programas que se vayan creando y los ults que vayan creando
+	while(1){
+		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
+	}
 
-//	for(int i = 0; i<4; i++){
-//		sem_wait(&cont_multiprogramacion);
-//		crearHilo(i+1);
-//		//usleep(500000);
-//		sleep(5);
-//	}
+	for(int i = 0; i<4; i++){
+		sem_wait(&cont_multiprogramacion);
+		crearHilo(i+1);
+		usleep(5000000);
+	}
 
 	for(;;);
 
@@ -94,17 +98,20 @@ void planificarUlts(){
 void printearNumeroDeHilo(tcb* threadControlBlock){
 
 	int i = 0;
-	int cantidadLoops = randomEntre1y10(rand());
+	srand(time(NULL));
+	int numeroRandom = rand();
+	int cantidadLoops = randomEntre1y10(numeroRandom);
 
 	while(cantidadLoops > i){
 
 		log_info(log, "Soy el hilo numero %d del proceso %d\n\n", threadControlBlock->t_id, threadControlBlock->p_id);
-		//usleep(400000);
-		sleep(4);
+		usleep(4000000);
 
 		i++;
 
 	}
+
+	sem_post(&cont_multiprogramacion);
 
 	log_info(log, "Termine de printear, soy el hilo numero %d y me printee %d veces", threadControlBlock->t_id, cantidadLoops);
 
@@ -126,10 +133,6 @@ void crearHilo(int numero){
 	threadControlBlock->t_id = numero;
 	threadControlBlock->estimacion = 0;
 
-	sem_wait(&sem_mutNew);
-		list_add(estadoNew, threadControlBlock);
-	sem_post(&sem_mutNew);
-
 	pthread_t hiloDeNumero;
 	if(pthread_create(&hiloDeNumero, NULL, (void*)printearNumeroDeHilo, (void*)threadControlBlock)!=0){
 		log_error(log, "Error creando el hilo");
@@ -137,6 +140,9 @@ void crearHilo(int numero){
 
 	pthread_detach(hiloDeNumero);
 
+	sem_wait(&sem_mutNew);
+		list_add(estadoNew, threadControlBlock);
+	sem_post(&sem_mutNew);
 }
 
 int randomEntre1y10(int numero){
@@ -151,9 +157,11 @@ int randomEntre1y10(int numero){
 }
 
 //Cosas para el servidor
-void montarServidor(){
+
+int crearServidor(){
 
 	struct sockaddr_in direccionServidor;
+
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
 	direccionServidor.sin_port = htons(8080);
@@ -161,49 +169,43 @@ void montarServidor(){
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 	//Esto es para que cuando haga ctrl+c y vuelvo a levantar el sv, no tenga problemas con el bind
 	int activado = 1;
-	setsockopt(servidor, SOL_SOCKET, SO_REUSEADDR, &activado, sizeof(activado));
+	setsockopt(servidor, SOL_SOCKET, SO_REUSEPORT, &activado, sizeof(activado));
 
 	if(bind(servidor, (void*)&direccionServidor, sizeof(direccionServidor))!= 0){
 
 		perror("Fallo la creacion del servidor en el bind");
-
+		return 1;
 	}
 
-	printf("Estoy escuchando en el puerto 8080\n");
-	listen(servidor, 100);
+	log_info(log, "Estoy escuchando en el puerto 8080");
+	listen(servidor,SOMAXCONN);
+	return servidor;
+}
 
-	int cliente = aceptarConexion(servidor);
+void escucharServidor(int servidor){//Esta funcion es la que va a hacer de escucha para todos los programas que se vayan levantando
 
-	char* buffer = malloc(1000);
+	uint32_t cliente = aceptarConexion(servidor);
 
-	while(1){
-		int bytesRecibidos = recv(cliente, buffer, 4, 0);
+	pthread_t hiloDeEscucha;
 
-		if(bytesRecibidos <= 0){
-			perror("Se deconecto el cliente");
-			return;
-		}
+	pthread_create(&hiloDeEscucha,NULL,(void*)ocupateDeEste,(void*)cliente);
+	pthread_detach(hiloDeEscucha);
 
-		buffer[bytesRecibidos] = '\0';
-		log_info(log, "Me llegaron %d bytes con %s", bytesRecibidos, buffer);
-	}
+}
 
-	free(buffer);
-
-	return;
-
+void ocupateDeEste(uint32_t cliente){
+	log_info(log, "Tengo a este cliente %d",cliente);
 }
 
 int aceptarConexion(int servidor){
 
 	struct sockaddr_in direccionCliente;
 	unsigned int tamanioDireccion = sizeof(direccionCliente);
-	int cliente = accept(servidor, (void*)&direccionCliente, &tamanioDireccion);
+	uint32_t cliente = accept(servidor, (void*)&direccionCliente, &tamanioDireccion);
 	//perror("Error: ");
-	printf("Recibi una conexion de %d!!\n", cliente);
+	log_info(log, "Recibi una conexion de %d!!\n", cliente);
 
-	send(cliente, "Hola NetCat!", 13, 0);
-	send(cliente, ":)", 3, 0);
+	send(cliente, "Hola!", 6, 0);
 
 	return cliente;
 
@@ -218,17 +220,4 @@ void crearHiloPlanificador(){
 	}
 
 	pthread_detach(planificador);
-}
-
-void crearHiloDeServidor(){
-
-	pthread_t servidor;//Con este thread escucho/recibo a los nuevos threads de programa que se creen
-
-	if(pthread_create(&servidor, NULL, (void*)montarServidor, NULL) != 0){
-		log_error(log, "Hubo un error crando el hilo del servidor");
-	}
-
-	pthread_detach(servidor);
-
-
 }
