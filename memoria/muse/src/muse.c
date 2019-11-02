@@ -18,130 +18,7 @@ int main(int argc, char **argv) {
 //		printf("%s",(char*)swap);
 //	}
 //	perror("error: ");
-//	return 0;
 
-<<<<<<< HEAD
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"prog0");
-	list_add(tabla_de_programas,programa);
-
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"prog1");
-	list_add(tabla_de_programas,programa1);
-
-=======
-//	programa_t* programa = malloc(sizeof(programa_t));
-//	programa->tabla_de_segmentos = list_create();
-//	programa->id_programa = string_new();
-//	string_append(&programa->id_programa,"prog0");
-//	list_add(tabla_de_programas,programa);
-//
-//	programa_t* programa1 = malloc(sizeof(programa_t));
-//	programa1->tabla_de_segmentos = list_create();
-//	programa1->id_programa = string_new();
-//	string_append(&programa1->id_programa,"prog1");
-//	list_add(tabla_de_programas,programa1);
-//
->>>>>>> cbf0e190068a2f272d47ca21bda464969c87ad98
-//	programa_t* programa2 = malloc(sizeof(programa_t));
-//	programa2->tabla_de_segmentos = list_create();
-//	programa2->id_programa = string_new();
-//	string_append(&programa2->id_programa,"prog2");
-//	list_add(tabla_de_programas,programa2);
-<<<<<<< HEAD
-
-//	prueba creo segmento 1
-	muse_alloc_t* mat = crear_muse_alloc(320,"prog0");
-	int result = muse_alloc(mat);
-	printf("\nDireccion virtual de mat: %d",result);
-	fflush(stdout);
-//	prueba creo segmento 2
-	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog0");
-	int result1 = muse_alloc(mat1);
-	printf("\nDireccion virtual de mat1: %d",result1);
-	fflush(stdout);
-//	prueba creo segmento 3
-	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog0");
-	int result2 = muse_alloc(mat2);
-	printf("\nDireccion virtual de mat2: %d",result2);
-	fflush(stdout);
-//	prueba uso segmento 3
-	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog0");
-	int result3 = muse_alloc(mat3);
-	printf("\nDireccion virtual de mat3: %d",result3);
-	fflush(stdout);
-//	prueba creo segmento 3
-	muse_alloc_t* mat4 = crear_muse_alloc(320,"prog0");
-	int result4 = muse_alloc(mat4);
-	printf("\nDireccion virtual de mat2: %d",result4);
-	fflush(stdout);
-//	prueba uso segmento 3
-	muse_alloc_t* mat5 = crear_muse_alloc(100,"prog0");
-	int result5 = muse_alloc(mat5);
-	printf("\nDireccion virtual de mat3: %d",result5);
-	fflush(stdout);
-
-	//libero el segundo y el ultimo
-	muse_free_t* mft = crear_muse_free("prog0",result);
-	muse_free_t* mft1 = crear_muse_free("prog0",result1);
-	muse_free_t* mft2 = crear_muse_free("prog0",result2);
-	muse_free_t* mft3 = crear_muse_free("prog0",result3);
-	muse_free_t* mft4 = crear_muse_free("prog0",result4);
-	muse_free_t* mft5 = crear_muse_free("prog0",result5);
-
-	muse_free(mft);
-	muse_free(mft1);
-	muse_free(mft5);
-	muse_free(mft4);
-	muse_free(mft3);
-	muse_free(mft2);
-
-=======
-//
-////	prueba creo segmento 1
-//	muse_alloc_t* mat = crear_muse_alloc(4086,"prog0");
-//	int result = muse_alloc(mat);
-//	printf("\nDireccion virtual de mat: %d",result);
-//	fflush(stdout);
-////	prueba creo segmento 2
-//	muse_alloc_t* mat1 = crear_muse_alloc(100,"prog1");
-//	int result1 = muse_alloc(mat1);
-//	printf("\nDireccion virtual de mat1: %d",result1);
-//	fflush(stdout);
-////	prueba creo segmento 3
-//	muse_alloc_t* mat2 = crear_muse_alloc(500,"prog2");
-//	int result2 = muse_alloc(mat2);
-//	printf("\nDireccion virtual de mat2: %d",result2);
-//	fflush(stdout);
-////	prueba uso segmento 3
-//	muse_alloc_t* mat3 = crear_muse_alloc(500,"prog2");
-//	int result3 = muse_alloc(mat3);
-//	printf("\nDireccion virtual de mat3: %d",result3);
-//	fflush(stdout);
->>>>>>> cbf0e190068a2f272d47ca21bda464969c87ad98
-
-////	Pruebas clock modificado
-//	t_bit_memoria* llenar_bits(t_bit_memoria* _bit){
-//		_bit->ocupado = true;
-//		_bit->bit_modificado = true;
-//		_bit->bit_uso = true;
-//		return _bit;
-//	}
-//	list_map(bitarray->bitarray_memoria,(void*)llenar_bits);
-////	t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,5);
-////	_bit->bit_uso = true;
-////	_bit->bit_modificado = true;
-////	t_bit_memoria* _bit2 = list_get(bitarray->bitarray_memoria,7);
-////	_bit2->bit_uso = false;
-////	_bit2->bit_modificado = true;
-//	posicion_puntero_clock = 4;
-//	t_bit_memoria* _b = ejecutar_clock_modificado(list_create());
-//	printf("\n%d-numero de bit: %d.(%d,%d)\n",_b->ocupado,_b->posicion,_b->bit_uso,_b->bit_modificado);
-//	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -151,7 +28,7 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 void init_estructuras(char* path){
-	iniciar_memoria_virtual(path);
+	//iniciar_memoria_virtual(path);
 	upcm = malloc(configuracion->tam_mem);
 	swap = malloc(configuracion->tam_swap);//provisorio
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
