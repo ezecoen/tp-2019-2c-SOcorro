@@ -38,6 +38,12 @@ typedef struct segmento{
 	t_list* info_heaps;
 }segmento;
 
+typedef struct mapeo_t{
+	char* path;
+	uint32_t contador;
+	t_list* paginas;
+}mapeo_t;
+
 typedef struct heap_metadata{
 	uint32_t size;
 	_Bool is_free;
@@ -45,7 +51,7 @@ typedef struct heap_metadata{
 }__attribute__((packed)) heap_metadata ;
 
 typedef struct heap_lista{
-	int direccion_heap_metadata;
+	int direccion_heap_metadata; //con respecto al segmento
 	int espacio;
 	_Bool is_free;
 	int indice;
@@ -168,9 +174,7 @@ void* upcm;
 void* swap;
 uint32_t lugar_disponible;
 t_list* tabla_de_programas;
-int DIR_TAM_DIRECCION;
-int DIR_TAM_DESPLAZAMIENTO;
-int DIR_TAM_PAGINA;
+t_list* tabla_de_mapeo;
 int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
@@ -193,7 +197,7 @@ void iniciar_log(char* path);
 s_config* leer_config(char* path);
 int redondear_double_arriba(double d);
 int muse_alloc(muse_alloc_t* datos);
-uint32_t base_logica_segmento_nuevo(segmento* segmento_anterior);
+uint32_t base_logica_segmento_nuevo(t_list* tabla_de_segmentos);
 segmento* buscar_segmento_con_espacio(t_list* tabla_de_segmentos,uint32_t tamanio);
 segmento* buscar_segmento_propio_por_id(char* id);
 uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio);
@@ -202,6 +206,7 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 t_bit_memoria* asignar_marco_nuevo();
 void* obtener_puntero_a_marco(pagina* pag);
 t_bit_memoria* ejecutar_clock_modificado();
+t_bit_memoria* ejecutar_clock_modificado_2vuelta();
 t_bit_memoria* buscar_0_0();
 t_bit_memoria* buscar_0_1();
 pagina* buscar_pagina_por_bit(t_bit_memoria* bit);
@@ -211,6 +216,8 @@ void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
+t_list* buscar_mapeo_existente(char* path);
+void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
 int muse_close(char* id_cliente);
@@ -224,6 +231,7 @@ void destroy_bitarray();
 t_bit_memoria* bit_libre_memoria();
 t_bit_swap* bit_libre_memoria_virtual();
 _Bool bit_libre(t_bit_memoria* bit);
+//serializaciones
 muse_alloc_t* crear_muse_alloc(uint32_t tamanio,char* id);
 void muse_alloc_destroy(muse_alloc_t* mat);
 void* serializar_muse_alloc(muse_alloc_t* mat);

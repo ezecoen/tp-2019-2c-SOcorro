@@ -18,6 +18,7 @@
 #include <commons/string.h>
 #include <commons/log.h>
 #include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 #include <commons/bitarray.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -96,7 +97,13 @@ char* dame_el_nombre(char** nombres,int quien);
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
+<<<<<<< HEAD
 
+=======
+static unsigned int _hash(char *key, int key_len);
+char* dame_path_padre(char* nombre);
+bloque* bloque_de_nodo(int nodo);
+>>>>>>> 78ec1913a2d10af63c029baacf3c75def4bb87dc
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;
@@ -108,5 +115,9 @@ bloque* primer_bloque_de_disco;
 t_bitarray* bitarray;
 header* _header;
 nodo** tabla_de_nodos;
+<<<<<<< HEAD
 t_list* tabla_file_descriptors;
+=======
+t_dictionary* diccionario_de_path;
+>>>>>>> 78ec1913a2d10af63c029baacf3c75def4bb87dc
 #endif /* SAC_SERVER_H_ */
