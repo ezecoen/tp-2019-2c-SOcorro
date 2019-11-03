@@ -1246,17 +1246,22 @@ void ocupate_de_este(int socket){
 				}
 				printf("enviando resolucion del cpy a: %d, resultado: %d\n",socket,resultado);
 				break;
-			case MUSE_MAP://hay que hacerla bien
+			case MUSE_MAP:
 				recv(socket,&tam,4,0);
 				void* vmmt = malloc(tam);
 				recv(socket,vmmt,tam,0);
 				muse_map_t* dmmt = deserializar_muse_map(vmmt);
 				resultado = muse_map(dmmt);
-				//devuelve si esta to do ok o no
-				send(socket,&resultado,4,0);
+				//devuelve la direccion de memoria en muse
+				int _op = MUSE_INT;
+				void* void_respuesta = malloc(8);
+				memcpy(void_respuesta,&_op,4);
+				memcpy(void_respuesta,&resultado,4);
+				send(socket,void_respuesta,8,0);
 				printf("enviando resolucion del map %d a: %d\n",socket,resultado);
 				muse_map_destroy(dmmt);
 				free(vmmt);
+				free(void_respuesta);
 				break;
 			case MUSE_SYNC://hay que hacerla bien
 				recv(socket,&tam,4,0);
