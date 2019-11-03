@@ -9,9 +9,20 @@ int main(int argc, char **argv) {
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
-	char* sample = string_new();
-	string_append(&sample,"hola sample");
-	memcpy(upcm+5,sample,strlen(sample)+1);
+
+	programa_t* programa = malloc(sizeof(programa_t));
+	programa->tabla_de_segmentos = list_create();
+	programa->id_programa = string_new();
+	string_append(&programa->id_programa,"prog0");
+	list_add(tabla_de_programas,programa);
+
+	muse_alloc_t* mat = crear_muse_alloc(320,"prog0");
+	int result = muse_alloc(mat);
+	printf("\nDireccion virtual de mat: %d",result);
+
+	muse_alloc_t* mat1 = crear_muse_alloc(320,"prog0");
+	int result1 = muse_alloc(mat1);
+	printf("\nDireccion virtual de mat: %d",result1);
 
 //	if(swap != MAP_FAILED){
 //		memcpy(swap,sample,1000);
@@ -288,6 +299,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			heap_lista_nuevo->direccion_heap_metadata = num_pagina_final*configuracion->tam_pag + offset_final;
 			heap_lista_nuevo->espacio = heap_final->size;
 			heap_lista_nuevo->is_free = true;
+			heap_lista_nuevo->indice=heap_lista_encontrado->indice+1;
 			//agrego el nuevo heap_lista dsps del anterior
 			list_add_in_index(segmento_buscado->info_heaps,heap_lista_encontrado->indice+1,heap_lista_nuevo);
 
@@ -694,10 +706,12 @@ int muse_free(muse_free_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
+		log_info(logg,"no se encontro el segmento ingresado: %s",datos->id);
 		return -1;
 	}
 	if(segmento_buscado->mmapeado){
 			//si esta mmpapeado, no se puede liberar
+			log_info(logg,"El segmento %s esta mappeado entonces no se puede liberar",datos->id);
 			return -1;
 	}
 
@@ -714,9 +728,7 @@ int muse_free(muse_free_t* datos){
 		}
 	}
 	if(heap_lista_encontrado == NULL){
-		//no se encontro la direccion que se quiere liberar
-		//segmentation fault??
-		//muse segmentation f
+		log_info(logg,"No se encontro en el segmento %s la direccion a liberar %s",datos->id,datos->direccion);
 		return -1;
 	}
 	//hay que reemplazar el heap posta,
@@ -740,24 +752,18 @@ int muse_free(muse_free_t* datos){
 
 		if(i+1==segmento_buscado->info_heaps->elements_count)
 		{
-			//significa que todos estan libres..
-			//dejo el primer heap_lista noma
-			//y la primer pag
-			//que los seteo en 0
-
-//			for(int i = 1;i<segmento_buscado->paginas->elements_count;){
-//				list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
-//			}
-
+			//como todos estan libres, dejo solo el primero
 			for(int i = 1;i<segmento_buscado->info_heaps->elements_count;){
 				list_remove_and_destroy_element(segmento_buscado->info_heaps,i,(void*)free);
 			}
-			//segmento_buscado->tamanio=configuracion->tam_pag;
+
 			heap_lista* unico_heap = list_get(segmento_buscado->info_heaps,0);
-			unico_heap->espacio=configuracion->tam_pag-sizeof(heap_metadata);
+			unico_heap->espacio=segmento_buscado->tamanio-sizeof(heap_metadata);
 			unico_heap->is_free=true;
 			unico_heap->indice=0;
 			//no necesito hacer un heap_metadata porque ya lo hice y lo pegue antes
+			log_info(logg,"Se libero la direccion %i",datos->direccion);
+			log_info(logg,"El segmento %s quedo completamente liberado",datos->id);
 			return 0;
 		}
 
@@ -772,11 +778,7 @@ int muse_free(muse_free_t* datos){
 			// si parte del ultimo y el anterior esta vacio
 			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
 			if(heap_de_lista_anterior->is_free){
-				//desde esta pagina habria que liberar
-//				int pagina_heap_anterior = (heap_de_lista_anterior->direccion_heap_metadata+sizeof(heap_metadata)) / configuracion->tam_pag;
-//				for(int i = pagina_heap_anterior+1;i<segmento_buscado->paginas->elements_count;){
-//					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
-//				}
+
 				int offset_heap_anterior=(heap_de_lista_anterior->direccion_heap_metadata+sizeof(heap_metadata))%configuracion->tam_pag;
 				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior;
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
@@ -786,7 +788,6 @@ int muse_free(muse_free_t* datos){
 				if(contador_index>1){
 					list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
 				}
-			//	segmento_buscado->tamanio=segmento_buscado->paginas->elements_count*configuracion->tam_pag;
 			}
 
 		}else if(heap_de_lista->is_free && contador_index>0) {
@@ -813,6 +814,7 @@ int muse_free(muse_free_t* datos){
 	}
 
 //	retorna -1 si falla
+	log_info(logg,"Direccion %i del segmento %s liberada correctamente",datos->direccion,datos->id);
 	return 0;
 }
 
@@ -864,6 +866,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
+		log_info(logg,"no se encontro el segmento ingresado: %s",datos->id);
 		return -1;
 	}
 	heap_lista* heap_dst = NULL;
@@ -874,9 +877,9 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 			// por cada heap_lista, veo si la direccion que me mandaron
 			// pertenece a ese ->datos
 			heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
-			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) < direccion_al_segmento &&
+			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) <= direccion_al_segmento &&
 					heap_aux->direccion_heap_metadata+sizeof(heap_metadata)+heap_aux->espacio
-					> direccion_al_segmento) {
+					> direccion_al_segmento && !heap_aux->is_free) {
 				//significa que la dire nueva esta entre un heap y el siguiente
 				heap_dst=heap_aux;
 				break;
@@ -886,15 +889,18 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	}
 	if(heap_dst == NULL){
 	//no se encontro el heap de destino
+		log_info(logg,"No se encontro direccion %i en el segmento %s",datos->direccion,datos->id);
 		return -1;
 	}
 	if(heap_dst->espacio<datos->size_paquete) {
 		//no entra en el espacio de ese heap_dst
+		log_info(logg,"Los datos que desea copiar no entran en la direccion %i para el segmento %s",datos->direccion,datos->id);
 		return -1;
 	}
-	int offset_al_heap = direccion_al_segmento-heap_dst->direccion_heap_metadata;
-	if(offset_al_heap+datos->size_paquete > heap_dst->direccion_heap_metadata+heap_dst->espacio+sizeof(heap_metadata)) {
+	int offset_al_heap = direccion_al_segmento-heap_dst->direccion_heap_metadata-sizeof(heap_metadata);
+	if(offset_al_heap + datos->size_paquete > heap_dst->espacio) {
 		//va a pisar el heap_lista_siguiente
+		log_info(logg,"Generar un cpy en la direccion %i genera un conflico en el segmento %s",datos->direccion,datos->id);
 		return -1;
 	}
 
@@ -902,38 +908,46 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	int nro_pagina =  direccion_al_segmento/configuracion->tam_pag;
 	pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
 	void* marco = obtener_puntero_a_marco(pag);
-	int cuanto_puedo_pegar=configuracion->tam_pag-offset_al_heap;
-	memcpy(marco+offset_al_heap,datos->paquete,cuanto_puedo_pegar);
+	int cuanto_puedo_pegar=configuracion->tam_pag-heap_dst->direccion_heap_metadata-offset_al_heap-sizeof(heap_metadata);
+	if(cuanto_puedo_pegar<=datos->size_paquete){
+		//pego lo que pueda
+		memcpy(marco+heap_dst->direccion_heap_metadata+sizeof(heap_metadata)+
+				offset_al_heap,datos->paquete,cuanto_puedo_pegar);
 
+	}else{
+		//pego el paquete completo
+		memcpy(marco+heap_dst->direccion_heap_metadata+sizeof(heap_metadata)+
+				offset_al_heap,datos->paquete,datos->size_paquete);
+		log_info(logg,"Datos en segmento %s direccion %i fueron cpy con exito ",datos->id,datos->direccion);
+		return 0;
+	}
 	//voy pegando las que me faltan
 	nro_pagina++; //siguiente pagina
 	int contador=0;
 	do{
 		//agarro la pag siguiente y su marco
-		int cuanto_me_falta = datos->size_paquete-cuanto_puedo_pegar-contador*configuracion->tam_pag;
+		int cuanto_me_falta = datos->size_paquete-cuanto_puedo_pegar;
 
 		if(cuanto_me_falta>=configuracion->tam_pag){
 			//si me falta mas que una pagina, puedo pegar la pag entera
 			pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
 			void* marco = obtener_puntero_a_marco(pag);
 			//voy acumulando cuantas paginas voy pegando
-			cuanto_puedo_pegar+=contador*configuracion->tam_pag;
 			memcpy(marco,datos->paquete+cuanto_puedo_pegar,configuracion->tam_pag);
+			cuanto_puedo_pegar+=configuracion->tam_pag;
 			contador++;
 			nro_pagina++;
 		} else if(cuanto_me_falta>0){
 			//si me falta menos de una pagina, pego lo que tengo
 			pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
 			void* marco = obtener_puntero_a_marco(pag);
-			memcpy(marco,datos->paquete+cuanto_puedo_pegar,configuracion->tam_pag);
-			break;
-		}else{
+			memcpy(marco,datos->paquete+cuanto_puedo_pegar,cuanto_me_falta);
 			break;
 		}
-
 	}while (1);
 	//HAY QUE PROBAR MMCOPY
 
+	log_info(logg,"Datos en segmento %s direccion %i fueron cpy con exito ",datos->id,datos->direccion);
 	return 0;
 }
 
