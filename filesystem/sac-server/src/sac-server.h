@@ -94,6 +94,7 @@ nodo* dame_el_nodo_de(const char* _nombre);
 static unsigned int _hash(char *key, int key_len);
 char* dame_path_padre(char* nombre);
 bloque* bloque_de_nodo(int nodo);
+void dame_mi_path_entero(int numero_de_nodo);
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;
@@ -107,4 +108,6 @@ header* _header;
 nodo** tabla_de_nodos;
 t_list* tabla_file_descriptors;
 t_dictionary* diccionario_de_path;
+char* path_generator;
+char* path_intermedio;
 #endif /* SAC_SERVER_H_ */

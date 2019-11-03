@@ -154,15 +154,62 @@ void load_fs(char* fs){
 	log_info(logger,"Cargando el bitmap");
 	levantar_tabla_de_nodo(primer_bloque_de_disco+1+tam_de_bitmap);
 	log_info(logger,"Cargando la tabla de nodos");
+	levantar_diccionario();
+
+}
+void levantar_diccionario(){
+	for(int i = 0;i<1024;i++){
+		for(int j = 0;j<1024;j++){
+			if(tabla_de_nodos[j]->estado == 0){
+				continue;
+			}
+			if(tabla_de_nodos[j]->bloque_padre==i){
+				path_intermedio = string_new();
+				path_generator = string_new();
+				dame_mi_path_entero(j);
+				dictionary_put(diccionario_de_path,path_generator,j);
+				free(path_generator);
+				free(path_intermedio);
+			}
+		}
+	}
 }
 void levantar_tabla_de_nodo(bloque* bloque){
 	tabla_de_nodos = (nodo**)malloc(sizeof(nodo*)*1024);
 	for(int i = 0;i<1024;i++){
 		tabla_de_nodos[i] = (nodo*) bloque;
-		if(tabla_de_nodos[i]->estado != 0){
-			dictionary_put(diccionario_de_path,tabla_de_nodos[i]->nombre_de_archivo,i);
-		}
 		bloque++;
+	}
+}
+void acomodamelo_papi(char* path_al_reves){
+	char** a = string_split(path_al_reves,"/");
+	int i;
+	for(i=0;a[i]!=NULL;i++);
+	string_append(&path_generator,"/");
+	for(int j=i;j!=0;j--){
+		string_append(&path_generator,a[j-1]);
+		if(j-1 != 0){
+			string_append(&path_generator,"/");
+		}
+	}
+
+}
+void dame_mi_path_entero(int numero_de_nodo){
+	if(numero_de_nodo == 0){
+		string_append(&path_intermedio,"/");
+		//  ARE/pepo/hola//
+		acomodamelo_papi(path_intermedio);
+		return;
+	}else{
+		string_append(&path_intermedio,tabla_de_nodos[numero_de_nodo]->nombre_de_archivo);
+		string_append(&path_intermedio,"/");
+		int padre = tabla_de_nodos[numero_de_nodo]->bloque_padre;
+		if(padre -1-tam_de_bitmap < 0){
+			padre = 0;
+		}else{
+			padre = padre - 1 - tam_de_bitmap;
+		}
+		dame_mi_path_entero(padre);
 	}
 }
 t_bitarray* levantar_bit_array(bloque* bloque){
@@ -204,12 +251,12 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
-			nodo_vacio->bloque_padre=1;
+			nodo_vacio->bloque_padre=-1;
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
 			for(int i = 0;i<71;i++){
-				nodo_vacio->nombre_de_archivo[i] = '0';
+				nodo_vacio->nombre_de_archivo[i] = '\0';
 			}
 			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 			nodo_vacio->tamanio_de_archivo=0;
