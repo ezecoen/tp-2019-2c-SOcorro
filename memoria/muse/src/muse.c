@@ -10,19 +10,19 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
 
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"prog0");
-	list_add(tabla_de_programas,programa);
-
-	muse_alloc_t* mat = crear_muse_alloc(320,"prog0");
-	int result = muse_alloc(mat);
-	printf("\nDireccion virtual de mat: %d",result);
-
-	muse_alloc_t* mat1 = crear_muse_alloc(320,"prog0");
-	int result1 = muse_alloc(mat1);
-	printf("\nDireccion virtual de mat: %d",result1);
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"prog0");
+//	list_add(tabla_de_programas,programa);
+//
+//	muse_alloc_t* mat = crear_muse_alloc(320,"prog0");
+//	int result = muse_alloc(mat);
+//	printf("\nDireccion virtual de mat: %d",result);
+//
+//	muse_alloc_t* mat1 = crear_muse_alloc(320,"prog0");
+//	int result1 = muse_alloc(mat1);
+//	printf("\nDireccion virtual de mat: %d",result1);
 
 //	if(swap != MAP_FAILED){
 //		memcpy(swap,sample,1000);
@@ -820,8 +820,8 @@ void* muse_get(muse_get_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
-	//si copia demas tira segm fault!!
-	if(segmento_buscado!=NULL){
+	//si copia demas tira segm fault en libmuse!!
+	if(segmento_buscado!=NULL && segmento_buscado->tamanio >= datos->tamanio){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
 		int direccion_final = direccion_al_segmento+datos->tamanio;
 		int offset_final = direccion_final % configuracion->tam_pag;
@@ -1135,9 +1135,10 @@ void ocupate_de_este(int socket){
 	char* id_cliente;
 	void* respuesta;
 	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
-		printf("- Nuevo pedido de %d\n",socket);
+		printf("-Nuevo pedido de %d",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
+				printf("-INIT\n");
 				//recibo int pid, crep el char* id y se lo mando
 				uint32_t pid;
 				recv(socket,&pid,4,0);
@@ -1160,6 +1161,7 @@ void ocupate_de_este(int socket){
 				free(pid_char);
 				break;
 			case MUSE_ALLOC:;
+				printf("-ALLOC\n");
 				recv(socket,&tam,4,0);
 				void* vmat = malloc(tam);
 				recv(socket,vmat,tam,0);
@@ -1185,6 +1187,7 @@ void ocupate_de_este(int socket){
 				free(vmat);
 				break;
 			case MUSE_FREE:;
+				printf("-FREE\n");
 				recv(socket,&tam,4,0);
 				void* vmft = malloc(tam);
 				recv(socket,vmft,tam,0);
@@ -1203,6 +1206,7 @@ void ocupate_de_este(int socket){
 				free(vmft);
 				break;
 			case MUSE_GET:;
+				printf("-GET\n");
 				recv(socket,&tam,4,0);
 				void* vmgt = malloc(tam);
 				recv(socket,vmgt,tam,0);
@@ -1215,12 +1219,12 @@ void ocupate_de_este(int socket){
 					uint32_t tamanio_respuesta;
 					memcpy(&tamanio_respuesta,respuesta+4,4);
 					send(socket,respuesta,tamanio_respuesta,0);
-					//^^error de valgrind q no pude arreglar?? igual no rompe
+					// ^^error de valgrind q no pude arreglar?? igual no rompe
 					printf("enviando resolucion del get a: %d\n",socket);
-					char* buff = malloc(20);
-					memcpy(buff,resultado_get,20);	//pa probar
-					printf("buff: %s\n",buff);		//pa probar
-					free(buff);						//pa probar
+					char* buff = malloc(mgt->tamanio);
+					memcpy(buff,resultado_get,mgt->tamanio);	//pa probar
+					printf("buff: %s\n",buff);					//pa probar
+					free(buff);									//pa probar
 					free(resultado_get);
 					free(respuesta);
 					muse_void_destroy(mv);
@@ -1234,10 +1238,12 @@ void ocupate_de_este(int socket){
 				free(vmgt);
 				break;
 			case MUSE_CPY:;
+				printf("-CPY\n");
 				recv(socket,&tam,4,0);
 				void* vmct = malloc(tam);
 				recv(socket,vmct,tam,0);
 				muse_cpy_t* mct = deserializar_muse_cpy(vmct);
+				printf("datos a copiar: %s\n",(char*)mct->paquete);
 				resultado = muse_cpy(mct);
 				if(resultado == -1){//fallo
 					operacion_respuesta = MUSE_SEG_FAULT;
@@ -1249,14 +1255,13 @@ void ocupate_de_este(int socket){
 					//funciono
 					operacion_respuesta = MUSE_EXITOSO;
 					send(socket,&respuesta,4,0);
-					free(vmct);
-					muse_cpy_destroy(mct);
 					muse_cpy_destroy(mct);
 					free(vmct);
 				}
 				printf("enviando resolucion del cpy a: %d, resultado: %d\n",socket,resultado);
 				break;
 			case MUSE_MAP:
+				printf("-MAP\n");
 				recv(socket,&tam,4,0);
 				void* vmmt = malloc(tam);
 				recv(socket,vmmt,tam,0);
@@ -1274,6 +1279,7 @@ void ocupate_de_este(int socket){
 				free(void_respuesta);
 				break;
 			case MUSE_SYNC://hay que hacerla bien
+				printf("-SYNC\n");
 				recv(socket,&tam,4,0);
 				void* vmst = malloc(tam);
 				recv(socket,vmst,tam,0);
@@ -1286,6 +1292,7 @@ void ocupate_de_este(int socket){
 				free(vmst);
 				break;
 			case MUSE_UNMAP://hay que hacerla bien
+				printf("-UNMAP\n");
 				recv(socket,&tam,4,0);
 				void* vmut = malloc(tam);
 				recv(socket,vmut,tam,0);
@@ -1298,8 +1305,9 @@ void ocupate_de_este(int socket){
 				free(vmut);
 				break;
 			case MUSE_CLOSE:;
+				printf("-CLOSE\n");
 //				si no se libera algun muse_alloc-> es un memory leak
-			//liberar tabla de programas
+//				liberar tabla de programas
 				resultado = muse_close(id_cliente);
 				printf("Se fue %d\n",socket);
 				exit_loop = true;
