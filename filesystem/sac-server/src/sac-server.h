@@ -63,11 +63,6 @@ typedef struct{
 	void* argumentos;
 }operacion;
 
-typedef struct{
-	uint32_t fd;
-	uint32_t ptr_a_nodo;
-}t_filedes;
-
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
 int crear_servidor(int puerto);
@@ -89,7 +84,6 @@ bool el_fs_esta_formateado(char* fs);
 void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
-void _readdir(int cliente);
 int dame_el_numero_de_bloque_de_nodo(char* nombre);
 void crear_nodo(const char* path);
 nodo* dame_el_primer_nodo_libre();

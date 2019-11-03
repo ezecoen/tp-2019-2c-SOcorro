@@ -120,22 +120,6 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		getattr_destroy(atributos);
 		return 0;
 	}
-//	st_mtime;
-
-
-	//Si path es igual a "/" nos estan pidiendo los atributos del punto de montaje
-
-//	if (strcmp(path, "/") == 0) {
-//		stbuf->st_mode = S_IFDIR | 0777;
-//		stbuf->st_nlink = 2;
-//	} else if (strcmp(path, DEFAULT_FILE_PATH) == 0) {
-//		stbuf->st_mode = S_IFREG | 0777;
-//		stbuf->st_nlink = 1;
-//		stbuf->st_size = strlen(DEFAULT_FILE_CONTENT);
-//	} else {
-//		res = -ENOENT;
-//	}
-//	return res;
 }
 
 
@@ -223,7 +207,8 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 //	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
 	int tam;
-	int fd;
+	int resp;
+	int err;
 //
 	t_open* pedido = crear_open(path,fi->flags);
 	void* magic = serialiazar_open(pedido);
@@ -233,8 +218,14 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	free(magic);
 
 
-
-	return fd;
+	recv(_socket,&resp,4,MSG_WAITALL);
+	if(resp == ERROR){
+		recv(_socket,&err,4,MSG_WAITALL);
+		return -err;
+	}
+	else{
+		return 1;
+	}
 }
 
 

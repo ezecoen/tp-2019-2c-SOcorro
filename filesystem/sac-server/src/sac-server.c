@@ -369,7 +369,7 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
 			free(magic);
 //			busco las entradas y las pongo en una lista
-			t_list* entradas = list_create();
+			t_list* entradas = list_create(); //hay que liberar esta lista?
 			res = encontrame_las_entradas_de(entradas,path_pedido);
 			if(res == -1){
 				int err = ERROR;
@@ -379,10 +379,25 @@ void atender_cliente(int cliente){
 				int tam;
 				memcpy(&tam,magic+8,sizeof(int));
 				send(cliente,magic,tam,0);
+				free(magic);
 			}
 			break;
 		case OPEN:
 			log_info(logger,"Llego la instruccion OPEN");
+			recv(cliente, &_tam,4,MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			t_open* pedido = deserializar_open(magic);
+			res = _open(pedido);
+			if(res == 1){
+				int a = OPEN;
+				send(cliente,&a,4,0);
+			}
+			else{
+				send(cliente,armar_error(res),8,0);
+			}
+			open_destroy(pedido);
+			free(magic);
 			break;
 		case READ:
 			log_info(logger,"Llego la instruccion READ");
@@ -469,6 +484,26 @@ void atender_cliente(int cliente){
 		}
 	}
 }
+
+int _open(t_open* pedido){
+	int res_mknod;
+	if (!dictionary_has_key(diccionario_de_path,pedido->path)){
+		if (pedido->crear || (pedido->crear && pedido->crear_ensure)){
+			res_mknod = _mknod(pedido->path);
+			if (res_mknod == -1)
+				return EDQUOT;
+			return 1;
+		}
+		else
+			return ENOENT;
+	}else{
+		if(pedido->crear && pedido->crear_ensure)
+			return EEXIST;
+		return 1;
+	}
+}
+
+
 //int escribime_en(t_write* wwrite, nodo* nodo){
 //	if()//todo
 //}
@@ -501,15 +536,4 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 		}
 	}
 	return 0;
-}
-void _readdir(int cliente){
-
-//	tengo que recivir el tamanio de la estructura entera pero no tengo
-//	el socket,deberia pasarme el socket por parametro o deberia hacer
-//	el recv antes y mandarme el tamanio por parametro
-
-//	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
-//	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
-//									las entradas de directorio o un error (si no existe devolver -ENOENT)
-
 }
