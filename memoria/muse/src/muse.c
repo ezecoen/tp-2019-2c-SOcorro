@@ -24,6 +24,11 @@ int main(int argc, char **argv) {
 	int result1 = muse_alloc(mat1);
 	printf("\nDireccion virtual de mat: %d",result1);
 
+	muse_free_t* mft = crear_muse_free("prog0",result);
+	muse_free(mft);
+	muse_free_t* mft1 = crear_muse_free("prog0",result1);
+	muse_free(mft1);
+
 //	if(swap != MAP_FAILED){
 //		memcpy(swap,sample,1000);
 //		printf("%s",(char*)swap);
@@ -784,7 +789,8 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
-				reemplazar_heap_en_memoria(heap_de_lista_anterior,segmento_buscado,heap_metadata_nuevo);
+				reemplazar_heap_en_memoria(heap_de_lista_anterior,
+						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
 					list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
 				}
