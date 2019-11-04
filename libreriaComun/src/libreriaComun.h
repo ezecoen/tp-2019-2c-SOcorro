@@ -40,7 +40,8 @@ typedef enum {
 	UNLINK,
 	ERROR,
 	WRITE,
-	EXITOSO
+	EXITOSO,
+	UTIMES
 }operaciones;
 
 typedef struct{
@@ -74,6 +75,12 @@ typedef struct{
 	uint32_t size_buff;
 	uint32_t offset;
 }t_write;
+
+typedef struct{
+	int size_path;
+	char* path;
+	long int utime;
+}t_utime;
 
 /**
 * @NAME: char_length
