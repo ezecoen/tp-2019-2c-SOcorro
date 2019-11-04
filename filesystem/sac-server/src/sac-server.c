@@ -23,11 +23,10 @@ int main(int argc,char* argv[]) {
 //	}
 
 
-
-
-
 	return 0;
 }
+
+
 int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
 	nodo* nodo = dame_el_primer_nodo_libre(nombre);
 	if(nodo == -1){//no hay mas nodos
@@ -476,6 +475,23 @@ void atender_cliente(int cliente){
 //			que esten a nuestro alcance por lo menos)
 
 //			mandar socket respuesta con el valor de la respuesta
+		case UNLINK:
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			free(magic);
+			log_info(logger,"Llego la instruccion UNLINKde %s",path_pedido);
+			res = _unlink(path_pedido);
+			if(res != 0){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				int a = UNLINK;
+				send(cliente,&a,4,0);
+			}
+			break;
 		case MKDIR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
@@ -500,9 +516,6 @@ void atender_cliente(int cliente){
 			break;
 		case CHMOD:
 			log_info(logger,"Llego la instruccion CHMOD");
-			break;
-		case UNLINK:
-			log_info(logger,"Llego la instruccion UNLINK");
 			break;
 		case WRITE:
 			log_info(logger,"Llego la instruccion WRITE");
@@ -575,6 +588,49 @@ int _open(t_open* pedido){
 		return 1;
 	}
 }
+
+int _unlink (char* path){
+	int indice_de_nodo;
+	if (!dictionary_has_key(diccionario_de_path,path)){
+		return ENOENT;
+	}
+	else{
+		indice_de_nodo = dictionary_get(diccionario_de_path,path);
+		nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
+		limpiar_nodo(nodox);
+		return 0;
+	}
+}
+
+void limpiar_nodo(nodo* nodox){
+	int i = 0, j;
+	t_punteros_a_bloques_de_datos* BPD; //Bloque de Punteros a Datos
+	while(i<1000 && nodox->punteros_indirectos[i].punteros != 0){
+		j = 0;
+		BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+nodox->punteros_indirectos[i].punteros);
+		while(j<1024 && BPD->punteros_a_bloques_de_datos[j] != 0){
+			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
+			BPD->punteros_a_bloques_de_datos[j] = 0;
+			j++;
+		}
+		bitarray_clean_bit(bitarray,nodox->punteros_indirectos[i].punteros);
+		nodox->punteros_indirectos[i].punteros = 0;
+		i++;
+	}
+}
+
+
+//int escribime_en(t_write* wwrite, nodo* nodo){
+//	if()//todo
+//}
+//bloque* dame_el_bloque_para_escribir_de(nodo* mi_nodo){
+//	if(no_tengo_bloques_asignados(mi_nodo) || el_ultimo){
+//		asignar_bloque(mi_nodo);
+//		return dame_el_bloque_para_escribir_de(mi_nodo);
+//	}else{
+//		return (bloque*)primer_bloque_de_disco+1+tam_de_bitmap+bloque_para_escribir(mi_nodo->punteros_indirectos);
+//	}
+//}
 
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 	if(!dictionary_has_key(diccionario_de_path,path_pedido)){

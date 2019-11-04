@@ -66,6 +66,10 @@ typedef struct{
 	void* argumentos;
 }operacion;
 
+typedef struct{
+	uint32_t punteros_a_bloques_de_datos[1024];
+}t_punteros_a_bloques_de_datos;
+
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
 int crear_servidor(int puerto);
