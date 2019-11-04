@@ -418,6 +418,7 @@ t_open* deserializar_open(void* magic){
 
 	memcpy(&tam, magic+puntero, 4);
 	puntero += 4;
+	resp->size_path = tam;
 	resp->path = malloc(tam);
 	memcpy(resp->path, magic+puntero, tam);
 	puntero += tam;
