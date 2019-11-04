@@ -9,6 +9,7 @@
 #define SAC_SERVER_H_
 
 #include <time.h>
+#include <math.h>
 #include <pthread.h>
 #include <readline/readline.h>
 #include <stdio.h>
@@ -93,12 +94,11 @@ char* dame_el_nombre(char** nombres,int quien);
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
-static unsigned int _hash(char *key, int key_len);
 char* dame_path_padre(char* nombre);
 bloque* bloque_de_nodo(int nodo);
 void dame_mi_path_entero(int numero_de_nodo);
 int _open(t_open* pedido);
-
+uint32_t dame_un_bloque_libre();
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;

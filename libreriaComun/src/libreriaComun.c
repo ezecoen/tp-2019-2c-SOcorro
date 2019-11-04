@@ -25,18 +25,20 @@ void* serializar_write(t_write* wwrite){
 	uint32_t comando = WRITE;
 	int puntero = 0;
 	void* magic = malloc(bytes);
-	mempcpy(magic+puntero,&comando,sizeof(uint32_t));
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-	mempcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-	mempcpy(magic+puntero,&wwrite->size_path,sizeof(uint32_t));
+	memcpy(magic+puntero,&wwrite->offset,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-	mempcpy(magic+puntero,&wwrite->path,wwrite->size_path);
-	puntero += wwrite->size_path;
-	mempcpy(magic+puntero,&wwrite->size_buff,sizeof(uint32_t));
+	memcpy(magic+puntero,&wwrite->size_buff,sizeof(uint32_t));
 	puntero += sizeof(uint32_t);
-	mempcpy(magic+puntero,&wwrite->buff,wwrite->size_buff);
+	memcpy(magic+puntero,&wwrite->buff,wwrite->size_buff);
 	puntero += wwrite->size_buff;
+	memcpy(magic+puntero,&wwrite->size_path,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&wwrite->path,wwrite->size_path);
+	puntero += wwrite->size_path;
 	return magic;
 }
 t_write* deserializar_write(void* magic){
@@ -46,10 +48,12 @@ t_write* deserializar_write(void* magic){
 	puntero+=sizeof(uint32_t);
 	memcpy(&wwrite->size_buff,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
+	wwrite->buff = malloc(wwrite->size_buff);
 	memcpy(wwrite->buff,magic+puntero,wwrite->size_buff);
 	puntero+=wwrite->size_buff;
 	memcpy(&wwrite->size_path,magic+puntero,sizeof(uint32_t));
 	puntero+=sizeof(uint32_t);
+	wwrite->path = malloc(wwrite->size_path);
 	memcpy(wwrite->path,magic+puntero,wwrite->size_path);
 	puntero+=wwrite->size_path;
 	return wwrite;
@@ -449,7 +453,6 @@ void* serializar_utime (t_utime* pedido){
 	operaciones op = UTIMES;
 	void* magic = malloc(bytes);
 	int puntero = 0;
-
 	memcpy(magic+puntero,&op,4);
 	puntero += 4;
 	memcpy(magic+puntero,&bytes,4);
@@ -458,9 +461,8 @@ void* serializar_utime (t_utime* pedido){
 	puntero += 4;
 	memcpy(magic+puntero, pedido->path, pedido->size_path);
 	puntero += pedido->size_path;
-	memcpy(magic+puntero, &pedido->utime,sizeof(long int));
-	puntero += sizeof(long int);
-
+	memcpy(magic+puntero, &pedido->utime,sizeof(uint64_t));
+	puntero += sizeof(uint64_t);
 	return magic;
 }
 
@@ -468,19 +470,19 @@ t_utime* deserializar_utime(void* magic){
 	int puntero = 0;
 	t_utime* resp = malloc(sizeof(t_utime));
 	int tam;
-
 	memcpy(&tam, magic+puntero, 4);
 	puntero += 4;
+	resp->size_path = tam;
 	resp->path = malloc(tam);
 	memcpy(resp->path, magic+puntero, tam);
 	puntero += tam;
-	memcpy(&resp->utime, magic+puntero, sizeof(long int));
-	puntero += sizeof(long int);
+	memcpy(&resp->utime, magic+puntero, sizeof(uint64_t));
+	puntero += sizeof(uint64_t);
 
 	return resp;
 }
 
-void utime_destroy(t_utime)* dest){
+void utime_destroy(t_utime* dest){
 
 }
 

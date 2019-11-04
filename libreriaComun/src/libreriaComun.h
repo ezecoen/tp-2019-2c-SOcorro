@@ -79,7 +79,7 @@ typedef struct{
 typedef struct{
 	int size_path;
 	char* path;
-	long int utime;
+	uint64_t utime;
 }t_utime;
 
 /**
