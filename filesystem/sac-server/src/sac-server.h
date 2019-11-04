@@ -28,6 +28,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
@@ -95,6 +97,8 @@ static unsigned int _hash(char *key, int key_len);
 char* dame_path_padre(char* nombre);
 bloque* bloque_de_nodo(int nodo);
 void dame_mi_path_entero(int numero_de_nodo);
+int _open(t_open* pedido);
+
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;

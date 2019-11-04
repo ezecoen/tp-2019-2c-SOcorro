@@ -224,10 +224,14 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 		return -err;
 	}
 	else{
-		return 1;
+		filedes++;
+		return filedes;
 	}
 }
 
+int sac_release (const char * path, int fildes){
+	return 0;
+}
 
 static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	int _tam;
@@ -342,6 +346,7 @@ int sac_write (const char *path, const char *buf, size_t tam, off_t offset, stru
 	}
 }
 
+
 //static int sac_opendir (const char *, struct fuse_file_info *)
 
 
@@ -361,7 +366,8 @@ static struct fuse_operations sac_oper = {
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
 		.unlink = sac_unlink,
-		.write = sac_write
+		.write = sac_write,
+		.release = sac_release
 };
 
 

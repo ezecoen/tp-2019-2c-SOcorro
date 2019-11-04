@@ -1,7 +1,5 @@
 // servidor para probar sockets mañana
 #include "sac-server.h"
-#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
-#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
@@ -430,11 +428,11 @@ void atender_cliente(int cliente){
 			}
 			break;
 		case OPEN:
-			log_info(logger,"Llego la instruccion OPEN");
 			recv(cliente, &_tam,4,MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			t_open* pedido = deserializar_open(magic);
+			log_info(logger,"Llego la instruccion OPEN de %s",pedido->path);
 			res = _open(pedido);
 			if(res == 1){
 				int a = OPEN;

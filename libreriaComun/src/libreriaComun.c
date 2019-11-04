@@ -1,5 +1,6 @@
 #include "libreriaComun.h"
 
+#include <string.h>
 //	PAQUETE	:	COD_COM	|	TAM_PAQUETE	|	PAQUETE
 //	Para recibir los paquetes hacer
 //	uint32_t comando = recibir_op(socket)
