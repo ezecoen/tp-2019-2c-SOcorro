@@ -252,6 +252,7 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	}
 }
 
+
 static int sac_mkdir(const char *path, mode_t mode)
 {
 	int _tam;
@@ -272,6 +273,26 @@ static int sac_mkdir(const char *path, mode_t mode)
 	}
 }
 
+
+static int sac_unlink(const char *path)
+{
+	int _tam;
+
+	void* peticion = serializar_path(path, UNLINK);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	if(op == ERROR){
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
+
+
 static int sac_chmod(const char *path, mode_t mode)
 {
     int res;
@@ -280,19 +301,6 @@ static int sac_chmod(const char *path, mode_t mode)
         return -errno;
     return 0;
 }
-
-
-static int sac_unlink(const char *path)
-{
-    int res;
-
-    res = unlink(path);
-    if(res == -1)
-        return -errno;
-
-    return 0;
-}
-
 
 /*
  * @DESC
@@ -330,9 +338,12 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 }
 int sac_write (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
 	t_write* wwrite = crear_write(path,buf,tam,offset);
+	int _tam;
 	void* magic = serializar_write(wwrite);
-	send(_socket,magic,(int)magic+4,0);
+	memcpy(&_tam,magic+4,4);
+	send(_socket,magic,_tam,0);
 	free(magic);
+
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
@@ -347,7 +358,23 @@ int sac_write (const char *path, const char *buf, size_t tam, off_t offset, stru
 }
 
 int sac_utimes (const char *filename, struct timeval tvp[2]){
+	uint64_t timee = timestamp();
+	t_utime* pedido = crear_utime(filename, timee);
+	void* magic = serializar_utime(pedido);
+	int tam;
+	memcpy(&tam, magic+4,4);
+	send(_socket,magic,tam,0);
 
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
 }
 
 //static int sac_opendir (const char *, struct fuse_file_info *)
@@ -371,7 +398,7 @@ static struct fuse_operations sac_oper = {
 		.unlink = sac_unlink,
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
-		.utimes = sac_utimes
+		.utime = sac_utimes
 };
 
 
@@ -405,7 +432,7 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 
    /*============= MAIN DE PRUEBA =============*/
-x	system("fusermount -u fs");
+	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
 

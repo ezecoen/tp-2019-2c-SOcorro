@@ -79,7 +79,7 @@ typedef struct{
 typedef struct{
 	int size_path;
 	char* path;
-	long int utime;
+	uint64_t utime;
 }t_utime;
 
 /**
@@ -119,5 +119,6 @@ t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo);
 void* serializar_getattr(t_getattr* stat);
 t_getattr* deserializar_getattr(void* magic);
 t_open* crear_open(char* path, int flags);
+t_utime* crear_utime (char* path, uint64_t utime);
 
 #endif /* LIBRERIA_COMUN_H_ */
