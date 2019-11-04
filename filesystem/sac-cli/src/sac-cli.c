@@ -224,8 +224,8 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 		return -err;
 	}
 	else{
-		filedes++;
-		return filedes;
+//		filedes++;
+		return 0;
 	}
 }
 
@@ -346,6 +346,9 @@ int sac_write (const char *path, const char *buf, size_t tam, off_t offset, stru
 	}
 }
 
+int sac_utimes (const char *filename, struct timeval tvp[2]){
+
+}
 
 //static int sac_opendir (const char *, struct fuse_file_info *)
 
@@ -360,14 +363,15 @@ static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
 		.open = sac_open,
+		.release = sac_release,
 //		.opendir = sac_opendir,
 		.read = sac_read,
+		.write = sac_write,
 		.mknod = sac_mknod,
+		.unlink = sac_unlink,
 		.mkdir = sac_mkdir,
 		.chmod = sac_chmod,
-		.unlink = sac_unlink,
-		.write = sac_write,
-		.release = sac_release
+		.utimes = sac_utimes
 };
 
 
@@ -401,12 +405,12 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 
    /*============= MAIN DE PRUEBA =============*/
-
+x	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("127.0.0.1", 8080);
+	_socket = conectar_socket_a("192.168.1.104", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 

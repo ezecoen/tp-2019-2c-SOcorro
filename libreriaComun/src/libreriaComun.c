@@ -433,4 +433,58 @@ void open_destroy(t_open* open){
 	free(open);
 }
 
+t_utime* crear_utime (char* path, long int utime){
+	t_utime* pedido = malloc(sizeof(t_utime));
+	int tam_char = char_length(path);
+	pedido->size_path = tam_char;
+	pedido->path = malloc(tam_char);
+	memcpy(pedido->path, path, tam_char);
+	pedido->utime = utime;
+
+	return pedido;
+}
+
+void* serializar_utime (t_utime* pedido){
+	int bytes = 2*sizeof(int) + pedido->size_path + sizeof(int) + sizeof(long int);
+	operaciones op = UTIMES;
+	void* magic = malloc(bytes);
+	int puntero = 0;
+
+	memcpy(magic+puntero,&op,4);
+	puntero += 4;
+	memcpy(magic+puntero,&bytes,4);
+	puntero += 4;
+	memcpy(magic+puntero, &pedido->size_path,4);
+	puntero += 4;
+	memcpy(magic+puntero, pedido->path, pedido->size_path);
+	puntero += pedido->size_path;
+	memcpy(magic+puntero, &pedido->utime,sizeof(long int));
+	puntero += sizeof(long int);
+
+	return magic;
+}
+
+t_utime* deserializar_utime(void* magic){
+	int puntero = 0;
+	t_utime* resp = malloc(sizeof(t_utime));
+	int tam;
+
+	memcpy(&tam, magic+puntero, 4);
+	puntero += 4;
+	resp->path = malloc(tam);
+	memcpy(resp->path, magic+puntero, tam);
+	puntero += tam;
+	memcpy(&resp->utime, magic+puntero, sizeof(long int));
+	puntero += sizeof(long int);
+
+	return resp;
+}
+
+void utime_destroy(t_utime)* dest){
+
+}
+
+
+
+
 

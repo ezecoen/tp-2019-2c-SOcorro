@@ -76,6 +76,12 @@ typedef struct{
 	uint32_t offset;
 }t_write;
 
+typedef struct{
+	int size_path;
+	char* path;
+	long int utime;
+}t_utime;
+
 /**
 * @NAME: char_length
 * @DESC: Devuelve el tamaño de un char, incluido el '\0'
