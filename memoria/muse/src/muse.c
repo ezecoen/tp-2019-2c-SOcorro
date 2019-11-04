@@ -24,12 +24,6 @@ int main(int argc, char **argv) {
 //	int result1 = muse_alloc(mat1);
 //	printf("\nDireccion virtual de mat: %d",result1);
 
-//	if(swap != MAP_FAILED){
-//		memcpy(swap,sample,1000);
-//		printf("%s",(char*)swap);
-//	}
-//	perror("error: ");
-
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -39,9 +33,9 @@ int main(int argc, char **argv) {
 	return EXIT_SUCCESS;
 }
 void init_estructuras(char* path){
-	//iniciar_memoria_virtual(path);
 	upcm = malloc(configuracion->tam_mem);
-	swap = malloc(configuracion->tam_swap);//provisorio
+//	swap = malloc(configuracion->tam_swap);//provisorio
+	iniciar_memoria_virtual(path);
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
 	tabla_de_mapeo = list_create();
@@ -66,9 +60,15 @@ void iniciar_memoria_virtual(char* path_swap){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-	int fd = open(path_swap,O_RDWR,0);
+	int fd = open(path_swap,O_RDWR);
+	if(fd<0){
+		printf("no se pudo abrir el archivo de swap");
+	}
 	//no funciona!!
 	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+	if(swap == MAP_FAILED || swap == NULL){
+		perror("error: ");
+	}
 	free(aux);
 
 }
@@ -206,7 +206,6 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					}
 				}
 				list_add(paginas,pag);
-
 			}
 			free(heap_al_final);
 			segmento_nuevo->paginas = paginas;
@@ -652,7 +651,7 @@ t_bit_memoria* buscar_0_1(){
 	return bit_nulo;
 }
 pagina* buscar_pagina_por_bit(t_bit_memoria* bit){
-	pagina* pagina_return;
+	pagina* pagina_return = NULL;
 	void buscar_bit(pagina* pag){
 		if(pag->presencia){
 			if(pag->bit_marco->posicion == bit->posicion){
