@@ -430,7 +430,7 @@ void atender_cliente(int cliente){
 		case OPEN:
 			recv(cliente, &_tam,4,MSG_WAITALL);
 			magic = malloc(_tam);
-			recv(cliente,magic,_tam,MSG_WAITALL);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_open* pedido = deserializar_open(magic);
 			log_info(logger,"Llego la instruccion OPEN de %s",pedido->path);
 			res = _open(pedido);
@@ -439,7 +439,9 @@ void atender_cliente(int cliente){
 				send(cliente,&a,4,0);
 			}
 			else{
-				send(cliente,armar_error(res),8,0);
+				void* error = armar_error(res);
+				send(cliente,error,8,0);
+				free(error);
 			}
 			open_destroy(pedido);
 			free(magic);
@@ -522,6 +524,9 @@ void atender_cliente(int cliente){
 //			}else{
 //
 //			}
+			break;
+		case UTIMES:
+
 			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");

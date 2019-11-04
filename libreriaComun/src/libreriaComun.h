@@ -40,7 +40,8 @@ typedef enum {
 	UNLINK,
 	ERROR,
 	WRITE,
-	EXITOSO
+	EXITOSO,
+	UTIMES
 }operaciones;
 
 typedef struct{
