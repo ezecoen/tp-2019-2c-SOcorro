@@ -464,10 +464,6 @@ void* serializar_utime (t_utime* pedido){
 	puntero += pedido->size_path;
 	memcpy(magic+puntero, &pedido->utime,sizeof(uint64_t));
 	puntero += sizeof(uint64_t);
-<<<<<<< HEAD
-=======
-
->>>>>>> 55dcf8fe7c67c6d28b002e414c415af4fb94c944
 	return magic;
 }
 
