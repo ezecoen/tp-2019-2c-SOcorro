@@ -9,6 +9,7 @@
 #define SAC_SERVER_H_
 
 #include <time.h>
+#include <math.h>
 #include <pthread.h>
 #include <readline/readline.h>
 #include <stdio.h>
@@ -28,6 +29,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <errno.h>
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
+#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 struct sockaddr_in  direccionServidor;
 struct sockaddr_in  direccionCliente;
@@ -64,9 +67,8 @@ typedef struct{
 }operacion;
 
 typedef struct{
-	uint32_t fd;
-	uint32_t ptr_a_nodo;
-}t_filedes;
+	uint32_t punteros_a_bloques_de_datos[1024];
+}t_punteros_a_bloques_de_datos;
 
 /*==	Firmas de Funciones		==*/
 void esperar_conexion(int servidor);
@@ -89,7 +91,6 @@ bool el_fs_esta_formateado(char* fs);
 void init_fs(char* fs);
 void load_fs(char* fs);
 void atender_cliente(int cliente);
-void _readdir(int cliente);
 int dame_el_numero_de_bloque_de_nodo(char* nombre);
 void crear_nodo(const char* path);
 nodo* dame_el_primer_nodo_libre();
@@ -97,10 +98,11 @@ char* dame_el_nombre(char** nombres,int quien);
 int _mknod(char* nombre);
 int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
-static unsigned int _hash(char *key, int key_len);
 char* dame_path_padre(char* nombre);
 bloque* bloque_de_nodo(int nodo);
 void dame_mi_path_entero(int numero_de_nodo);
+int _open(t_open* pedido);
+uint32_t dame_un_bloque_libre();
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
 int es_virgen;

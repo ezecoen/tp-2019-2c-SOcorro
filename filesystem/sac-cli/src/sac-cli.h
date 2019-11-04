@@ -25,6 +25,7 @@
 /*==	Variables Globales		==*/
 int _socket;
 t_log* logger;
+int filedes = 0;
 
 void cargar_dirents_en_buffer(t_list* lista, void *buf, fuse_fill_dir_t filler, int cant);
 

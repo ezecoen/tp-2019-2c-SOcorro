@@ -40,7 +40,8 @@ typedef enum {
 	UNLINK,
 	ERROR,
 	WRITE,
-	EXITOSO
+	EXITOSO,
+	UTIMES
 }operaciones;
 
 typedef struct{
@@ -74,6 +75,12 @@ typedef struct{
 	uint32_t size_buff;
 	uint32_t offset;
 }t_write;
+
+typedef struct{
+	int size_path;
+	char* path;
+	uint64_t utime;
+}t_utime;
 
 /**
 * @NAME: char_length
@@ -112,5 +119,6 @@ t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo);
 void* serializar_getattr(t_getattr* stat);
 t_getattr* deserializar_getattr(void* magic);
 t_open* crear_open(char* path, int flags);
+t_utime* crear_utime (char* path, uint64_t utime);
 
 #endif /* LIBRERIA_COMUN_H_ */
