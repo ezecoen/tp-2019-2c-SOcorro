@@ -14,11 +14,11 @@ int main(void) {
 	pruebita();
 	int init = muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
 	if(init==0){
-		void* void1 = malloc(10);
-		char* mensaje = string_new();
-		char* mensaje_recibido = malloc(10);
-		string_append(&mensaje,"hola :D:D");
-		memcpy(void1,mensaje,10);
+//		void* void1 = malloc(10);
+//		char* mensaje = string_new();
+//		char* mensaje_recibido = malloc(10);
+//		string_append(&mensaje,"hola :D:D");
+//		memcpy(void1,mensaje,10);
 
 //		int alloc1 = muse_alloc(10);
 //		printf("Direccion1 de muse_alloc recibida en prueba: %d\n",alloc1);

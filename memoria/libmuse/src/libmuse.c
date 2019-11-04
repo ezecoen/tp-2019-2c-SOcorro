@@ -66,7 +66,7 @@ uint32_t muse_alloc(uint32_t tam){
 		printf("Direccion recibida en libmuse: %d\n",direccion);
 	}
 	else{
-		direccion = NULL;
+		direccion = (int)NULL;
 		//probar si se manda el null
 	}
 	free(magic);
