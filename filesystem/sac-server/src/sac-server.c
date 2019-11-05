@@ -23,11 +23,15 @@ int main(int argc,char* argv[]) {
 //		int cliente = aceptar_cliente(servidor);
 //		atender_cliente(cliente);
 	}
-
+	destroy_semaforos();
 
 	return 0;
 }
-
+void destroy_semaforos(){
+	sem_destroy(&s_bitarray);
+	sem_destroy(&s_diccionario);	
+	sem_destroy(&s_tabla_de_nodos);
+}
 void init_semaforos(){
 	sem_init(&s_bitarray,0,1);
 	sem_init(&s_diccionario,0,1);
