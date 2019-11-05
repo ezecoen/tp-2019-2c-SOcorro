@@ -1,8 +1,4 @@
-#include <hilolay/alumnos.h>
-#include <stdio.h>
-#include <time.h>
-#include <stdlib.h>
-
+#include "hilolay.h"
 /* Lib implementation: It'll only schedule the last thread that was created */
 int max_tid = 0;
 
@@ -45,7 +41,20 @@ static struct hilolay_operations hiloops = {
 
 void hilolay_init(void){
 	init_internal(&hiloops);
-
 	//Aca tengo que decirle a suse que inicialice las cosas (estados del planificador, semaforos, etc)
-
+	//tambien hay que hacer el connect con suse
 }
+uint32_t conectar_socket_a(char* ip, uint32_t puerto){
+	struct sockaddr_in direccionServidor;
+	direccionServidor.sin_family = AF_INET;
+	direccionServidor.sin_addr.s_addr = inet_addr(ip);
+	direccionServidor.sin_port = htons(puerto);
+
+	uint32_t cliente = socket(AF_INET, SOCK_STREAM,0);
+	if (connect(cliente,(void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+		printf("Error al conectar a ip %s y puerto %d\n",ip,puerto);
+		return -1;
+	}
+	return cliente;
+}
+

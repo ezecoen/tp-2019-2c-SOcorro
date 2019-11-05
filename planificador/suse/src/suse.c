@@ -23,7 +23,7 @@ int main(void) {
 //
 //	pthread_t hiloDePrueba;
 //	if(pthread_create(&hiloDePrueba, NULL, (void*)funcionDePrueba, NULL) != 0){
-//		log_error(log, "Erroe creando el hilo de prueba");
+//		log_error(logg, "Erroe creando el hilo de prueba");
 //	}
 
 //	pthread_detach(hiloDePrueba);
@@ -54,7 +54,7 @@ void printearNumeroDeHilo(tcb* threadControlBlock){
 
 	while(cantidadLoops > i){
 
-		log_info(log, "Soy el hilo numero %d del proceso %d\n\n", threadControlBlock->t_id, threadControlBlock->p_id);
+		log_info(logg, "Soy el hilo numero %d del proceso %d\n\n", threadControlBlock->t_id, threadControlBlock->p_id);
 		usleep(4000000);
 
 		i++;
@@ -63,7 +63,7 @@ void printearNumeroDeHilo(tcb* threadControlBlock){
 
 	sem_post(&mut_multiprogramacion);
 
-	log_info(log, "Termine de printear, soy el hilo numero %d y me printee %d veces", threadControlBlock->t_id, cantidadLoops);
+	log_info(logg, "Termine de printear, soy el hilo numero %d y me printee %d veces", threadControlBlock->t_id, cantidadLoops);
 
 	_Bool compararNumeroDeTID(tcb* _threadControlBlock){
 		return threadControlBlock->t_id == threadControlBlock->t_id;
@@ -85,7 +85,7 @@ void crearHilo(int numero){
 
 	pthread_t hiloDeNumero;
 	if(pthread_create(&hiloDeNumero, NULL, (void*)printearNumeroDeHilo, (void*)threadControlBlock)!=0){
-		log_error(log, "Error creando el hilo");
+		log_error(logg, "Error creando el hilo");
 	}
 
 	pthread_detach(hiloDeNumero);
@@ -123,13 +123,13 @@ p_config* leer_config(){//TODO: tengo que ver como levantar los arrays de la con
 	configuracion->ALPHA_SJF = config_get_int_value(g_config, "ALPHA_SJF");
 
 	//Imprimo las variables
-//	log_info(log, "Puerto de escucha: %d",configuracion->LISTEN_PORT);
-//	log_info(log, "Timer para metricas: %d",configuracion->METRICS_TIMER);
-//	log_info(log, "Grado de Multiprogramacion: %d",configuracion->MAX_MULTIPROG);
-//	log_info(log, "Alpha para el algoritmo: %d",configuracion->ALPHA_SJF);
+//	log_info(logg, "Puerto de escucha: %d",configuracion->LISTEN_PORT);
+//	log_info(logg, "Timer para metricas: %d",configuracion->METRICS_TIMER);
+//	log_info(logg, "Grado de Multiprogramacion: %d",configuracion->MAX_MULTIPROG);
+//	log_info(logg, "Alpha para el algoritmo: %d",configuracion->ALPHA_SJF);
 
 //	for(int i=0 ; i < (sizeof(configuracion->SEM_IDS / sizeof(uint32_t))); i++){
-//		log_info(log, "Sem id %d: %c", i, configuracion->SEM_IDS[i]);
+//		log_info(logg, "Sem id %d: %c", i, configuracion->SEM_IDS[i]);
 //	}
 
 	return configuracion;
@@ -137,8 +137,8 @@ p_config* leer_config(){//TODO: tengo que ver como levantar los arrays de la con
 }
 
 void iniciar_log(){
-	log = log_create("suse.log","suse",1,LOG_LEVEL_TRACE);
-	log_info(log, "Log creado!");
+	logg = log_create("suse.log","suse",1,LOG_LEVEL_TRACE);
+	log_info(logg, "Log creado!");
 }
 
 void inicializarSemaforos(){
@@ -184,7 +184,7 @@ int crearServidor(){
 		return 1;
 	}
 
-	log_info(log, "Estoy escuchando en el puerto 8080");
+	log_info(logg, "Estoy escuchando en el puerto 8080");
 	listen(servidor,SOMAXCONN);
 	return servidor;
 }
@@ -200,29 +200,35 @@ void escucharServidor(int servidor){//Esta funcion es la que va a hacer de escuc
 
 }
 
-void ocupateDeEste(uint32_t cliente, uint32_t operacion){//Con esta funcion identifico lo que me pida hilolay y lo ejecuto
+void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pida hilolay y lo ejecuto
+	log_info(logg, "Tengo a este cliente %d",cliente);
+	int operacion;
+	int pid;
+	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
+		switch(operacion){
+			case INIT:
+				//se hace 1 vez por proceso
+				break;
+			case CREATE:
+				//planificarNuevoProceso(pid, tid);
 
-	log_info(log, "Tengo a este cliente %d",cliente);
-
-	switch(operacion){
-		case 0:
-			//planificarNuevoProceso(pid, tid);
-			break;
-		case 1:
-			//lo que tenga que hacer para suse_schedule_next
-			break;
-		case 2:
-			//lo que tenga que hacer para suse_join
-			break;
-		case 3:
-			//lo que tenga que hacer para suse_close
-			break;
-		case 4:
-			//lo que tenga que hacer para suse_wait
-			break;
-		case 5:
-			//lo que tenga que hacer para suse_signal
-			break;
+				break;
+			case SCHEDULE_NEXT:
+				//lo que tenga que hacer para suse_schedule_next
+				break;
+			case JOIN:
+				//lo que tenga que hacer para suse_join
+				break;
+			case CLOSE:
+				//lo que tenga que hacer para suse_close
+				break;
+			case WAIT:
+				//lo que tenga que hacer para suse_wait
+				break;
+			case SIGNAL:
+				//lo que tenga que hacer para suse_signal
+				break;
+		}
 	}
 }
 
@@ -232,7 +238,7 @@ int aceptarConexion(int servidor){
 	unsigned int tamanioDireccion = sizeof(direccionCliente);
 	uint32_t cliente = accept(servidor, (void*)&direccionCliente, &tamanioDireccion);
 	//perror("Error: ");
-	log_info(log, "Recibi una conexion de %d!!\n", cliente);
+	log_info(logg, "Recibi una conexion de %d!!\n", cliente);
 
 	send(cliente, "Hola!", 6, 0);
 
@@ -280,6 +286,9 @@ void planificarNuevoProceso(uint32_t pid, uint32_t tid){//Con esto creo un nuevo
 	list_add(estadoNew, pcb);
 
 }
+pcb* buscarProcesoEnListaDeProcesos(int pid){
 
+}
 //OTRAS FUNCIONES
+
 

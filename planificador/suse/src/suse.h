@@ -1,9 +1,10 @@
+#ifndef SUSE_H_
+#define SUSE_H_
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <pthread.h>
-#include <../hilolay/hilolay.h>
 #include <semaphore.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -40,14 +41,15 @@ typedef struct{
 	uint32_t SEM_MAX[];
 }p_config;
 
-typedef enum{
+typedef enum operaciones_t{
+	INIT,
 	CREATE,
 	SCHEDULE_NEXT,
 	JOIN,
 	CLOSE,
 	WAIT,
 	SIGNAL
-};//Enum de operaciones para el Switch
+}operaciones_t;//Enum de operaciones para el Switch
 
 
 
@@ -70,14 +72,15 @@ void inicializarOtrasListas();
 //COSAS PARA EL SERVIDOR
 int crearServidor();
 void escucharServidor(int);
-void ocupateDeEste(uint32_t, uint32_t);
+void ocupateDeEste(uint32_t cliente);
 int aceptarConexion(int);
 
 
 //FUNCIONES PARA HACER LO QUE ME PIDA HILOLAY, O SEA, LA IMPLEMENTACION DE SUSE
-void planificarNuevoProceso(uint32_t pid, uint32_t tid)
+void planificarNuevoProceso(uint32_t pid, uint32_t tid);
 pcb* crearPCB();
 void crearTCB(uint32_t, uint32_t);
+pcb* buscarProcesoEnListaDeProcesos(int pid);
 
 
 //OTRAS FUNCIONES
@@ -87,7 +90,7 @@ void crearTCB(uint32_t, uint32_t);
 /* VARIABLES GLOBALES ---------------------------------------------------------------------------------------------*/
 t_list* ultsAPlanificar;
 t_list* listaDeProgramas; //Lista de programas ejecutando/a ejecutar
-t_log* log;
+t_log* logg;
 t_config* g_config;
 p_config* configuracion;
 uint32_t numeroDePrograma; //vendria a ser como el "pid" de cada programa/proceso
@@ -107,3 +110,4 @@ sem_t mut_numeroDePrograma;
 t_list* estadoNew;
 t_list* estadoExit;
 t_list* estadoBlocked;
+#endif /* SUSE_H_ */
