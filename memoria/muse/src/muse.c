@@ -16,42 +16,43 @@ int main(int argc, char **argv) {
 	string_append(&programa->id_programa,"prog0");
 	list_add(tabla_de_programas,programa);
 
+
+	muse_alloc_t* mat = crear_muse_alloc(100,"prog0");
+	int resu = muse_alloc(mat);
+	printf("\nDireccion virtual del mat: %d",resu);
+	fflush(stdout);
+
+
 	muse_map_t* mmt = crear_muse_map(100,"prog0",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map = muse_map(mmt);
 	printf("\nDireccion virtual del map: %d",puntero_map);
 	fflush(stdout);
 
-	muse_get_t* mgt = crear_muse_get(100,"prog0",puntero_map);
-	void* resultado_get = muse_get(mgt);
-	printf("\nResultado get: %s",(char*)resultado_get);
+	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog0");
+	int resu2 = muse_alloc(mat2);
+	printf("\nDireccion virtual del mat: %d",resu2);
+		fflush(stdout);
+
+
+	muse_alloc_t* mat3 = crear_muse_alloc(13,"prog0");
+	int resu3 = muse_alloc(mat3);
+	printf("\nDireccion virtual del mat: %d",resu3);
+		fflush(stdout);
+
+	muse_free_t* mft = crear_muse_free("prog0",resu);
+	muse_free(mft);
+
+	muse_alloc_t* mat4 = crear_muse_alloc(30,"prog0");
+	int resu4 = muse_alloc(mat4);
+	printf("\nDireccion virtual del mat: %d",resu4);
 	fflush(stdout);
-	printf("\nLength del resultado: %d",strlen((char*)resultado_get));
-
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"prog1");
-	list_add(tabla_de_programas,programa1);
-
-	muse_map_t* mmt1 = crear_muse_map(100,"prog1",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
-	int puntero_map1 = muse_map(mmt1);
-	printf("\nDireccion virtual del map: %d",puntero_map1);
+	muse_alloc_t* mat5 = crear_muse_alloc(30,"prog0");
+	int resu5 = muse_alloc(mat5);
+	printf("\nDireccion virtual del mat: %d",resu5);
 	fflush(stdout);
 
-	char* char_example = malloc(40);
-	memcpy(char_example,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",40);
-	muse_cpy_t* mct = crear_muse_cpy(40,"prog1",puntero_map1,(void*)char_example);
-	int resultado_cpy = muse_cpy(mct);
-	printf("\nResultado cpy: %d",resultado_cpy);
-	fflush(stdout);
 
-	muse_get_t* mgt1 = crear_muse_get(100,"prog1",puntero_map1);
-	char* resultado_get1 = muse_get(mgt1);
-	printf("\nResultado get: %s",(char*)resultado_get1);
-	fflush(stdout);
-	printf("\nLength del resultado: %d",strlen((char*)resultado_get1));
-
-
+	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -439,6 +440,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					segmento_nuevo->compartido = false;
 					segmento_nuevo->mmapeado = false;
 					segmento_nuevo->tamanio = cantidad_de_paginas*configuracion->tam_pag;
+					segmento_nuevo->info_heaps = list_create();
 
 					heap_lista* heap_inicial_lista = malloc(sizeof(heap_lista));
 					heap_inicial_lista->direccion_heap_metadata = 0;
@@ -737,6 +739,7 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap);
 		memcpy(puntero_a_marco+nuevo_offset_heap_al_marco,nuevo_heap_metadata,sizeof(heap_metadata));
 	}
+	free(nuevo_heap_metadata);
 }
 
 
@@ -1924,6 +1927,33 @@ muse_void* deserializar_muse_void(void* magic){
 	puntero += mv->size_paquete;
 	return mv;
 }
+
+void destroy_programa(programa_t* prog)
+{
+	//falta bien liberar segmentos mappeados
+	free(prog->id_programa);
+	list_clean_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
+	free(prog->tabla_de_segmentos);
+	free(prog);
+	_Bool esPrograma(programa_t* programa){
+			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
+	}
+	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
+
+	}
+void destroy_segmento(segmento* seg)
+{
+	//falta bien liberar segmentos mappeados
+	if(!seg->mmapeado){
+	list_clean_and_destroy_elements(seg->info_heaps,(void*)free);
+	}
+	list_clean_and_destroy_elements(seg->paginas,(void*)free);
+	free(seg->info_heaps);
+	free(seg->paginas);
+	free(seg->path_mapeo);
+	free(seg);
+}
+
 
 
 // Sobre asignacion de memoria
