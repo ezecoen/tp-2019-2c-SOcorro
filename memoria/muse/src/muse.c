@@ -79,16 +79,17 @@ void iniciar_memoria_virtual(char* path_swap){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
+	FILE* fSwap;
 	if(!fopen(path_swap,"rb")){
 		log_info(logg,"no se pudo abrir el archivo de swap");
 	}else{
+		fSwap =fopen(path_swap,"w+");
 		log_info(logg,"se pudo abrir el archivo de swap");
-		FILE* fSwap =fopen(path_swap,"w+");
 		fprintf(fSwap,"holiiiiiii eeeeeee aaaaaaaaa");
 		fclose(fSwap);
 	}
-	//no funciona!!
-	//swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE,fSwap, 0);
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
