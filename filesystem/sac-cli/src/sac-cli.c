@@ -252,6 +252,23 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	}
 }
 
+static int sac_unlink(const char *path)
+{
+	int _tam;
+
+	void* peticion = serializar_path(path, UNLINK);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	if(op == ERROR){
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
 
 static int sac_mkdir(const char *path, mode_t mode)
 {
@@ -273,12 +290,10 @@ static int sac_mkdir(const char *path, mode_t mode)
 	}
 }
 
-
-static int sac_unlink(const char *path)
-{
+int sac_rmdir(const char *path){
 	int _tam;
 
-	void* peticion = serializar_path(path, UNLINK);
+	void* peticion = serializar_path(path, RMDIR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
 	free(peticion);
@@ -377,6 +392,7 @@ int sac_utimes (const char *filename, struct timeval tvp[2]){
 	}
 }
 
+
 //static int sac_opendir (const char *, struct fuse_file_info *)
 
 
@@ -392,11 +408,12 @@ static struct fuse_operations sac_oper = {
 		.open = sac_open,
 		.release = sac_release,
 //		.opendir = sac_opendir,
-		.read = sac_read,
-		.write = sac_write,
+//		.read = sac_read,
+//		.write = sac_write,
 		.mknod = sac_mknod,
 		.unlink = sac_unlink,
 		.mkdir = sac_mkdir,
+		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
 		.utime = sac_utimes
 };

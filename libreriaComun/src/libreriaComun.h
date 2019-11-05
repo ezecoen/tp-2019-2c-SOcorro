@@ -41,7 +41,8 @@ typedef enum {
 	ERROR,
 	WRITE,
 	EXITOSO,
-	UTIMES
+	UTIMES,
+	RMDIR
 }operaciones;
 
 typedef struct{
