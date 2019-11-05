@@ -52,15 +52,6 @@ int main(int argc, char **argv) {
 	printf("\nLength del resultado: %d",strlen((char*)resultado_get1));
 
 
-	return 0;
-//	muse_alloc_t* mat = crear_muse_alloc(320,"prog0");
-//	int result = muse_alloc(mat);
-//	printf("\nDireccion virtual de mat: %d",result);
-//
-//	muse_alloc_t* mat1 = crear_muse_alloc(320,"prog0");
-//	int result1 = muse_alloc(mat1);
-//	printf("\nDireccion virtual de mat: %d",result1);
-
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -97,12 +88,17 @@ void iniciar_memoria_virtual(char* path_swap){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-	int fd = open(path_swap,O_RDWR);
-	if(fd<0){
-		printf("no se pudo abrir el archivo de swap");
+	FILE* fSwap;
+	if(!fopen(path_swap,"rb")){
+		log_info(logg,"no se pudo abrir el archivo de swap");
+	}else{
+		fSwap =fopen(path_swap,"w+");
+		log_info(logg,"se pudo abrir el archivo de swap");
+		fprintf(fSwap,"holiiiiiii eeeeeee aaaaaaaaa");
+		fclose(fSwap);
 	}
-	//no funciona!!
-	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE,fSwap, 0);
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
@@ -823,7 +819,8 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
-				reemplazar_heap_en_memoria(heap_de_lista_anterior,segmento_buscado,heap_metadata_nuevo);
+				reemplazar_heap_en_memoria(heap_de_lista_anterior,
+						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
 					list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
 				}
