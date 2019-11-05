@@ -16,10 +16,11 @@ int main(int argc, char **argv) {
 	string_append(&programa->id_programa,"prog0");
 	list_add(tabla_de_programas,programa);
 
-	muse_map_t* mmt = crear_muse_map(100,"prog0",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/comunicaciones_memoria");
+	muse_map_t* mmt = crear_muse_map(100,"prog0",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map = muse_map(mmt);
 	printf("\nDireccion virtual del map: %d",puntero_map);
 	fflush(stdout);
+
 	muse_get_t* mgt = crear_muse_get(100,"prog0",puntero_map);
 	void* resultado_get = muse_get(mgt);
 	printf("\nResultado get: %s",(char*)resultado_get);
@@ -32,12 +33,20 @@ int main(int argc, char **argv) {
 	string_append(&programa1->id_programa,"prog1");
 	list_add(tabla_de_programas,programa1);
 
-	muse_map_t* mmt1 = crear_muse_map(100,"prog1",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/comunicaciones_memoria");
+	muse_map_t* mmt1 = crear_muse_map(100,"prog1",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map1 = muse_map(mmt1);
 	printf("\nDireccion virtual del map: %d",puntero_map1);
 	fflush(stdout);
+
+	char* char_example = malloc(40);
+	memcpy(char_example,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",40);
+	muse_cpy_t* mct = crear_muse_cpy(40,"prog1",puntero_map1,(void*)char_example);
+	int resultado_cpy = muse_cpy(mct);
+	printf("\nResultado cpy: %d",resultado_cpy);
+	fflush(stdout);
+
 	muse_get_t* mgt1 = crear_muse_get(100,"prog1",puntero_map1);
-	void* resultado_get1 = muse_get(mgt1);
+	char* resultado_get1 = muse_get(mgt1);
 	printf("\nResultado get: %s",(char*)resultado_get1);
 	fflush(stdout);
 	printf("\nLength del resultado: %d",strlen((char*)resultado_get1));
@@ -963,90 +972,134 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	heap_lista* heap_dst = NULL;
 	//la dire es abs
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
-	if(list_size(segmento_buscado->info_heaps)>0){
-		for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
-			// por cada heap_lista, veo si la direccion que me mandaron
-			// pertenece a ese ->datos
-			heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
-			if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) <= direccion_al_segmento &&
-					heap_aux->direccion_heap_metadata+sizeof(heap_metadata)+heap_aux->espacio
-					> direccion_al_segmento && !heap_aux->is_free) {
-				//significa que la dire nueva esta entre un heap y el siguiente
-				heap_dst=heap_aux;
+	if(!segmento_buscado->mmapeado){
+
+
+		if(list_size(segmento_buscado->info_heaps)>0){
+			for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
+				// por cada heap_lista, veo si la direccion que me mandaron
+				// pertenece a ese ->datos
+				heap_lista* heap_aux=  list_get(segmento_buscado->info_heaps,i);
+				if(heap_aux->direccion_heap_metadata+sizeof(heap_metadata) <= direccion_al_segmento &&
+						heap_aux->direccion_heap_metadata+sizeof(heap_metadata)+heap_aux->espacio
+						> direccion_al_segmento && !heap_aux->is_free) {
+					//significa que la dire nueva esta entre un heap y el siguiente
+					heap_dst=heap_aux;
+					break;
+				}
+				//no esta en esta
+			}
+		}
+		if(heap_dst == NULL){
+		//no se encontro el heap de destino- segm fault
+			log_info(logg,"No se encontro direccion %i en el segmento de %s",datos->direccion,datos->id);
+			return -1;
+		}
+		if(heap_dst->espacio<datos->size_paquete) {
+			//no entra en el espacio de ese heap_dst-segm fault
+			log_info(logg,"Los datos que desea copiar no entran en la direccion %i para el segmento %s",datos->direccion,datos->id);
+			return -1;
+		}
+		int offset_al_muse_alloc = direccion_al_segmento-heap_dst->direccion_heap_metadata-sizeof(heap_metadata);
+		if(offset_al_muse_alloc + datos->size_paquete > heap_dst->espacio) {
+			//va a pisar el heap_lista_siguiente
+			log_info(logg,"Generar un cpy en la direccion %i genera un conflico en el segmento %s",datos->direccion,datos->id);
+			return -1;
+		}
+
+		//pego la inicial
+		int nro_pagina =  direccion_al_segmento/configuracion->tam_pag;
+		pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
+		void* marco = obtener_puntero_a_marco(pag);
+		pag->bit_marco->bit_uso = true;
+		pag->bit_marco->bit_modificado = true;
+		int cuanto_puedo_pegar = configuracion->tam_pag-(datos->direccion%configuracion->tam_pag);
+		if(cuanto_puedo_pegar <= datos->size_paquete){
+			//pego lo que pueda
+			memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,cuanto_puedo_pegar);
+
+		}
+		else{
+			//pego el paquete completo
+			memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,datos->size_paquete);
+			log_info(logg,"Datos en segmento %d direccion %d fueron copiados con exito"
+					,segmento_buscado->num_segmento,datos->direccion);
+			return 0;
+		}
+		//voy pegando las que me faltan
+		nro_pagina++; //siguiente pagina
+		do{
+			//agarro la pag siguiente y su marco
+			int cuanto_me_falta = datos->size_paquete-cuanto_puedo_pegar;
+
+			if(cuanto_me_falta>=configuracion->tam_pag){
+				//si me falta mas que una pagina, puedo pegar la pag entera
+				pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
+				void* marco = obtener_puntero_a_marco(pag);
+				pag->bit_marco->bit_uso = true;
+				pag->bit_marco->bit_modificado = true;
+				//voy acumulando cuantas paginas voy pegando
+				memcpy(marco,datos->paquete+cuanto_puedo_pegar,configuracion->tam_pag);
+				cuanto_puedo_pegar+=configuracion->tam_pag;
+				nro_pagina++;
+			} else if(cuanto_me_falta>0){
+				//si me falta menos de una pagina, pego lo que tengo
+				pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
+				void* marco = obtener_puntero_a_marco(pag);
+				pag->bit_marco->bit_uso = true;
+				pag->bit_marco->bit_modificado = true;
+				memcpy(marco,datos->paquete+cuanto_puedo_pegar,cuanto_me_falta);
 				break;
 			}
-			//no esta en esta
-		}
-	}
-	if(heap_dst == NULL){
-	//no se encontro el heap de destino- segm fault
-		log_info(logg,"No se encontro direccion %i en el segmento de %s",datos->direccion,datos->id);
-		return -1;
-	}
-	if(heap_dst->espacio<datos->size_paquete) {
-		//no entra en el espacio de ese heap_dst-segm fault
-		log_info(logg,"Los datos que desea copiar no entran en la direccion %i para el segmento %s",datos->direccion,datos->id);
-		return -1;
-	}
-	int offset_al_muse_alloc = direccion_al_segmento-heap_dst->direccion_heap_metadata-sizeof(heap_metadata);
-	if(offset_al_muse_alloc + datos->size_paquete > heap_dst->espacio) {
-		//va a pisar el heap_lista_siguiente
-		log_info(logg,"Generar un cpy en la direccion %i genera un conflico en el segmento %s",datos->direccion,datos->id);
-		return -1;
-	}
+		}while (1);
+		//HAY QUE PROBAR MMCOPY
 
-	//pego la inicial
-	int nro_pagina =  direccion_al_segmento/configuracion->tam_pag;
-	pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
-	void* marco = obtener_puntero_a_marco(pag);
-	pag->bit_marco->bit_uso = true;
-	pag->bit_marco->bit_modificado = true;
-	int cuanto_puedo_pegar = configuracion->tam_pag-(datos->direccion%configuracion->tam_pag);
-	if(cuanto_puedo_pegar <= datos->size_paquete){
-		//pego lo que pueda
-		memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,cuanto_puedo_pegar);
-
-	}
-	else{
-		//pego el paquete completo
-		memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,datos->size_paquete);
 		log_info(logg,"Datos en segmento %d direccion %d fueron copiados con exito"
-				,segmento_buscado->num_segmento,datos->direccion);
+						,segmento_buscado->num_segmento,datos->direccion);
 		return 0;
 	}
-	//voy pegando las que me faltan
-	nro_pagina++; //siguiente pagina
-	do{
-		//agarro la pag siguiente y su marco
-		int cuanto_me_falta = datos->size_paquete-cuanto_puedo_pegar;
+	else{
+		//es mmapeado
+		//puede haber pags q nunca se levantaron (no estan en memoria)
+		paginas_de_map_en_memoria(datos->direccion,datos->size_paquete,segmento_buscado);
 
-		if(cuanto_me_falta>=configuracion->tam_pag){
-			//si me falta mas que una pagina, puedo pegar la pag entera
-			pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
-			void* marco = obtener_puntero_a_marco(pag);
-			pag->bit_marco->bit_uso = true;
-			pag->bit_marco->bit_modificado = true;
-			//voy acumulando cuantas paginas voy pegando
-			memcpy(marco,datos->paquete+cuanto_puedo_pegar,configuracion->tam_pag);
-			cuanto_puedo_pegar+=configuracion->tam_pag;
-			nro_pagina++;
-		} else if(cuanto_me_falta>0){
-			//si me falta menos de una pagina, pego lo que tengo
-			pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
-			void* marco = obtener_puntero_a_marco(pag);
-			pag->bit_marco->bit_uso = true;
-			pag->bit_marco->bit_modificado = true;
-			memcpy(marco,datos->paquete+cuanto_puedo_pegar,cuanto_me_falta);
-			break;
+		int numero_pagina_inicial = datos->direccion / configuracion->tam_pag;
+		int offset_pagina_inicial = datos->direccion % configuracion->tam_pag;
+		int numero_pagina_final = (datos->direccion+datos->size_paquete) / configuracion->tam_pag;
+		int offset_pagina_final = (datos->direccion+datos->size_paquete) % configuracion->tam_pag;
+		if(numero_pagina_inicial*configuracion->tam_pag+offset_pagina_inicial+datos->size_paquete
+				> segmento_buscado->tamanio){
+			return -1;
 		}
-	}while (1);
-	//HAY QUE PROBAR MMCOPY
-
-	log_info(logg,"Datos en segmento %d direccion %d fueron copiados con exito"
-					,segmento_buscado->num_segmento,datos->direccion);
-	return 0;
+		int puntero = 0;
+		for(int i = numero_pagina_inicial;i<=numero_pagina_final;i++){
+			pagina* pag = list_get(segmento_buscado->paginas,i);
+			void* puntero_a_marco = obtener_puntero_a_marco(pag);
+			pag->bit_marco->bit_modificado = true;
+			pag->bit_marco->bit_uso = true;
+			if(pag->num_pagina == numero_pagina_inicial){//si es la primera pego desde el off
+				if(pag->num_pagina == numero_pagina_final){//es la primera y ulitma?
+					memcpy(puntero_a_marco+offset_pagina_inicial,datos->paquete,
+							datos->size_paquete);
+				}
+				else{
+					memcpy(puntero_a_marco+offset_pagina_inicial,datos->paquete,
+							configuracion->tam_pag-offset_pagina_inicial);
+					puntero += configuracion->tam_pag-offset_pagina_inicial;
+				}
+			}
+			else if(pag->num_pagina == numero_pagina_final){
+				memcpy(puntero_a_marco,datos->paquete+puntero,
+						datos->size_paquete-puntero);
+			}
+			else{
+				memcpy(puntero_a_marco,datos->paquete+puntero,configuracion->tam_pag);
+				puntero += configuracion->tam_pag;
+			}
+		}
+		return 0;
+	}
 }
-
 /**
 * Devuelve un puntero a una posición mappeada de páginas por una cantidad `length` de bytes
 * el archivo del `path` dado.
