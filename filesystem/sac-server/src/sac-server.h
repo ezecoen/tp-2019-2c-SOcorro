@@ -100,8 +100,9 @@ int _mkdir(char* nombre);
 nodo* dame_el_nodo_de(const char* _nombre);
 char* dame_path_padre(char* nombre);
 bloque* bloque_de_nodo(int nodo);
-void dame_mi_path_entero(int numero_de_nodo);
+void dame_mi_path_entero_global(int numero_de_nodo);
 int _open(t_open* pedido);
+char* acomodamelo_papi_local(char* path_al_reves);
 uint32_t dame_un_bloque_libre();
 /*==	Variables Globales		==*/
 int cantidad_de_bloques;
