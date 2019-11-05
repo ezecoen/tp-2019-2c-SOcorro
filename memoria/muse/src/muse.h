@@ -31,6 +31,7 @@ typedef struct programa_t{
 typedef struct segmento{
 	_Bool mmapeado;
 	_Bool compartido;
+	char* path_mapeo;
 	uint32_t num_segmento;
 	uint32_t base_logica;
 	uint32_t tamanio;
@@ -214,6 +215,7 @@ t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit);
 int muse_free(muse_free_t* datos);
 void* muse_get(muse_get_t* datos);
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion);
+void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_buscado);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
 t_list* buscar_mapeo_existente(char* path);

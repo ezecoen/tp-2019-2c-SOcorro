@@ -66,7 +66,7 @@ uint32_t muse_alloc(uint32_t tam){
 		printf("Direccion recibida en libmuse: %d\n",direccion);
 	}
 	else{
-		direccion = NULL;
+		direccion = (int)NULL;
 		//probar si se manda el null
 	}
 	free(magic);
@@ -151,7 +151,7 @@ int muse_cpy(uint32_t dst, void* src, int n){
 	muse_cpy_destroy(mct);
 	uint32_t operacion;
 	recv(socket_muse,&operacion,4,0);
-	if(operacion == MUSE_ERROR){
+	if(operacion == MUSE_SEG_FAULT){
 		printf("error al realizar el cpy en: %d\n",dst);
 		raise(11);
 	}

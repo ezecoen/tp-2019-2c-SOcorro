@@ -1,7 +1,5 @@
 // servidor para probar sockets mañana
 #include "sac-server.h"
-#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.h"
-#include "/home/utnso/tp-2019-2c-SOcorro/libreriaComun/src/libreriaComun.c"
 
 int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
@@ -18,18 +16,17 @@ int main(int argc,char* argv[]) {
 	load_fs(argv[1]);
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
-//	while(1){
+	while(1){
 //		esperar_conexion(_servidor);
 		int cliente = aceptar_cliente(servidor);
 		atender_cliente(cliente);
-//	}
-
-
-
+	}
 
 
 	return 0;
 }
+
+
 int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
 	nodo* nodo = dame_el_primer_nodo_libre(nombre);
 	if(nodo == -1){//no hay mas nodos
@@ -106,6 +103,56 @@ char* dame_el_nombre(char** nombres,int quien){
 	}
 
 }
+int _rmdir(char* path){
+	int indice_de_nodo;
+	if (!dictionary_has_key(diccionario_de_path,path)){
+		return ENOENT;
+	}
+	else{
+		indice_de_nodo = dictionary_get(diccionario_de_path,path);
+		if(indice_de_nodo != 0){
+			indice_de_nodo+1+tam_de_bitmap;
+		}
+		for(int i = 0;i<1024;i++){
+			if(tabla_de_nodos[i]->bloque_padre == indice_de_nodo){
+				if(tabla_de_nodos[i]->estado == 1){ //es un archivo
+					char* ppath = string_new();
+					reconstruir_path(i,ppath);
+					char* reco_path = acomodamelo_papi_local(ppath);
+					_unlink(path);
+					free(ppath);
+					free(reco_path);
+				}if(tabla_de_nodos[i]->estado == 2){
+					char* ppath = string_new();
+					reconstruir_path(i,ppath);
+					char* reco_path = acomodamelo_papi_local(ppath);
+					_rmdir(path);
+					free(ppath);
+					free(reco_path);
+				}
+			}
+		}
+		indice_de_nodo = dictionary_get(diccionario_de_path,path);
+		nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
+		nodox->estado = 0;
+		dictionary_remove(diccionario_de_path,path);
+		return 0;
+	}
+}
+void reconstruir_path(uint32_t indice_de_nodo,char* ppath){
+	nodo* nodox = (nodo*) bloque_de_nodo(indice_de_nodo);
+	if(!strcmp(nodox->nombre_de_archivo,"/")){
+		string_append(&ppath,"/");
+		return;
+	}
+	string_append(&ppath,nodox->nombre_de_archivo);
+	string_append(&ppath,"/");
+	int indice_de_nodo_padre = nodox->bloque_padre -1 -tam_de_bitmap;
+	if(indice_de_nodo_padre <0){
+		indice_de_nodo_padre = 0;
+	}
+	reconstruir_path(indice_de_nodo_padre,ppath);
+}
 t_getattr* _getattr(char* nombre){
 	nodo* _nodo = dame_el_nodo_de(nombre);
 	if(_nodo == -1){//no hay nodos
@@ -166,7 +213,7 @@ void levantar_diccionario(){
 			if(tabla_de_nodos[j]->bloque_padre==i){
 				path_intermedio = string_new();
 				path_generator = string_new();
-				dame_mi_path_entero(j);
+				dame_mi_path_entero_global(j);
 				dictionary_put(diccionario_de_path,path_generator,j);
 				free(path_generator);
 				free(path_intermedio);
@@ -192,12 +239,25 @@ void acomodamelo_papi(char* path_al_reves){
 			string_append(&path_generator,"/");
 		}
 	}
-
 }
-void dame_mi_path_entero(int numero_de_nodo){
+char* acomodamelo_papi_local(char* path_al_reves){
+	char** a = string_split(path_al_reves,"/");
+	char* b = string_new();
+	int i;
+	for(i=0;a[i]!=NULL;i++);
+	string_append(&b,"/");
+	for(int j=i;j!=0;j--){
+		string_append(&b,a[j-1]);
+		if(j-1 != 0){
+			string_append(&b,"/");
+		}
+	}
+	return b;
+}
+
+void dame_mi_path_entero_global(int numero_de_nodo){
 	if(numero_de_nodo == 0){
 		string_append(&path_intermedio,"/");
-		//  ARE/pepo/hola//
 		acomodamelo_papi(path_intermedio);
 		return;
 	}else{
@@ -209,8 +269,23 @@ void dame_mi_path_entero(int numero_de_nodo){
 		}else{
 			padre = padre - 1 - tam_de_bitmap;
 		}
-		dame_mi_path_entero(padre);
+		dame_mi_path_entero_global(padre);
 	}
+}
+char* dame_mi_path_entero_local(int numero_de_nodo){
+	if(numero_de_nodo == 0){
+			return "/";
+		}else{
+			string_append(&path_intermedio,tabla_de_nodos[numero_de_nodo]->nombre_de_archivo);
+			string_append(&path_intermedio,"/");
+			int padre = tabla_de_nodos[numero_de_nodo]->bloque_padre;
+			if(padre -1-tam_de_bitmap < 0){
+				padre = 0;
+			}else{
+				padre = padre - 1 - tam_de_bitmap;
+			}
+			dame_mi_path_entero_global(padre);
+		}
 }
 t_bitarray* levantar_bit_array(bloque* bloque){
 	char* a = string_repeat('0',tam_de_bitmap*4096);
@@ -247,7 +322,9 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->fecha_de_creacion=timestamp();
 			nodo_vacio->fecha_de_modificacion=timestamp();
 			strcpy(nodo_vacio->nombre_de_archivo,"/");
-			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
+			for(int x = 0;x<1000;i++){
+				nodo_vacio->punteros_indirectos[x].punteros = 0;
+			}
 			nodo_vacio->tamanio_de_archivo=0;
 		}else{
 			nodo* nodo_vacio = (nodo*) _bloque;
@@ -255,8 +332,11 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
-			for(int i = 0;i<71;i++){
-				nodo_vacio->nombre_de_archivo[i] = '\0';
+			for(int j = 0;j<71;i++){
+				nodo_vacio->nombre_de_archivo[j] = '\0';
+			}
+			for(int x = 0;x<1000;i++){
+				nodo_vacio->punteros_indirectos[x].punteros = 0;
 			}
 			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 			nodo_vacio->tamanio_de_archivo=0;
@@ -372,7 +452,6 @@ void atender_cliente(int cliente){
 	int res;
 	void* magic;
 	char* path_pedido;
-
 	int cli;
 	recv(cliente,&cli,4,MSG_WAITALL);
 	log_info(logger,"%d",cli);
@@ -384,8 +463,24 @@ void atender_cliente(int cliente){
 	log_info(logger,"Se conecto un sac-clie");
 	operaciones operacion;
 	while(recv(cliente,&operacion,sizeof(int),MSG_WAITALL)>0){
-
 		switch(operacion){
+		case RMDIR:
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			log_info(logger,"Llego la instruccion RMDIR %s",path_pedido);
+			free(magic);
+			res = _rmdir(path_pedido);
+			if(res == -1){
+				int error = ERROR;
+				send(cliente,&error,4,0);
+			}else{
+				int ress = MKDIR;
+				send(cliente,&res,4,0);
+			}
+			break;
 		case GETATTR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
@@ -416,7 +511,7 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
 			free(magic);
 //			busco las entradas y las pongo en una lista
-			t_list* entradas = list_create();
+			t_list* entradas = list_create(); //hay que liberar esta lista?
 			res = encontrame_las_entradas_de(entradas,path_pedido);
 			if(res == -1){
 				int err = ERROR;
@@ -426,10 +521,27 @@ void atender_cliente(int cliente){
 				int tam;
 				memcpy(&tam,magic+8,sizeof(int));
 				send(cliente,magic,tam,0);
+				free(magic);
 			}
 			break;
 		case OPEN:
-			log_info(logger,"Llego la instruccion OPEN");
+			recv(cliente, &_tam,4,MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_open* pedido = deserializar_open(magic);
+			log_info(logger,"Llego la instruccion OPEN de %s",pedido->path);
+			res = _open(pedido);
+			if(res == 1){
+				int a = OPEN;
+				send(cliente,&a,4,0);
+			}
+			else{
+				void* error = armar_error(res);
+				send(cliente,error,8,0);
+				free(error);
+			}
+			open_destroy(pedido);
+			free(magic);
 			break;
 		case READ:
 			log_info(logger,"Llego la instruccion READ");
@@ -463,6 +575,23 @@ void atender_cliente(int cliente){
 //			que esten a nuestro alcance por lo menos)
 
 //			mandar socket respuesta con el valor de la respuesta
+		case UNLINK:
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam,MSG_WAITALL);
+			path_pedido = string_new();
+			string_append(&path_pedido,magic);
+			free(magic);
+			log_info(logger,"Llego la instruccion UNLINK de %s",path_pedido);
+			res = _unlink(path_pedido);
+			if(res != 0){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				int a = UNLINK;
+				send(cliente,&a,4,0);
+			}
+			break;
 		case MKDIR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
@@ -488,27 +617,28 @@ void atender_cliente(int cliente){
 		case CHMOD:
 			log_info(logger,"Llego la instruccion CHMOD");
 			break;
-		case UNLINK:
-			log_info(logger,"Llego la instruccion UNLINK");
-			break;
 		case WRITE:
 			log_info(logger,"Llego la instruccion WRITE");
-//			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
-//			magic = malloc(_tam);
-//			recv(cliente,magic,_tam,MSG_WAITALL);
-//			t_write* wwrite = deserializar_write(magic);
-//			char** list = string_split(path_pedido,"/");
-//			char* nom_mio = dame_el_nombre(list,1);
-//			nodo* mi_nodo = dame_el_nodo_de(nom_mio);
-//			escribime_en(wwrite,mi_nodo);
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_write* wwrite = deserializar_write(magic);
 //			len = strlen(DEFAULT_FILE_CONTENT);
 //			if (offset < len) {
 //				if (offset + size > len)
 //					size = len - offset;
 //			memcpy(buf, DEFAULT_FILE_CONTENT + offset, size);
-//			}else{
-//
-//			}
+			res = _write(wwrite);
+			break;
+		case UTIMES:
+			recv(cliente,&_tam,4,MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_utime* modif = deserializar_utime(magic);
+			nodo* _nodo = dame_el_nodo_de(modif->path);
+			_nodo->fecha_de_modificacion = (uint64_t) modif->utime;
+			resultado = UTIMES;
+			send(cliente,&resultado,4,0);
 			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");
@@ -516,6 +646,82 @@ void atender_cliente(int cliente){
 		}
 	}
 }
+int _write(t_write* wwrite){
+	nodo* _nodo = dame_el_nodo_de(wwrite->path);
+	int base = pow(2,22);
+	int indice_de_PIS = wwrite->offset/base;
+	if(_nodo->punteros_indirectos[indice_de_PIS].punteros == 0){// no tiene ningun bloque asignado
+		uint32_t bloque_a_usar = dame_un_bloque_libre();
+		if(bloque_a_usar == -1){
+			return -1;
+		}
+
+		_nodo->punteros_indirectos[indice_de_PIS].punteros = bloque_a_usar;
+	}else{ //ya tiene el bloque inicializado
+	return 0;
+	}
+	return 0;
+}
+uint32_t dame_un_bloque_libre(){
+	for(int i = 0;i<tam_de_bitmap*4096;i++){
+		if(bitarray_test_bit(bitarray,i) == 0){
+
+			return i;
+		}
+	}
+	return -1;
+}
+int _open(t_open* pedido){
+	int res_mknod;
+	if (!dictionary_has_key(diccionario_de_path,pedido->path)){
+		if (pedido->crear || (pedido->crear && pedido->crear_ensure)){
+			res_mknod = _mknod(pedido->path);
+			if (res_mknod == -1)
+				return EDQUOT;
+			return 1;
+		}
+		else
+			return ENOENT;
+	}else{
+		if(pedido->crear && pedido->crear_ensure)
+			return EEXIST;
+		return 1;
+	}
+}
+
+int _unlink (char* path){
+	int indice_de_nodo;
+	if (!dictionary_has_key(diccionario_de_path,path)){
+		return ENOENT;
+	}
+	else{
+		indice_de_nodo = dictionary_get(diccionario_de_path,path);
+		nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
+		limpiar_nodo(nodox);
+		dictionary_remove(diccionario_de_path,path);
+		return 0;
+	}
+}
+
+void limpiar_nodo(nodo* nodox){
+	int i = 0, j;
+	t_punteros_a_bloques_de_datos* BPD; //Bloque de Punteros a Datos
+	while(i<1000 && nodox->punteros_indirectos[i].punteros != 0){
+		j = 0;
+		BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+nodox->punteros_indirectos[i].punteros);
+		while(j<1024 && BPD->punteros_a_bloques_de_datos[j] != 0){
+			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
+			BPD->punteros_a_bloques_de_datos[j] = 0;
+			j++;
+		}
+		bitarray_clean_bit(bitarray,nodox->punteros_indirectos[i].punteros);
+		nodox->punteros_indirectos[i].punteros = 0;
+		i++;
+	}
+	nodox->estado = 0;
+}
+
+
 //int escribime_en(t_write* wwrite, nodo* nodo){
 //	if()//todo
 //}
@@ -540,7 +746,7 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 		bloque_padre = nodo+1+tam_de_bitmap;
 	}
 	for(int i = 0;i<1024;i++){
-		if(string_contains(tabla_de_nodos[i]->nombre_de_archivo,"/")){
+		if(string_contains(tabla_de_nodos[i]->nombre_de_archivo,"/") || tabla_de_nodos[i]->estado == 0){
 			continue;
 		}
 		if(tabla_de_nodos[i]->bloque_padre == bloque_padre){
@@ -548,15 +754,4 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 		}
 	}
 	return 0;
-}
-void _readdir(int cliente){
-
-//	tengo que recivir el tamanio de la estructura entera pero no tengo
-//	el socket,deberia pasarme el socket por parametro o deberia hacer
-//	el recv antes y mandarme el tamanio por parametro
-
-//	primero habria que fijarse si el directorio existe creo. y si existe devolver las entradas de directorio
-//	leer_directorio(path_pedido); //esto tiene que retornar una lista con los nombres (paths) de
-//									las entradas de directorio o un error (si no existe devolver -ENOENT)
-
 }
