@@ -1066,7 +1066,6 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 		int numero_pagina_inicial = datos->direccion / configuracion->tam_pag;
 		int offset_pagina_inicial = datos->direccion % configuracion->tam_pag;
 		int numero_pagina_final = (datos->direccion+datos->size_paquete) / configuracion->tam_pag;
-		int offset_pagina_final = (datos->direccion+datos->size_paquete) % configuracion->tam_pag;
 		if(numero_pagina_inicial*configuracion->tam_pag+offset_pagina_inicial+datos->size_paquete
 				> segmento_buscado->tamanio){
 			return -1;
@@ -1127,7 +1126,7 @@ int muse_map(muse_map_t* datos){
 
 		if(datos->flag != MAP_PRIVATE){
 			segmento_nuevo->compartido = true;
-			t_list* tabla_de_paginas = buscar_mapeo_existente(datos->path);
+			t_list* tabla_de_paginas = buscar_mapeo_existente(datos->path,datos->tamanio);
 			if(tabla_de_paginas!=NULL){
 				//comparto la tabla de paginas :D
 				segmento_nuevo->paginas = tabla_de_paginas;
@@ -1158,6 +1157,7 @@ int muse_map(muse_map_t* datos){
 		mapeo_tabla->contador = 1;
 		mapeo_tabla->paginas = tabla_de_paginas;
 		mapeo_tabla->path = string_duplicate(datos->path);
+		mapeo_tabla->tamanio = datos->tamanio;
 		list_add(tabla_de_mapeo,mapeo_tabla);
 
 		return segmento_nuevo->base_logica;
@@ -1167,12 +1167,12 @@ int muse_map(muse_map_t* datos){
 		return -1;
 	}
 }
-t_list* buscar_mapeo_existente(char* path){
+t_list* buscar_mapeo_existente(char* path,int tamanio){
 	//me fijo si ya existe ese mapeo, si ya existe y es MAP_SHARED,
 	//me traigo un puntero a su tabla de pags y aumento el contador en el segmento
 	t_list* tabla_de_paginas = NULL;
 	void iteracion(mapeo_t* mapeo){
-		if(string_equals_ignore_case(mapeo->path,path)){
+		if(string_equals_ignore_case(mapeo->path,path) && mapeo->tamanio == tamanio){
 			tabla_de_paginas = mapeo->paginas;
 			mapeo->contador++;
 		}
