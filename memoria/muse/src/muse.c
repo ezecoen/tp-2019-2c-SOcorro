@@ -544,7 +544,7 @@ uint32_t base_logica_segmento_nuevo(t_list* tabla_de_segmentos){
 pagina* ultima_pagina_por_numero(segmento* seg){
 	pagina* pag=NULL;
 	if(list_is_empty(seg->paginas)){
-		return pag; //vacia?
+		return pag;
 	}
 	pag->num_pagina=0;
 	for(int i=0;i<list_size(seg->paginas)-1;i++) {
@@ -580,10 +580,6 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	}
 	return pags;
 }
-//_Bool encontrar_ultima_pagina(pagina* pag){
-	//return pag->ultimo_heap_metadata_libre!=-1;
-	//si es != -1 entonces es la ultima pagina del segmento
-//}
 void* obtener_puntero_a_marco(pagina* pag){
 	//fijarse si esta en memoria o en swap
 	if(pag->presencia == false){
@@ -635,8 +631,8 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	}
 
 	pagina* pagina_a_sacar = buscar_pagina_por_bit(bit_return);
+	//si es un mmap se tendria que hacer un muse_sync?!?!hay que arreglar esto
 	pagina_a_sacar->bit_swap = pasar_marco_a_swap(pagina_a_sacar->bit_marco);
-	//si es un mmap se tendria que hacer un muse_sync?!?!
 	pagina_a_sacar->bit_marco = NULL;
 	pagina_a_sacar->presencia = false;
 	bit_return->bit_modificado = false;//lo dejo en (1,0) listo para usar
@@ -866,7 +862,7 @@ void* muse_get(muse_get_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
-	//si copia demas tira segm fault en libmuse?
+	//si copia demas tira segm fault en libmuse
 	if(segmento_buscado != NULL && segmento_buscado->tamanio >= datos->tamanio){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
 		int direccion_final = direccion_al_segmento+datos->tamanio;
@@ -973,8 +969,6 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	//la dire es abs
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	if(!segmento_buscado->mmapeado){
-
-
 		if(list_size(segmento_buscado->info_heaps)>0){
 			for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 				// por cada heap_lista, veo si la direccion que me mandaron
@@ -1077,7 +1071,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 			pag->bit_marco->bit_modificado = true;
 			pag->bit_marco->bit_uso = true;
 			if(pag->num_pagina == numero_pagina_inicial){//si es la primera pego desde el off
-				if(pag->num_pagina == numero_pagina_final){//es la primera y ulitma?
+				if(pag->num_pagina == numero_pagina_final){//es la primera y ulitma
 					memcpy(puntero_a_marco+offset_pagina_inicial,datos->paquete,
 							datos->size_paquete);
 				}
@@ -1122,7 +1116,6 @@ int muse_map(muse_map_t* datos){
 		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 		segmento_nuevo->info_heaps = NULL;
 		segmento_nuevo->path_mapeo = string_duplicate(datos->path);
-		//los segmentos mmapeados no tienen lista de heaps, fijarse q no rompa nada!!
 
 		if(datos->flag != MAP_PRIVATE){
 			segmento_nuevo->compartido = true;
@@ -1145,7 +1138,7 @@ int muse_map(muse_map_t* datos){
 		for(int i = 0; i < cantidad_de_paginas;i++){
 			pagina* pag = malloc(sizeof(pagina));
 			pag->num_pagina = i;
-			pag->bit_marco = NULL;//!!
+			pag->bit_marco = NULL;
 			pag->presencia = false;
 			pag->bit_swap = NULL;
 			list_add(tabla_de_paginas,pag);
@@ -1374,7 +1367,7 @@ void ocupate_de_este(int socket){
 					muse_void_destroy(mv);
 				}
 				else{
-//					todos los errores son segm fault!!??
+//					todos los errores son segm fault??
 					operacion_respuesta = MUSE_SEG_FAULT;
 					send(socket,&operacion_respuesta,4,0);
 				}
@@ -1472,7 +1465,7 @@ void init_bitarray(){
 		bit->ocupado = false;
 		bit->posicion = i;
 		bit->bit_modificado = false;
-		bit->bit_uso = 0;
+		bit->bit_uso = false;
 		list_add(bitarray->bitarray_memoria,bit);
 	}
 	bitarray->size_memoria_virtual = CANT_PAGINAS_MEMORIA_VIRTUAL;
