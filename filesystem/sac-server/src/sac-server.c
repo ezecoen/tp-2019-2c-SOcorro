@@ -15,6 +15,7 @@ int main(int argc,char* argv[]) {
 		log_info(logger,"El fileSystem fue cargado");
 	}
 	load_fs(argv[1]);
+
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 	while(1){
@@ -763,3 +764,21 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 	sem_post(&s_tabla_de_nodos);
 	return 0;
 }
+
+void reconstruir_path(int indice_nodo, char* path){
+	nodo* nodox = (nodo*)bloque_de_nodo(indice_nodo);
+
+	if(!strcmp(nodox->nombre_de_archivo, "/")){
+		string_append(&path, "/");
+		return;
+	}
+
+	string_append(&path,nodox->nombre_de_archivo);
+	int indice_nodo_padre = nodox->bloque_padre - 1 - tam_de_bitmap;
+
+	reconstruir_path(indice_nodo_padre, path);
+}
+
+
+
+
