@@ -273,5 +273,7 @@ void* serializar_muse_void(muse_void* mv);
 muse_void* deserializar_muse_void(void* magic);
 void* list_last_element(t_list* lista);
 pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag);
+void destroy_segmento(segmento* seg);
+void destroy_programa(programa_t* prog);
 
 #endif /* MUSE_H_ */
