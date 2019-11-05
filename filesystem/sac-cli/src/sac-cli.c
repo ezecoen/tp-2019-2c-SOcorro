@@ -84,7 +84,9 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0 || strcmp(path,"/cmov") == 0){
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0
+			|| strcmp(path,"/cmov") == 0 || strcmp(path,"/libselinux.so.1") == 0 || strcmp(path,"/libc.so.6") == 0 || strcmp(path,"/libpcre.so.3") == 0
+			|| strcmp(path,"/libpthread.so.0") == 0 || strcmp(path,"/libdl.so.2") == 0){
 		return -ENOENT;
 	}
 
@@ -120,22 +122,6 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 		getattr_destroy(atributos);
 		return 0;
 	}
-//	st_mtime;
-
-
-	//Si path es igual a "/" nos estan pidiendo los atributos del punto de montaje
-
-//	if (strcmp(path, "/") == 0) {
-//		stbuf->st_mode = S_IFDIR | 0777;
-//		stbuf->st_nlink = 2;
-//	} else if (strcmp(path, DEFAULT_FILE_PATH) == 0) {
-//		stbuf->st_mode = S_IFREG | 0777;
-//		stbuf->st_nlink = 1;
-//		stbuf->st_size = strlen(DEFAULT_FILE_CONTENT);
-//	} else {
-//		res = -ENOENT;
-//	}
-//	return res;
 }
 
 
@@ -223,7 +209,8 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 
 //	O_CREAT, O_EXCL (obliga a crear el file, si ya existe retrn EEXIST), O_TRUNC (si el archivo existe y es un reg file le borra lo que tiene adentro)
 	int tam;
-	int fd;
+	int resp;
+	int err;
 //
 	t_open* pedido = crear_open(path,fi->flags);
 	void* magic = serialiazar_open(pedido);
@@ -233,10 +220,20 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	free(magic);
 
 
-
-	return fd;
+	recv(_socket,&resp,4,MSG_WAITALL);
+	if(resp == ERROR){
+		recv(_socket,&err,4,MSG_WAITALL);
+		return -err;
+	}
+	else{
+//		filedes++;
+		return 0;
+	}
 }
 
+int sac_release (const char * path, int fildes){
+	return 0;
+}
 
 static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 	int _tam;
@@ -250,6 +247,24 @@ static int sac_mknod(const char * path, mode_t mode, dev_t rdev){
 //	int error;
 	if(op == ERROR){
 //		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
+
+static int sac_unlink(const char *path)
+{
+	int _tam;
+
+	void* peticion = serializar_path(path, UNLINK);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	if(op == ERROR){
 		return -1;
 	}
 	else{
@@ -276,6 +291,22 @@ static int sac_mkdir(const char *path, mode_t mode)
 		return 0;
 	}
 }
+static int sac_rmdir(const char* path){
+	int _tam,err;
+	void* peticion = serializar_path(path, RMDIR);
+	memcpy(&_tam, peticion+4, 4);
+	send(_socket, peticion, _tam+8,0);
+	free(peticion);
+
+	operaciones op = recibir_op(_socket);
+	if(op == ERROR){
+		recv(_socket,&err,4,MSG_WAITALL);
+		return -err;
+	}
+	else{
+		return 0;
+	}
+}
 
 static int sac_chmod(const char *path, mode_t mode)
 {
@@ -285,19 +316,6 @@ static int sac_chmod(const char *path, mode_t mode)
         return -errno;
     return 0;
 }
-
-
-static int sac_unlink(const char *path)
-{
-    int res;
-
-    res = unlink(path);
-    if(res == -1)
-        return -errno;
-
-    return 0;
-}
-
 
 /*
  * @DESC
@@ -335,9 +353,12 @@ static int sac_read(const char *path, char *buf, size_t size, off_t offset, stru
 }
 int sac_write (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
 	t_write* wwrite = crear_write(path,buf,tam,offset);
+	int _tam;
 	void* magic = serializar_write(wwrite);
-	send(_socket,magic,(int)magic+4,0);
+	memcpy(&_tam,magic+4,4);
+	send(_socket,magic,_tam,0);
 	free(magic);
+
 
 	operaciones op = recibir_op(_socket);
 	void* _respuesta;
@@ -350,6 +371,27 @@ int sac_write (const char *path, const char *buf, size_t tam, off_t offset, stru
 		return 0;
 	}
 }
+
+int sac_utimes (const char *filename, struct timeval tvp[2]){
+	uint64_t timee = timestamp();
+	t_utime* pedido = crear_utime(filename, timee);
+	void* magic = serializar_utime(pedido);
+	int tam;
+	memcpy(&tam, magic+4,4);
+	send(_socket,magic,tam,0);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
+
 
 //static int sac_opendir (const char *, struct fuse_file_info *)
 
@@ -364,13 +406,16 @@ static struct fuse_operations sac_oper = {
 		.getattr = sac_getattr,
 		.readdir = sac_readdir,
 		.open = sac_open,
+		.release = sac_release,
 //		.opendir = sac_opendir,
-		.read = sac_read,
+//		.read = sac_read,
+//		.write = sac_write,
 		.mknod = sac_mknod,
-		.mkdir = sac_mkdir,
-		.chmod = sac_chmod,
 		.unlink = sac_unlink,
-		.write = sac_write
+		.mkdir = sac_mkdir,
+		.rmdir = sac_rmdir,
+		.chmod = sac_chmod,
+		.utime = sac_utimes,
 };
 
 
@@ -404,7 +449,7 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 
    /*============= MAIN DE PRUEBA =============*/
-
+	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
 

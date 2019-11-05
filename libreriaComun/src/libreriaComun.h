@@ -40,7 +40,9 @@ typedef enum {
 	UNLINK,
 	ERROR,
 	WRITE,
-	EXITOSO
+	EXITOSO,
+	UTIMES,
+	RMDIR
 }operaciones;
 
 typedef struct{
@@ -75,6 +77,12 @@ typedef struct{
 	uint32_t offset;
 }t_write;
 
+typedef struct{
+	int size_path;
+	char* path;
+	uint64_t utime;
+}t_utime;
+
 /**
 * @NAME: char_length
 * @DESC: Devuelve el tamaño de un char, incluido el '\0'
@@ -102,7 +110,6 @@ uint64_t timestamp();
 int aceptar_cliente(int servidor);
 int crear_servidor(int puerto);
 uint32_t length_de_char_asterisco(char** arrays);
-
 void* serializar_path(const char* path, operaciones comando);
 char* deserializar_path (void* magic);
 void* serializar_lista_ent_dir(t_list* lista);
@@ -113,5 +120,6 @@ t_getattr* crear_getattr(uint32_t size, uint64_t modif_time, uint8_t tipo);
 void* serializar_getattr(t_getattr* stat);
 t_getattr* deserializar_getattr(void* magic);
 t_open* crear_open(char* path, int flags);
+t_utime* crear_utime (char* path, uint64_t utime);
 
 #endif /* LIBRERIA_COMUN_H_ */

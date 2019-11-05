@@ -14,14 +14,40 @@ int main(void) {
 	pruebita();
 	int init = muse_init((int)getpid(),configuracion->ip_muse,configuracion->puerto_muse);
 	if(init==0){
-		int direccion = muse_alloc(1000);
-		printf("Direccion recibida en prueba: %d\n",direccion);
-		int direccion1 = muse_alloc(500);
-		void* buffer = malloc(20);
-		char* print = malloc(20);
-		muse_get(buffer,direccion,20);
-		memcpy(print,buffer,20);
-		printf("Buffer en prueba: %s\n",print);
+//		void* void1 = malloc(10);
+//		char* mensaje = string_new();
+//		char* mensaje_recibido = malloc(10);
+//		string_append(&mensaje,"hola :D:D");
+//		memcpy(void1,mensaje,10);
+
+//		int alloc1 = muse_alloc(10);
+//		printf("Direccion1 de muse_alloc recibida en prueba: %d\n",alloc1);
+//		muse_free(alloc1);
+//		alloc1 = muse_alloc(4096);
+//		printf("Direccion1 de muse_alloc recibida en prueba: %d\n",alloc1);
+//		int cpy1 = muse_cpy(alloc1,void1,10);
+//		printf("resultado cpy: %d\n",cpy1);
+//		int get1 = muse_get((void*)mensaje_recibido,alloc1,10);
+//		printf("resultado get: %d\n",get1);
+//		printf("contenido en get: %s\n",mensaje_recibido);
+//		int alloc2 = muse_alloc(500);
+//		printf("Direccion1 de muse_alloc recibida en prueba: %d\n",alloc2);
+
+		char* char2 = string_new();
+		for(int i = 0;i<4999;i++){
+			string_append(&char2,"0");
+		}
+		char* char2_respuesta = malloc(5000);
+
+		int alloc2 = muse_alloc(5000);
+		printf("Direccion2 de muse_alloc recibida en prueba: %d\n",alloc2);
+		int cpy2 = muse_cpy(alloc2,(void*)char2,5000);
+		printf("resultado cpy: %d\n",cpy2);
+		int get2 = muse_get((void*)char2_respuesta,alloc2,5000);
+		printf("resultado get: %d\n",get2);
+		printf("contenido en get: %s\n",char2_respuesta);
+
+
 		muse_close();
 	}
 	return EXIT_SUCCESS;
