@@ -43,6 +43,7 @@ typedef struct mapeo_t{
 	char* path;
 	uint32_t contador;
 	t_list* paginas;
+	int tamanio;
 }mapeo_t;
 
 typedef struct heap_metadata{
@@ -218,7 +219,7 @@ segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direcc
 void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_buscado);
 int muse_cpy(muse_cpy_t* datos);
 int muse_map(muse_map_t* datos);
-t_list* buscar_mapeo_existente(char* path);
+t_list* buscar_mapeo_existente(char* path, int tamanio);
 void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
