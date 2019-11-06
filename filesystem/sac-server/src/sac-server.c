@@ -455,7 +455,21 @@ void atender_cliente(int cliente){
 	operaciones operacion;
 	while(recv(cliente,&operacion,sizeof(int),MSG_WAITALL)>0){
 		switch(operacion){
-		case RMDIR: // @suppress("Symbol is not resolved")
+		case TRUNCATE:
+			recv(cliente, &_tam,4,MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_truncate* __truncate = deserializar_truncate(magic);
+			res = _truncate(__truncate);
+			if(res == 0){
+				int a = TRUNCATE;
+				send(cliente,&a,4,0);
+			}else if(res == -1){//el nodo con ese path ya existe
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}
+			break;
+		case RMDIR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam,MSG_WAITALL);
@@ -671,7 +685,7 @@ void atender_cliente(int cliente){
 				dictionary_remove(diccionario_de_path,_rename->old);
 				dictionary_put(diccionario_de_path,_rename->new,key);
 				sem_post(&s_diccionario);
-				int a = MKDIR;
+				int a = RENAME;
 				send(cliente,&a,4,0);
 			}
 			break;
@@ -680,6 +694,104 @@ void atender_cliente(int cliente){
 			break;
 		}
 	}
+}
+int cuantos_bloques_tengo(char* path){
+	nodo* _nodo = dame_el_nodo_de(path);
+	int libres = 0;
+	for(int i = 0;i<1000;i++){
+		if(_nodo->punteros_indirectos[i].punteros != 0){
+			t_punteros_a_bloques_de_datos* a =(t_punteros_a_bloques_de_datos*) primer_bloque_de_disco+_nodo->punteros_indirectos[i].punteros;
+			for(int j = 0; j<1024;j++){
+				if(a->punteros_a_bloques_de_datos[j] != 0){
+					libres ++;
+				}
+			}
+		}
+	}
+	return libres;
+}
+int _truncate(t_truncate* __truncate){
+	int new_tam = __truncate->new_size;
+	int tam_real = cuantos_bloques_tengo(__truncate->path)*4096;
+	if(new_tam < tam_real){
+		return 0;
+	}
+	int bloques_a_agregar = new_tam/4096;
+	t_punteros_a_bloques_de_datos* PIS = dame_el_pis(__truncate->path);
+	if(entran_en_el_PIS(__truncate->path,bloques_a_agregar)){
+		for(int i = 0;i<bloques_a_agregar;i++){
+			asigname_bloque(PIS);
+		}
+		return 0;
+	}
+	int libres = cuantos_entran(PIS);
+	for(int j=0;j<libres;j++){
+		asigname_bloque(PIS);
+	}
+	int faltan = bloques_a_agregar - libres;
+	if(faltan != 0){
+		int cuantos_pis_necesito = libres / 1024;
+		if(cuantos_pis_necesito == 0){
+			cuantos_pis_necesito ++;
+		}
+		for(int j = 0;j<cuantos_pis_necesito;j++){
+			puntero_a_bloque_de_puntero* PIS = dame_el_PIS_libre(__truncate->path);
+			for(int i = 0;i<1024 || i<faltan;i++){
+				uint32_t bloque_a_usar = dame_un_bloque_libre();
+				if(bloque_a_usar == -1){
+					return -1;
+				}
+				PIS = bloque_a_usar;
+			}
+		}
+	}
+	return 0;
+}
+puntero_a_bloque_de_puntero* dame_el_PIS_libre(char* path){
+	nodo* _nodo = dame_el_nodo_de(path);
+	int i;
+	for(i=0;i<1000;i++){
+		if(_nodo->punteros_indirectos[i].punteros == 0){
+			return _nodo->punteros_indirectos[i].punteros;
+		}
+	}
+	return -1;
+}
+int cuantos_entran(t_punteros_a_bloques_de_datos* PIS){
+	int libres = 0;
+	for(int i=0;i<1024;i++){
+		if(PIS->punteros_a_bloques_de_datos[i] != 0){
+			libres++;
+		}
+	}
+	return libres;
+}
+void asigname_bloque(t_punteros_a_bloques_de_datos* PIS){
+	for(int i=0;i<1024;i++){
+		if(PIS->punteros_a_bloques_de_datos[i] == 0){
+			continue;
+		}
+		uint32_t bloque_de_dato_a_usar = dame_un_bloque_libre();
+		PIS->punteros_a_bloques_de_datos[i] = bloque_de_dato_a_usar;
+	}
+}
+t_punteros_a_bloques_de_datos* dame_el_pis(char* path){
+	nodo* _nodo = dame_el_nodo_de(path);
+	int i = 0;
+	while(_nodo->punteros_indirectos[i].punteros !=0){
+		i++;
+	}
+	t_punteros_a_bloques_de_datos* BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+_nodo->punteros_indirectos[i].punteros);
+	return BPD;
+}
+bool entran_en_el_PIS(char* path,int bloques_a_agregar){
+	t_punteros_a_bloques_de_datos* PIS = dame_el_pis(path);
+	for(int i = 0;i<bloques_a_agregar;i++){
+		if(PIS->punteros_a_bloques_de_datos[i] == 0){
+			return false;
+		}
+	}
+	return true;
 }
 t_write* _read(t_write* wwrite){
 	t_write* res;

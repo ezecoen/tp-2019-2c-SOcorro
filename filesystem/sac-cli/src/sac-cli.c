@@ -84,12 +84,6 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0
-			|| strcmp(path,"/cmov") == 0 || strcmp(path,"/libselinux.so.1") == 0 || strcmp(path,"/libc.so.6") == 0 || strcmp(path,"/libpcre.so.3") == 0
-			|| strcmp(path,"/libpthread.so.0") == 0 || strcmp(path,"/libdl.so.2") == 0){
-		return -ENOENT;
-	}
-
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -231,7 +225,7 @@ static int sac_open(const char *path, struct fuse_file_info *fi) {
 	}
 }
 
-int sac_release (const char * path, int fildes){
+int sac_release (const char * path, struct fuse_file_info * fildes){
 	return 0;
 }
 
@@ -354,6 +348,24 @@ static int sac_write(const char *path, char *buf, size_t size, off_t offset, str
 		return cantidad_escrita;
 	}
 }
+int sac_truncate (const char* path, off_t length){
+	t_truncate* _truncate = crear_truncate(path,length);
+
+	void* magic = serializar_truncate(_truncate);
+	int tam;
+	memcpy(&tam,magic+4,4);
+	send(_socket,magic,tam,0);
+	free(magic);
+	operaciones op = recibir_op(_socket);
+	int error;
+	if(op == ERROR){
+		recv(_socket,&error,4,MSG_WAITALL);
+		return -1;
+	}
+	else{// recibir buf
+		return 0;
+	}
+}
 int sac_read (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
 	t_write* wwrite = crear_write(path,buf,tam,offset);
 	int _tam;
@@ -422,7 +434,9 @@ int sac_truncate (const char *filename, off_t length){
 }
 
 
-//static int sac_opendir (const char *, struct fuse_file_info *)
+static int sac_opendir (const char * path, struct fuse_file_info * fi){
+	return 0;
+}
 
 
 /*
@@ -446,7 +460,7 @@ static struct fuse_operations sac_oper = {
 		.utime = sac_utimes,
 		.truncate = sac_truncate,
 		.rename = sac_rename,
-//		.flush = sac_flush //hay que implementarla?
+		.truncate = sac_truncate,
 };
 
 
