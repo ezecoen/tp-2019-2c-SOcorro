@@ -62,6 +62,47 @@ void* serializar_read(t_write* wwrite){
 	puntero += wwrite->size_path;
 	return magic;
 }
+void* serializar_rename(t_rename* _rename){
+	uint32_t bytes = sizeof(uint32_t)*4 + _rename->new_size + _rename->old_size;
+	uint32_t comando = RENAME;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+
+	memcpy(magic+puntero,&_rename->new_size,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,_rename->new,_rename->new_size);
+	puntero += _rename->new_size;
+
+	memcpy(magic+puntero,&_rename->old_size,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,_rename->old,_rename->old_size);
+	puntero += _rename->old_size;
+	return magic;
+}
+t_rename* deserializar_rename(void* magic){
+	t_rename* _rename = malloc(sizeof(t_rename));
+	int puntero = 0;
+
+	memcpy(&_rename->new_size,magic+puntero,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+
+	_rename->new = malloc(_rename->new_size);
+	memcpy(_rename->new,magic+puntero,_rename->new_size);
+	puntero += _rename->new_size;
+
+	memcpy(&_rename->old_size,magic+puntero,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+
+	_rename->old = malloc(_rename->old_size);
+	memcpy(_rename->old,magic+puntero,_rename->old_size);
+	puntero += _rename->old_size;
+
+	return _rename;
+}
 t_write* deserializar_write(void* magic){
 	t_write* wwrite = malloc(sizeof(t_write));
 	int puntero = 0;
@@ -78,6 +119,16 @@ t_write* deserializar_write(void* magic){
 	memcpy(wwrite->path,magic+puntero,wwrite->size_path);
 	puntero+=wwrite->size_path;
 	return wwrite;
+}
+t_rename* crear_rename(char* old, char* new){
+	t_rename* _rename = malloc(sizeof(t_rename));
+	_rename->old_size = strlen(old)+1;
+	_rename->new_size = strlen(new)+1;
+	_rename->new = malloc(_rename->new_size);
+	_rename->old = malloc(_rename->old_size);
+	memcpy(_rename->new,new,_rename->new_size);
+	memcpy(_rename->old,old,_rename->old_size);
+	return _rename;
 }
 void* serializar_paquete_error(t_error* error){
 	uint32_t bytes = sizeof(uint32_t)+ char_length(error->descripcion) + sizeof(uint32_t)*2;

@@ -19,9 +19,9 @@ int main(int argc,char* argv[]) {
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 	while(1){
-//		esperar_conexion(_servidor);
-		int cliente = aceptar_cliente(_servidor);
-		atender_cliente(cliente);
+		esperar_conexion(_servidor);
+//		int cliente = aceptar_cliente(_servidor);
+//		atender_cliente(cliente);
 	}
 	destroy_semaforos();
 
@@ -640,7 +640,6 @@ void atender_cliente(int cliente){
 				memcpy(magic,&r,4);
 				memcpy(magic+4,&res,4);
 				send(cliente,magic,8,0);
-
 			}
 			break;
 		case UTIMES:
@@ -648,10 +647,33 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_utime* modif = deserializar_utime(magic);
+			log_info(logger,"Llego la instruccion WRITE %s", modif->path);
 			nodo* _nodo = dame_el_nodo_de(modif->path);
 			_nodo->fecha_de_modificacion = (uint64_t) modif->utime;
 			resultado = UTIMES;
 			send(cliente,&resultado,4,0);
+			break;
+		case RENAME:
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_rename* _rename = deserializar_rename(magic);
+			char** split = string_split(_rename->new,"/");
+			char* new = dame_el_nombre(split,1);
+			nodo* __nodo = dame_el_nodo_de(_rename->old);
+			if(__nodo == -1){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				memcpy(__nodo->nombre_de_archivo,new,strlen(new)+1);
+				sem_wait(&s_diccionario);
+				int key = dictionary_get(diccionario_de_path,_rename->old);
+				dictionary_remove(diccionario_de_path,_rename->old);
+				dictionary_put(diccionario_de_path,_rename->new,key);
+				sem_post(&s_diccionario);
+				int a = MKDIR;
+				send(cliente,&a,4,0);
+			}
 			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");
