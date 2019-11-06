@@ -398,6 +398,25 @@ int sac_utimes (const char *filename, struct timeval tvp[2]){
 		return 0;
 	}
 }
+int sac_rename(const char* old,const char* new){
+	t_rename* _rename = crear_rename(old,new);
+	void* magic = serializar_rename(_rename);
+
+	int tam;
+	memcpy(&tam, magic+4,4);
+	send(_socket,magic,tam,0);
+
+	operaciones op = recibir_op(_socket);
+	void* _respuesta;
+	int error;
+	if(op == ERROR){
+//		recv(_socket,&error,4,0);
+		return -1;
+	}
+	else{
+		return 0;
+	}
+}
 
 
 //static int sac_opendir (const char *, struct fuse_file_info *)
@@ -423,6 +442,7 @@ static struct fuse_operations sac_oper = {
 		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
 		.utime = sac_utimes,
+		.rename = sac_rename,
 };
 
 

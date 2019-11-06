@@ -42,7 +42,8 @@ typedef enum {
 	WRITE,
 	EXITOSO,
 	UTIMES,
-	RMDIR
+	RMDIR,
+	RENAME,
 }operaciones;
 
 typedef struct{
@@ -55,6 +56,12 @@ typedef struct{
 	char* descripcion;
 }t_exitoso;
 
+typedef struct{
+	char* old;
+	char* new;
+	uint32_t old_size;
+	uint32_t new_size;
+}t_rename;
 typedef struct{
 	uint32_t size; //4bytes
 	uint64_t modif_time; //8bytes
