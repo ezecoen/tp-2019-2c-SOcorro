@@ -145,6 +145,11 @@ typedef struct muse_void{
 	void* paquete;
 }muse_void;
 
+typedef struct memoria_liberada{
+	char* programa_id;
+	int memoria_liberada_acumulada;
+}memoria_liberada;
+
 typedef struct s_config{
 	uint32_t puerto;
 	uint32_t tam_mem;
@@ -181,6 +186,8 @@ int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
+t_list* tabla_de_memoria_liberada;
+
 
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
@@ -273,5 +280,12 @@ void* serializar_muse_void(muse_void* mv);
 muse_void* deserializar_muse_void(void* magic);
 void* list_last_element(t_list* lista);
 pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag);
+void destroy_segmento(segmento* seg);
+void destroy_programa(programa_t* prog);
+void metricas();
+void metrica_del_sistema();
+void metrica_por_programa();
+void metrica_por_socket_conectado();
+void acumular_espacio_liberado(char* programa, int cuanto);
 
 #endif /* MUSE_H_ */

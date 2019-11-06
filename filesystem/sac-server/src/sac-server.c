@@ -4,6 +4,7 @@
 int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
 	es_virgen = 0;
+	init_semaforos();
 	if(argc != 2){
 		perror("falta el archivo del fileSystem");
 		return -1;
@@ -18,16 +19,24 @@ int main(int argc,char* argv[]) {
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 	while(1){
-//		esperar_conexion(_servidor);
-		int cliente = aceptar_cliente(servidor);
-		atender_cliente(cliente);
+		esperar_conexion(_servidor);
+//		int cliente = aceptar_cliente(servidor);
+//		atender_cliente(cliente);
 	}
-
+	destroy_semaforos();
 
 	return 0;
 }
-
-
+void destroy_semaforos(){
+	sem_destroy(&s_bitarray);
+	sem_destroy(&s_diccionario);	
+	sem_destroy(&s_tabla_de_nodos);
+}
+void init_semaforos(){
+	sem_init(&s_bitarray,0,1);
+	sem_init(&s_diccionario,0,1);
+	sem_init(&s_tabla_de_nodos,0,1);
+}
 int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
 	nodo* nodo = dame_el_primer_nodo_libre(nombre);
 	if(nodo == -1){//no hay mas nodos
@@ -40,7 +49,9 @@ int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	nodo->fecha_de_modificacion = timestamp();
 	char** list = string_split(nombre,"/");
 	char* path_padre = dame_path_padre(nombre);
+	sem_wait(&s_diccionario);
 	int padre = dictionary_get(diccionario_de_path,path_padre);
+	sem_post(&s_diccionario);
 	char* nom_mio = dame_el_nombre(list,1);
 	strcpy(nodo->nombre_de_archivo,nom_mio);
 	if(padre!=0){
@@ -62,7 +73,9 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	nodo->fecha_de_modificacion = timestamp();
 	char** list = string_split(nombre,"/");
 	char* path_padre = dame_path_padre(nombre);
+	sem_wait(&s_diccionario);
 	int padre = dictionary_get(diccionario_de_path,path_padre);//BLOQUE PADRE
+	sem_post(&s_diccionario);
 	char* nom_mio = dame_el_nombre(list,1);
 	strcpy(nodo->nombre_de_archivo,nom_mio);
 	if(padre!=0){
@@ -106,53 +119,27 @@ char* dame_el_nombre(char** nombres,int quien){
 }
 int _rmdir(char* path){
 	int indice_de_nodo;
-	if (!dictionary_has_key(diccionario_de_path,path)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,path);
+	sem_post(&s_diccionario);
+	if (!a){
 		return ENOENT;
 	}
 	else{
-		indice_de_nodo = dictionary_get(diccionario_de_path,path);
-		if(indice_de_nodo != 0){
-			indice_de_nodo+1+tam_de_bitmap;
+		t_list* entradas = list_create();
+		encontrame_las_entradas_de(entradas,path);
+		if(list_is_empty(entradas)){
+			sem_wait(&s_diccionario);
+			indice_de_nodo = dictionary_get(diccionario_de_path,path);
+			nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
+			nodox->estado = 0;
+			dictionary_remove(diccionario_de_path,path);
+			sem_post(&s_diccionario);
+			return 0;
+		}else{
+			return ENOTEMPTY;
 		}
-		for(int i = 0;i<1024;i++){
-			if(tabla_de_nodos[i]->bloque_padre == indice_de_nodo){
-				if(tabla_de_nodos[i]->estado == 1){ //es un archivo
-					char* ppath = string_new();
-					reconstruir_path(i,ppath);
-					char* reco_path = acomodamelo_papi_local(ppath);
-					_unlink(path);
-					free(ppath);
-					free(reco_path);
-				}if(tabla_de_nodos[i]->estado == 2){
-					char* ppath = string_new();
-					reconstruir_path(i,ppath);
-					char* reco_path = acomodamelo_papi_local(ppath);
-					_rmdir(path);
-					free(ppath);
-					free(reco_path);
-				}
-			}
-		}
-		indice_de_nodo = dictionary_get(diccionario_de_path,path);
-		nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
-		nodox->estado = 0;
-		dictionary_remove(diccionario_de_path,path);
-		return 0;
 	}
-}
-void reconstruir_path(uint32_t indice_de_nodo,char* ppath){
-	nodo* nodox = (nodo*) bloque_de_nodo(indice_de_nodo);
-	if(!strcmp(nodox->nombre_de_archivo,"/")){
-		string_append(&ppath,"/");
-		return;
-	}
-	string_append(&ppath,nodox->nombre_de_archivo);
-	string_append(&ppath,"/");
-	int indice_de_nodo_padre = nodox->bloque_padre -1 -tam_de_bitmap;
-	if(indice_de_nodo_padre <0){
-		indice_de_nodo_padre = 0;
-	}
-	reconstruir_path(indice_de_nodo_padre,ppath);
 }
 t_getattr* _getattr(char* nombre){
 	nodo* _nodo = dame_el_nodo_de(nombre);
@@ -215,7 +202,9 @@ void levantar_diccionario(){
 				path_intermedio = string_new();
 				path_generator = string_new();
 				dame_mi_path_entero_global(j);
-				dictionary_put(diccionario_de_path,path_generator,j);
+				sem_wait(&s_diccionario);
+				dictionary_put(diccionario_de_path,path_generator,(void*)j);
+				sem_post(&s_diccionario);
 				free(path_generator);
 				free(path_intermedio);
 			}
@@ -262,9 +251,11 @@ void dame_mi_path_entero_global(int numero_de_nodo){
 		acomodamelo_papi(path_intermedio);
 		return;
 	}else{
+		sem_wait(&s_tabla_de_nodos);
 		string_append(&path_intermedio,tabla_de_nodos[numero_de_nodo]->nombre_de_archivo);
 		string_append(&path_intermedio,"/");
 		int padre = tabla_de_nodos[numero_de_nodo]->bloque_padre;
+		sem_post(&s_tabla_de_nodos);
 		if(padre -1-tam_de_bitmap < 0){
 			padre = 0;
 		}else{
@@ -273,21 +264,7 @@ void dame_mi_path_entero_global(int numero_de_nodo){
 		dame_mi_path_entero_global(padre);
 	}
 }
-char* dame_mi_path_entero_local(int numero_de_nodo){
-	if(numero_de_nodo == 0){
-			return "/";
-		}else{
-			string_append(&path_intermedio,tabla_de_nodos[numero_de_nodo]->nombre_de_archivo);
-			string_append(&path_intermedio,"/");
-			int padre = tabla_de_nodos[numero_de_nodo]->bloque_padre;
-			if(padre -1-tam_de_bitmap < 0){
-				padre = 0;
-			}else{
-				padre = padre - 1 - tam_de_bitmap;
-			}
-			dame_mi_path_entero_global(padre);
-		}
-}
+
 t_bitarray* levantar_bit_array(bloque* bloque){
 	char* a = string_repeat('0',tam_de_bitmap*4096);
 	int sub_array = 0;
@@ -387,25 +364,38 @@ void printear(bloque* bloq){
 	}
 }
 nodo* dame_el_primer_nodo_libre(char* nombre){
-	if(dictionary_has_key(diccionario_de_path,nombre)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,nombre);
+	sem_post(&s_diccionario);
+	if(a){
 		return -2;
 	}
+	sem_wait(&s_tabla_de_nodos);
 	for(int i = 0;i<1024;i++){
 		if(tabla_de_nodos[i]->estado == 0){
 			// el indice de la tabla de nodos es el numero de nodo
 			nodo* bloque_del_nodo = (nodo*) primer_bloque_de_disco+1+tam_de_bitmap+i;
+			sem_wait(&s_diccionario);
 			dictionary_put(diccionario_de_path,nombre,(void*)i);
+			sem_post(&s_diccionario);
+			sem_post(&s_tabla_de_nodos);
 			return bloque_del_nodo;
 		}
 	}
 	//no hay nodos libres
+	sem_post(&s_tabla_de_nodos);
 	return -1;
 
 }
 nodo* dame_el_nodo_de(const char* _nombre){
 	int numero_nodo;
-	if(dictionary_has_key(diccionario_de_path,_nombre)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,_nombre);
+	sem_post(&s_diccionario);
+	if(a){
+		sem_wait(&s_diccionario);
 		numero_nodo = (int)dictionary_get(diccionario_de_path,_nombre);
+		sem_post(&s_diccionario);
 		return (nodo*)primer_bloque_de_disco+1+tam_de_bitmap+numero_nodo;
 	}
 	return -1;
@@ -438,7 +428,7 @@ void esperar_conexion(int servidor){
 		log_error(logger,"Error al crear el hilo de journal");
 	}
 	pthread_detach(hilo_nuevo_cliente);
-	close(cliente);
+//	close(cliente);
 }
 void* armar_error(int error_code){
 	void* err = malloc(sizeof(int)*2);
@@ -474,12 +464,13 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion RMDIR %s",path_pedido);
 			free(magic);
 			res = _rmdir(path_pedido);
-			if(res == -1){
-				int error = ERROR;
-				send(cliente,&error,4,0);
-			}else{
-				int ress = MKDIR;
+			if(res == 1){
+				res = MKDIR;
 				send(cliente,&res,4,0);
+			}else{
+				void* error = armar_error(res);
+				send(cliente,error,8,0);
+				free(error);
 			}
 			break;
 		case GETATTR:
@@ -664,17 +655,22 @@ int _write(t_write* wwrite){
 	return 0;
 }
 uint32_t dame_un_bloque_libre(){
+	sem_wait(&s_bitarray);
 	for(int i = 0;i<tam_de_bitmap*4096;i++){
 		if(bitarray_test_bit(bitarray,i) == 0){
-
+			sem_post(&s_bitarray);
 			return i;
 		}
 	}
+	sem_post(&s_bitarray);
 	return -1;
 }
 int _open(t_open* pedido){
 	int res_mknod;
-	if (!dictionary_has_key(diccionario_de_path,pedido->path)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,pedido->path);
+	sem_post(&s_diccionario);
+	if (!a){
 		if (pedido->crear || (pedido->crear && pedido->crear_ensure)){
 			res_mknod = _mknod(pedido->path);
 			if (res_mknod == -1)
@@ -692,14 +688,19 @@ int _open(t_open* pedido){
 
 int _unlink (char* path){
 	int indice_de_nodo;
-	if (!dictionary_has_key(diccionario_de_path,path)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,path);
+	sem_post(&s_diccionario);
+	if (!a){
 		return ENOENT;
 	}
 	else{
+		sem_wait(&s_diccionario);
 		indice_de_nodo = dictionary_get(diccionario_de_path,path);
 		nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
 		limpiar_nodo(nodox);
 		dictionary_remove(diccionario_de_path,path);
+		sem_post(&s_diccionario);
 		return 0;
 	}
 }
@@ -711,11 +712,15 @@ void limpiar_nodo(nodo* nodox){
 		j = 0;
 		BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+nodox->punteros_indirectos[i].punteros);
 		while(j<1024 && BPD->punteros_a_bloques_de_datos[j] != 0){
+			sem_wait(&s_bitarray);
 			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
+			sem_post(&s_bitarray);
 			BPD->punteros_a_bloques_de_datos[j] = 0;
 			j++;
 		}
+		sem_wait(&s_bitarray);
 		bitarray_clean_bit(bitarray,nodox->punteros_indirectos[i].punteros);
+		sem_post(&s_bitarray);
 		nodox->punteros_indirectos[i].punteros = 0;
 		i++;
 	}
@@ -736,16 +741,22 @@ void limpiar_nodo(nodo* nodox){
 //}
 
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
-	if(!dictionary_has_key(diccionario_de_path,path_pedido)){
+	sem_wait(&s_diccionario);
+	bool a = dictionary_has_key(diccionario_de_path,path_pedido);
+	sem_post(&s_diccionario);
+	if(!a){
 		return -1;
 	}
+	sem_wait(&s_diccionario);
 	int nodo = dictionary_get(diccionario_de_path,path_pedido);
+	sem_post(&s_diccionario);
 	int bloque_padre;
 	if(nodo == 0){
 		bloque_padre=0;
 	}else{
 		bloque_padre = nodo+1+tam_de_bitmap;
 	}
+	sem_wait(&s_tabla_de_nodos);
 	for(int i = 0;i<1024;i++){
 		if(string_contains(tabla_de_nodos[i]->nombre_de_archivo,"/") || tabla_de_nodos[i]->estado == 0){
 			continue;
@@ -754,6 +765,7 @@ int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 			list_add(entradas,tabla_de_nodos[i]->nombre_de_archivo);
 		}
 	}
+	sem_post(&s_tabla_de_nodos);
 	return 0;
 }
 

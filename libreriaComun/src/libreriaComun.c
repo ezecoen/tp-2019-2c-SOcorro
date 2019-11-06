@@ -89,18 +89,18 @@ int crear_servidor(int puerto){
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
 	direccionServidor.sin_port = htons(puerto);
-	servidor = socket(AF_INET,SOCK_STREAM,0);
+	int _servidor = socket(AF_INET,SOCK_STREAM,0);
 	/*== socket reusable multiples conexiones==*/
 	uint32_t flag = 1;
-	setsockopt(servidor, SOL_SOCKET,SO_REUSEPORT,&flag,sizeof(flag));
+	setsockopt(_servidor, SOL_SOCKET,SO_REUSEPORT,&flag,sizeof(flag));
 	/*== inicializamos el socket ==*/
-	if(bind(servidor, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
+	if(bind(_servidor, (void*) &direccionServidor, sizeof(direccionServidor)) != 0){
 		perror("Fallo el binde0 del servidor");
 		return 1;
 	}
 	log_info(logger,"Estoy escuchando en el puerto %d\n",puerto);
-	listen(servidor,SOMAXCONN);
-	return servidor;
+	listen(_servidor,SOMAXCONN);
+	return _servidor;
 }
 void mandar_char(char* _char, uint32_t _socket,uint32_t com){
 	uint32_t tam = char_length(_char);

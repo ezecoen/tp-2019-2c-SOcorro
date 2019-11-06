@@ -10,48 +10,65 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
 
+	programa_t* programa2 = malloc(sizeof(programa_t));
+	programa2->tabla_de_segmentos = list_create();
+	programa2->id_programa = string_new();
+	string_append(&programa2->id_programa,"prog2");
+	list_add(tabla_de_programas,programa2);
+
+
+	muse_alloc_t* matp = crear_muse_alloc(100,"prog2");
+	int resup = muse_alloc(matp);
+	printf("\nDireccion virtual del mat: %d",resup);
+	fflush(stdout);
+
+
 	programa_t* programa = malloc(sizeof(programa_t));
 	programa->tabla_de_segmentos = list_create();
 	programa->id_programa = string_new();
 	string_append(&programa->id_programa,"prog0");
 	list_add(tabla_de_programas,programa);
 
+
+	muse_alloc_t* mat = crear_muse_alloc(100,"prog0");
+	int resu = muse_alloc(mat);
+	printf("\nDireccion virtual del mat: %d",resu);
+	fflush(stdout);
+
+
 	muse_map_t* mmt = crear_muse_map(100,"prog0",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map = muse_map(mmt);
 	printf("\nDireccion virtual del map: %d",puntero_map);
 	fflush(stdout);
 
-	muse_get_t* mgt = crear_muse_get(100,"prog0",puntero_map);
-	void* resultado_get = muse_get(mgt);
-	printf("\nResultado get: %s",(char*)resultado_get);
+	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog0");
+	int resu2 = muse_alloc(mat2);
+	printf("\nDireccion virtual del mat: %d",resu2);
+		fflush(stdout);
+
+
+	muse_alloc_t* mat3 = crear_muse_alloc(13,"prog0");
+	int resu3 = muse_alloc(mat3);
+	printf("\nDireccion virtual del mat: %d",resu3);
+		fflush(stdout);
+
+	metricas();
+	muse_free_t* mft = crear_muse_free("prog0",resu);
+	muse_free(mft);
+
+	muse_alloc_t* mat4 = crear_muse_alloc(30,"prog0");
+	int resu4 = muse_alloc(mat4);
+	printf("\nDireccion virtual del mat: %d",resu4);
 	fflush(stdout);
-	printf("\nLength del resultado: %d",strlen((char*)resultado_get));
-
-	programa_t* programa1 = malloc(sizeof(programa_t));
-	programa1->tabla_de_segmentos = list_create();
-	programa1->id_programa = string_new();
-	string_append(&programa1->id_programa,"prog1");
-	list_add(tabla_de_programas,programa1);
-
-	muse_map_t* mmt1 = crear_muse_map(100,"prog1",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
-	int puntero_map1 = muse_map(mmt1);
-	printf("\nDireccion virtual del map: %d",puntero_map1);
+	muse_alloc_t* mat5 = crear_muse_alloc(30,"prog0");
+	int resu5 = muse_alloc(mat5);
+	printf("\nDireccion virtual del mat: %d",resu5);
 	fflush(stdout);
+	muse_free_t* mft2 = crear_muse_free("prog0",resu4);
+	muse_free(mft2);
+	metricas();
 
-	char* char_example = malloc(40);
-	memcpy(char_example,"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",40);
-	muse_cpy_t* mct = crear_muse_cpy(40,"prog1",puntero_map1,(void*)char_example);
-	int resultado_cpy = muse_cpy(mct);
-	printf("\nResultado cpy: %d",resultado_cpy);
-	fflush(stdout);
-
-	muse_get_t* mgt1 = crear_muse_get(100,"prog1",puntero_map1);
-	char* resultado_get1 = muse_get(mgt1);
-	printf("\nResultado get: %s",(char*)resultado_get1);
-	fflush(stdout);
-	printf("\nLength del resultado: %d",strlen((char*)resultado_get1));
-
-
+	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -67,6 +84,7 @@ void init_estructuras(char* path){
 	lugar_disponible = configuracion->tam_mem+configuracion->tam_swap;
 	tabla_de_programas = list_create();
 	tabla_de_mapeo = list_create();
+	tabla_de_memoria_liberada=list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
 	CANT_PAGINAS_MEMORIA_VIRTUAL = configuracion->tam_swap/configuracion->tam_pag;
 
@@ -439,6 +457,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					segmento_nuevo->compartido = false;
 					segmento_nuevo->mmapeado = false;
 					segmento_nuevo->tamanio = cantidad_de_paginas*configuracion->tam_pag;
+					segmento_nuevo->info_heaps = list_create();
 
 					heap_lista* heap_inicial_lista = malloc(sizeof(heap_lista));
 					heap_inicial_lista->direccion_heap_metadata = 0;
@@ -540,7 +559,7 @@ uint32_t base_logica_segmento_nuevo(t_list* tabla_de_segmentos){
 pagina* ultima_pagina_por_numero(segmento* seg){
 	pagina* pag=NULL;
 	if(list_is_empty(seg->paginas)){
-		return pag; //vacia?
+		return pag;
 	}
 	pag->num_pagina=0;
 	for(int i=0;i<list_size(seg->paginas)-1;i++) {
@@ -576,10 +595,6 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 	}
 	return pags;
 }
-//_Bool encontrar_ultima_pagina(pagina* pag){
-	//return pag->ultimo_heap_metadata_libre!=-1;
-	//si es != -1 entonces es la ultima pagina del segmento
-//}
 void* obtener_puntero_a_marco(pagina* pag){
 	//fijarse si esta en memoria o en swap
 	if(pag->presencia == false){
@@ -631,8 +646,8 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	}
 
 	pagina* pagina_a_sacar = buscar_pagina_por_bit(bit_return);
+	//si es un mmap se tendria que hacer un muse_sync?!?!hay que arreglar esto
 	pagina_a_sacar->bit_swap = pasar_marco_a_swap(pagina_a_sacar->bit_marco);
-	//si es un mmap se tendria que hacer un muse_sync?!?!
 	pagina_a_sacar->bit_marco = NULL;
 	pagina_a_sacar->presencia = false;
 	bit_return->bit_modificado = false;//lo dejo en (1,0) listo para usar
@@ -741,6 +756,7 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 		void* puntero_a_marco = obtener_puntero_a_marco(pagina_del_heap);
 		memcpy(puntero_a_marco+nuevo_offset_heap_al_marco,nuevo_heap_metadata,sizeof(heap_metadata));
 	}
+	free(nuevo_heap_metadata);
 }
 
 
@@ -777,6 +793,7 @@ int muse_free(muse_free_t* datos){
 	heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 	heap_metadata_nuevo->is_free = true;
 	heap_metadata_nuevo->size = heap_lista_encontrado->espacio;
+	acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 	reemplazar_heap_en_memoria(heap_lista_encontrado,segmento_buscado,heap_metadata_nuevo);
 
 	//recorro todos los heaps_lista viendo cuales tengo que juntar
@@ -794,6 +811,7 @@ int muse_free(muse_free_t* datos){
 
 		if(i+1==segmento_buscado->info_heaps->elements_count){//si el actual es el ultimo
 			//como todos estan libres, dejo solo el primero
+
 			for(int i = 1;i<segmento_buscado->info_heaps->elements_count;){
 				list_remove_and_destroy_element(segmento_buscado->info_heaps,i,(void*)free);
 			}
@@ -805,6 +823,7 @@ int muse_free(muse_free_t* datos){
 			//no necesito hacer un heap_metadata porque ya lo hice y lo pegue antes
 			log_info(logg,"Se libero la direccion %i",datos->direccion);
 			log_info(logg,"El segmento %d de %s quedo completamente liberado",segmento_buscado->num_segmento,datos->id);
+
 			return 0;
 		}
 
@@ -823,6 +842,7 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
+				acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 				reemplazar_heap_en_memoria(heap_de_lista_anterior,
 						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
@@ -841,6 +861,7 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
+				acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 				reemplazar_heap_en_memoria(heap_de_lista_anterior,segmento_buscado,heap_metadata_nuevo);
 				list_remove_and_destroy_element(segmento_buscado->info_heaps,heap_de_lista->indice,(void*)free);
 			}
@@ -863,7 +884,7 @@ void* muse_get(muse_get_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
-	//si copia demas tira segm fault en libmuse?
+	//si copia demas tira segm fault en libmuse
 	if(segmento_buscado != NULL && segmento_buscado->tamanio >= datos->tamanio){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
 		int direccion_final = direccion_al_segmento+datos->tamanio;
@@ -970,8 +991,6 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	//la dire es abs
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	if(!segmento_buscado->mmapeado){
-
-
 		if(list_size(segmento_buscado->info_heaps)>0){
 			for(int i =0; i < list_size(segmento_buscado->info_heaps); i++) {
 				// por cada heap_lista, veo si la direccion que me mandaron
@@ -1074,7 +1093,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 			pag->bit_marco->bit_modificado = true;
 			pag->bit_marco->bit_uso = true;
 			if(pag->num_pagina == numero_pagina_inicial){//si es la primera pego desde el off
-				if(pag->num_pagina == numero_pagina_final){//es la primera y ulitma?
+				if(pag->num_pagina == numero_pagina_final){//es la primera y ulitma
 					memcpy(puntero_a_marco+offset_pagina_inicial,datos->paquete,
 							datos->size_paquete);
 				}
@@ -1119,7 +1138,6 @@ int muse_map(muse_map_t* datos){
 		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 		segmento_nuevo->info_heaps = NULL;
 		segmento_nuevo->path_mapeo = string_duplicate(datos->path);
-		//los segmentos mmapeados no tienen lista de heaps, fijarse q no rompa nada!!
 
 		if(datos->flag != MAP_PRIVATE){
 			segmento_nuevo->compartido = true;
@@ -1142,7 +1160,7 @@ int muse_map(muse_map_t* datos){
 		for(int i = 0; i < cantidad_de_paginas;i++){
 			pagina* pag = malloc(sizeof(pagina));
 			pag->num_pagina = i;
-			pag->bit_marco = NULL;//!!
+			pag->bit_marco = NULL;
 			pag->presencia = false;
 			pag->bit_swap = NULL;
 			list_add(tabla_de_paginas,pag);
@@ -1206,6 +1224,10 @@ int muse_sync(muse_sync_t* datos){
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 */
 int muse_unmap(muse_unmap_t* datos){
+	//guarda los cambios realizados a archivo mappeado
+	//solo se puede hacer fclose si todos los programas que
+	// referenciaban al segmento, se cerraron con unmap.
+	// tipo hardlink?
 	return 0;
 }
 int muse_close(char* id_cliente){
@@ -1371,7 +1393,7 @@ void ocupate_de_este(int socket){
 					muse_void_destroy(mv);
 				}
 				else{
-//					todos los errores son segm fault!!??
+//					todos los errores son segm fault??
 					operacion_respuesta = MUSE_SEG_FAULT;
 					send(socket,&operacion_respuesta,4,0);
 				}
@@ -1469,7 +1491,7 @@ void init_bitarray(){
 		bit->ocupado = false;
 		bit->posicion = i;
 		bit->bit_modificado = false;
-		bit->bit_uso = 0;
+		bit->bit_uso = false;
 		list_add(bitarray->bitarray_memoria,bit);
 	}
 	bitarray->size_memoria_virtual = CANT_PAGINAS_MEMORIA_VIRTUAL;
@@ -1931,6 +1953,159 @@ muse_void* deserializar_muse_void(void* magic){
 	puntero += mv->size_paquete;
 	return mv;
 }
+
+void destroy_programa(programa_t* prog)
+{
+	//falta bien liberar segmentos mappeados
+	free(prog->id_programa);
+	free(prog->tabla_de_segmentos);
+	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
+	_Bool esPrograma(programa_t* programa){
+			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
+	}
+	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
+
+	}
+void destroy_segmento(segmento* seg)
+{
+	//falta bien liberar segmentos mappeados
+	free(seg->path_mapeo);
+	if(!seg->mmapeado){
+		list_destroy_and_destroy_elements(seg->info_heaps,(void*)free);
+	}
+	list_destroy_and_destroy_elements(seg->paginas,(void*)free);
+}
+
+void metricas()
+{
+	//Cuando un programa finaliza, tanto correctamente como al generar un segmentation fault
+	//Cuando se realiza una nueva petición de memoria muse_alloc
+	metrica_por_socket_conectado();
+	metrica_del_sistema();
+	metrica_por_programa();
+
+
+
+}
+void metrica_por_socket_conectado()
+{
+	//Cantidad de memoria disponible (en bytes) en el último segmento
+	//de memoria dinámica pedido
+
+	int total_de_segmentos=0;
+	for (int i=0;i<tabla_de_programas->elements_count;i++)
+	{ //agarro cada programa
+		programa_t* prog = list_get(tabla_de_programas,i);
+		total_de_segmentos+=prog->tabla_de_segmentos->elements_count;
+		segmento* seg = list_last_element(prog->tabla_de_segmentos);
+		if(!seg->mmapeado){
+			//en bytes ..?? !!
+			//cantidad de memoria disponible al final de cada programa
+			heap_lista* ultimo_heap = list_last_element(seg->info_heaps);
+			log_info(logg,"el espacio en el ultimo segmento %i",ultimo_heap->espacio);
+		}else{
+			log_info(logg,"el ultimo segmento esta mmapeado");
+		}
+	}
+
+	if(total_de_segmentos>0){
+		for (int i=0;i<tabla_de_programas->elements_count;i++)
+		{ //agarro cada programa
+			programa_t* prog = list_get(tabla_de_programas,i);
+			//porcentaje de todos los segmentos
+			log_info(logg,"%s tiene el %i porciento de los segmentos pedidos",prog->id_programa,prog->tabla_de_segmentos->elements_count*100/total_de_segmentos);
+
+		}
+	}else{
+		log_info(logg,"No hay segmentos");
+	}
+
+}
+
+void metrica_por_programa()
+{
+	for (int i=0;i<tabla_de_programas->elements_count;i++)
+	{ //agarro cada programa
+		programa_t* prog = list_get(tabla_de_programas,i);
+		//memoria liberada por programa
+		_Bool esMemoriaDelPrograma(memoria_liberada* mem_liberada){
+			return string_equals_ignore_case(mem_liberada->programa_id,prog->id_programa);
+		}
+		memoria_liberada* mem_liberada = list_find(tabla_de_memoria_liberada,(void*)esMemoriaDelPrograma);
+		if(mem_liberada!=NULL){
+		int memoria_liberada_por_programa = mem_liberada->memoria_liberada_acumulada;
+			log_info(logg,"el espacio liberado acumulado por %s es %i",prog->id_programa,memoria_liberada_por_programa);
+		}else{
+			log_info(logg,"el programa %s aun no ha liberado memoria",prog->id_programa);
+		}
+
+		int memoria_del_programa=0;
+		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
+		{ //agarro cada segmento del programa
+			segmento* seg = list_get(prog->tabla_de_segmentos,j);
+			memoria_del_programa+=seg->tamanio;
+			//tengo que fijarme que los segmentos mapeados no se repitan o k??!!
+		}
+		log_info(logg,"el espacio total pedido por %s es %i",prog->id_programa,memoria_del_programa);
+	}
+
+
+	//Memoria total liberada ??
+	//var global? lista?
+	//Memory leaks totales ??
+	//los leaks serian cuando se cierra mal el programa..
+	//contar que cosas quedaron alloc
+
+
+}
+
+void metrica_del_sistema()
+{
+//Del sistema:
+//Cantidad de memoria disponible (en bytes)
+	int memoria_ocupada=0;
+
+	for (int i=0;i<tabla_de_programas->elements_count;i++)
+	{ //agarro cada programa
+		programa_t* prog = list_get(tabla_de_programas,i);
+		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
+		{ //agarro cada segmento del programa
+			segmento* seg = list_get(prog->tabla_de_segmentos,j);
+			memoria_ocupada+=seg->tamanio;
+			//tengo que fijarme que los segmentos mapeados no se repitan o k??!!
+		}
+
+	}
+	//sin tener en cuenta la memoria virtual
+	int memoria_disponible = configuracion->tam_mem-memoria_ocupada;
+	log_info(logg,"el espacio disponible en la memoria es %i",memoria_disponible);
+
+}
+
+void acumular_espacio_liberado(char* programa, int cuanto)
+{
+
+	_Bool esMemoriaDelPrograma(memoria_liberada* mem_liberada){
+				return string_equals_ignore_case(mem_liberada->programa_id,programa);
+	}
+	memoria_liberada* mem_liberada = list_find(tabla_de_memoria_liberada,(void*)esMemoriaDelPrograma);
+
+	if(mem_liberada==NULL)
+	{ //si no hay, creo uno
+		memoria_liberada* mem_liberada = malloc(sizeof(memoria_liberada));
+		mem_liberada->programa_id = string_new();
+		string_append(&mem_liberada->programa_id,programa);
+		mem_liberada->memoria_liberada_acumulada=cuanto;
+		list_add(tabla_de_memoria_liberada,mem_liberada);
+
+	}else {
+		mem_liberada->memoria_liberada_acumulada+=cuanto;
+	}
+
+
+
+}
+
 
 
 // Sobre asignacion de memoria

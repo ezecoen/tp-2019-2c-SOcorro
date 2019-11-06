@@ -84,7 +84,9 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 
 	memset(stbuf, 0, sizeof(struct stat));
 
-	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0 || strcmp(path,"/cmov") == 0){
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0
+			|| strcmp(path,"/cmov") == 0 || strcmp(path,"/libselinux.so.1") == 0 || strcmp(path,"/libc.so.6") == 0 || strcmp(path,"/libpcre.so.3") == 0
+			|| strcmp(path,"/libpthread.so.0") == 0 || strcmp(path,"/libdl.so.2") == 0){
 		return -ENOENT;
 	}
 
@@ -289,10 +291,8 @@ static int sac_mkdir(const char *path, mode_t mode)
 		return 0;
 	}
 }
-
-int sac_rmdir(const char *path){
-	int _tam;
-
+static int sac_rmdir(const char* path){
+	int _tam,err;
 	void* peticion = serializar_path(path, RMDIR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -300,13 +300,13 @@ int sac_rmdir(const char *path){
 
 	operaciones op = recibir_op(_socket);
 	if(op == ERROR){
-		return -1;
+		recv(_socket,&err,4,MSG_WAITALL);
+		return -err;
 	}
 	else{
 		return 0;
 	}
 }
-
 
 static int sac_chmod(const char *path, mode_t mode)
 {
@@ -415,7 +415,7 @@ static struct fuse_operations sac_oper = {
 		.mkdir = sac_mkdir,
 		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
-		.utime = sac_utimes
+		.utime = sac_utimes,
 };
 
 
@@ -454,7 +454,7 @@ int main(int argc, char *argv[]) {
 	/*==	Init Socket		==*/
 
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("192.168.1.104", 8080);
+	_socket = conectar_socket_a("127.0.0.1", 8080);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
 
