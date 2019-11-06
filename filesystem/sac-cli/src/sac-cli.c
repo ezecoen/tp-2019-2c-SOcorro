@@ -428,17 +428,6 @@ int sac_rename(const char* old,const char* new){
 	}
 }
 
-int sac_truncate (const char *filename, off_t length){
-	puts("TRUNCATEEEEEEEEEjvbydfbvmksjnv");
-	return 0;
-}
-
-
-static int sac_opendir (const char * path, struct fuse_file_info * fi){
-	return 0;
-}
-
-
 /*
  * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
  * biblioteca que funciones tiene que invocar segun que se le pida a FUSE.
@@ -458,7 +447,6 @@ static struct fuse_operations sac_oper = {
 		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
 		.utime = sac_utimes,
-		.truncate = sac_truncate,
 		.rename = sac_rename,
 		.truncate = sac_truncate,
 };

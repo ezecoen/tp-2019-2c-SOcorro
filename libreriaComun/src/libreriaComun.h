@@ -69,6 +69,7 @@ typedef struct{
 	uint32_t size_path;
 	uint32_t new_size;
 }t_truncate;
+
 typedef struct{
 	uint32_t size; //4bytes
 	uint64_t modif_time; //8bytes

@@ -19,9 +19,9 @@ int main(int argc,char* argv[]) {
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 	while(1){
-		esperar_conexion(_servidor);
-//		int cliente = aceptar_cliente(_servidor);
-//		atender_cliente(cliente);
+//		esperar_conexion(_servidor);
+		int cliente = aceptar_cliente(_servidor);
+		atender_cliente(cliente);
 	}
 	destroy_semaforos();
 
@@ -710,43 +710,80 @@ int cuantos_bloques_tengo(char* path){
 	}
 	return libres;
 }
+
 int _truncate(t_truncate* __truncate){
 	int new_tam = __truncate->new_size;
 	int tam_real = cuantos_bloques_tengo(__truncate->path)*4096;
 	if(new_tam < tam_real){
+		desasignar_bloques(__truncate->path);
 		return 0;
 	}
-	int bloques_a_agregar = new_tam/4096;
-	t_punteros_a_bloques_de_datos* PIS = dame_el_pis(__truncate->path);
-	if(entran_en_el_PIS(__truncate->path,bloques_a_agregar)){
-		for(int i = 0;i<bloques_a_agregar;i++){
-			asigname_bloque(PIS);
-		}
-		return 0;
-	}
-	int libres = cuantos_entran(PIS);
-	for(int j=0;j<libres;j++){
-		asigname_bloque(PIS);
-	}
-	int faltan = bloques_a_agregar - libres;
-	if(faltan != 0){
-		int cuantos_pis_necesito = libres / 1024;
-		if(cuantos_pis_necesito == 0){
-			cuantos_pis_necesito ++;
-		}
-		for(int j = 0;j<cuantos_pis_necesito;j++){
-			puntero_a_bloque_de_puntero* PIS = dame_el_PIS_libre(__truncate->path);
-			for(int i = 0;i<1024 || i<faltan;i++){
-				uint32_t bloque_a_usar = dame_un_bloque_libre();
-				if(bloque_a_usar == -1){
-					return -1;
-				}
-				PIS = bloque_a_usar;
-			}
-		}
-	}
-	return 0;
+
+//	int bloques_a_agregar = new_tam/4096;
+//	t_punteros_a_bloques_de_datos* PIS = dame_el_pis(__truncate->path);
+//	if(entran_en_el_PIS(__truncate->path,bloques_a_agregar)){
+//		for(int i = 0;i<bloques_a_agregar;i++){
+//			asigname_bloque(PIS);
+//		}
+//		return 0;
+//	}
+//	int libres = cuantos_entran(PIS);
+//	for(int j=0;j<libres;j++){
+//		asigname_bloque(PIS);
+//	}
+//	int faltan = bloques_a_agregar - libres;
+//	if(faltan != 0){
+//		int cuantos_pis_necesito = libres / 1024;
+//		if(cuantos_pis_necesito == 0){
+//			cuantos_pis_necesito ++;
+//		}
+//		for(int j = 0;j<cuantos_pis_necesito;j++){
+//			puntero_a_bloque_de_puntero* PIS = dame_el_PIS_libre(__truncate->path);
+//			for(int i = 0;i<1024 || i<faltan;i++){
+//				uint32_t bloque_a_usar = dame_un_bloque_libre();
+//				if(bloque_a_usar == -1){
+//					return -1;
+//				}
+//				PIS = bloque_a_usar;
+//			}
+//		}
+//	}
+//	return 0;
 }
+
+void desasignar_bloques(char* path){
+	nodo* nodox = dame_el_nodo_de(path);
+	int i, j;
+	for(i=0;i < 1000;i++){
+		if(nodox->punteros_indirectos[i].punteros == 0){
+			continue;
+		}
+		t_punteros_a_bloques_de_datos* BPD = (t_punteros_a_bloques_de_datos*) primer_bloque_de_disco+nodox->punteros_indirectos[i].punteros;
+		for(j=0;j < 1024;j++){
+			if(BPD->punteros_a_bloques_de_datos[j] == 0){
+				continue;
+			}
+			llenar_de_barraceros(BPD->punteros_a_bloques_de_datos[j]);
+			sem_wait(&s_bitarray);
+			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
+			sem_post(&s_bitarray);
+			BPD->punteros_a_bloques_de_datos[j] = 0;
+		}
+		sem_wait(&s_bitarray);
+		bitarray_clean_bit(bitarray,nodox->punteros_indirectos[i].punteros);
+		sem_post(&s_bitarray);
+		nodox->punteros_indirectos[i].punteros = 0;
+	}
+	nodox->tamanio_de_archivo = 0;
+}
+
+void llenar_de_barraceros (uint32_t indice_bloque_de_datos){
+	bloque* _bloque = primer_bloque_de_disco+indice_bloque_de_datos;
+	for (int i = 0; i<4096;i++){
+		_bloque->bytes[i] = '\0';
+	}
+}
+
 puntero_a_bloque_de_puntero* dame_el_PIS_libre(char* path){
 	nodo* _nodo = dame_el_nodo_de(path);
 	int i;
@@ -760,7 +797,7 @@ puntero_a_bloque_de_puntero* dame_el_PIS_libre(char* path){
 int cuantos_entran(t_punteros_a_bloques_de_datos* PIS){
 	int libres = 0;
 	for(int i=0;i<1024;i++){
-		if(PIS->punteros_a_bloques_de_datos[i] != 0){
+		if(PIS->punteros_a_bloques_de_datos[i] == 0){
 			libres++;
 		}
 	}
