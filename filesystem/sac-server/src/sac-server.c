@@ -479,7 +479,7 @@ void atender_cliente(int cliente){
 			free(magic);
 			res = _rmdir(path_pedido);
 			if(res == 1){
-				res = RMDIR;
+				res = RMDIR; // @suppress("Symbol is not resolved")
 				send(cliente,&res,4,0);
 			}else{
 				void* error = armar_error(res);
@@ -523,7 +523,7 @@ void atender_cliente(int cliente){
 				int err = ERROR;
 				send(cliente,&err,4,0);
 			}else{
-				void* magic = serializar_lista_ent_dir(entradas);
+				magic = serializar_lista_ent_dir(entradas);
 				int tam;
 				memcpy(&tam,magic+8,sizeof(int));
 				send(cliente,magic,tam,0);
@@ -794,24 +794,31 @@ bool entran_en_el_PIS(char* path,int bloques_a_agregar){
 	return true;
 }
 t_write* _read(t_write* wwrite){
+	t_write* res;
 	nodo* _nodo = dame_el_nodo_de(wwrite->path);
 	int base = pow(2,22);
 	int bbase = pow(2,12);
 	int indice_de_PIS = wwrite->offset/base;
 	int resto = wwrite->offset%base;
-	if(_nodo->punteros_indirectos[indice_de_PIS].punteros == 0){// no tiene ningun bloque asignado
-		return -1;// no esta el puntero
+	if(_nodo->punteros_indirectos[indice_de_PIS].punteros == 0){// no tiene ningun bloque asignado, no esta el puntero, devuelve vacio ("")
+		char* buff = malloc(1);
+		memcpy(buff,"\0",1);
+		res = crear_write(wwrite->path,buff,1,wwrite->offset);
+		return res;
 	}
 	t_punteros_a_bloques_de_datos* BPD;
 	BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+_nodo->punteros_indirectos[indice_de_PIS].punteros);
 	int _bloque = resto/bbase;
 	int byte = resto%bbase;
-	if(BPD->punteros_a_bloques_de_datos[_bloque] == 0){
-			return -1;//no esta el bloque de dato
+	if(BPD->punteros_a_bloques_de_datos[_bloque] == 0){//no esta el bloque de dato, devuelve vacio ("")
+		char* buff = malloc(1);
+		memcpy(buff,"\0",1);
+		res = crear_write(wwrite->path,buff,1,wwrite->offset);
+		return res;
 	}
 	bloque* _bloq = (bloque*) primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
 	int espacio = 4096-byte;
-	t_write* res;
+
 	if(espacio > wwrite->size_buff){
 		char* buff = malloc(wwrite->size_buff);
 		memcpy(buff,_bloq+byte,wwrite->size_buff);

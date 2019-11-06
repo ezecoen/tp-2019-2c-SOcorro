@@ -339,7 +339,7 @@ static int sac_write(const char *path, char *buf, size_t size, off_t offset, str
 	operaciones op = recibir_op(_socket);
 	int error;
 	if(op == ERROR){
-		recv(_socket,&error,4,MSG_WAITALL);
+//		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{// recibir buf
@@ -376,7 +376,7 @@ int sac_read (const char *path, const char *buf, size_t tam, off_t offset, struc
 	operaciones op = recibir_op(_socket);
 	int error;
 	if(op == ERROR){
-		recv(_socket,&error,4,MSG_WAITALL);
+//		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{
@@ -428,6 +428,11 @@ int sac_rename(const char* old,const char* new){
 	}
 }
 
+int sac_truncate (const char *filename, off_t length){
+	puts("TRUNCATEEEEEEEEEjvbydfbvmksjnv");
+	return 0;
+}
+
 
 static int sac_opendir (const char * path, struct fuse_file_info * fi){
 	return 0;
@@ -454,6 +459,7 @@ static struct fuse_operations sac_oper = {
 		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
 		.utime = sac_utimes,
+		.truncate = sac_truncate,
 		.rename = sac_rename,
 		.truncate = sac_truncate,
 };
@@ -489,7 +495,7 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 
    /*============= MAIN DE PRUEBA =============*/
-	system("fusermount -u fs");
+//	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
 
