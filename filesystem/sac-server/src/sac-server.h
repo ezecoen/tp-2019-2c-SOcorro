@@ -110,6 +110,9 @@ int _unlink (char* path);
 t_write* _read(t_write* wwrite);
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido);
 void levantar_diccionario();
+bool entran_en_el_PIS(char* path,int bloques_a_agregar);
+puntero_a_bloque_de_puntero* dame_el_PIS_libre(char* path);
+t_punteros_a_bloques_de_datos* dame_el_pis(char* path);
 void init_semaforos();
 /*==	Variables Globales		==*/
 int es_virgen;

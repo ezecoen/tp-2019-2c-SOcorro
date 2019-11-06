@@ -417,7 +417,44 @@ void* serializar_getattr(t_getattr* stat){
 	puntero += sizeof(uint8_t);
 	return magic;
 }
-
+t_truncate* crear_truncate(const char* path, uint32_t size){
+	t_truncate* _truncate = malloc(sizeof(t_truncate));
+	int _size = strlen(path)+1;
+	_truncate->size_path = _size;
+	_truncate->new_size = size;
+	_truncate->path = malloc(_truncate->size_path);
+	memcpy(_truncate->path,path,_truncate->size_path);
+	return _truncate;
+}
+void* serializar_truncate(t_truncate* _truncate){
+	int bytes = sizeof(uint32_t)*4 + _truncate->size_path;
+	int comando = TRUNCATE;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, &_truncate->new_size, sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, &_truncate->size_path, sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero, _truncate->path, _truncate->size_path);
+	puntero += _truncate->size_path;
+	return magic;
+}
+t_truncate* deserializar_truncate(void* magic){
+	t_truncate* _truncate = malloc(sizeof(t_truncate));
+	int puntero = 0;
+	memcpy(&_truncate->new_size,magic+puntero,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(&_truncate->size_path,magic+puntero,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	_truncate->path = malloc(_truncate->size_path);
+	memcpy(_truncate->path,magic+puntero,_truncate->size_path);
+	puntero += _truncate->size_path;
+	return _truncate;
+}
 t_getattr* deserializar_getattr(void* magic){
 	t_getattr* resp = malloc(sizeof(t_getattr));
 	int puntero = 0;
