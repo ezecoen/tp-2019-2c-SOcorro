@@ -345,7 +345,7 @@ static int sac_write(const char *path, char *buf, size_t size, off_t offset, str
 	operaciones op = recibir_op(_socket);
 	int error;
 	if(op == ERROR){
-		recv(_socket,&error,4,MSG_WAITALL);
+//		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{// recibir buf
@@ -364,7 +364,7 @@ int sac_read (const char *path, const char *buf, size_t tam, off_t offset, struc
 	operaciones op = recibir_op(_socket);
 	int error;
 	if(op == ERROR){
-		recv(_socket,&error,4,MSG_WAITALL);
+//		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{
@@ -372,8 +372,6 @@ int sac_read (const char *path, const char *buf, size_t tam, off_t offset, struc
 		magic = malloc(_tam);
 		recv(_socket,magic,_tam-8,MSG_WAITALL);
 		t_write* _wwrite = deserializar_write(magic);
-		free(buf);
-		buf = malloc(_wwrite->size_buff);
 		memcpy(buf,_wwrite->buff,_wwrite->size_buff);
 		return _wwrite->size_buff;
 	}
@@ -397,6 +395,11 @@ int sac_utimes (const char *filename, struct timeval tvp[2]){
 	else{
 		return 0;
 	}
+}
+
+int sac_truncate (const char *filename, off_t length){
+	puts("TRUNCATEEEEEEEEEjvbydfbvmksjnv");
+	return 0;
 }
 
 
@@ -423,6 +426,7 @@ static struct fuse_operations sac_oper = {
 		.rmdir = sac_rmdir,
 		.chmod = sac_chmod,
 		.utime = sac_utimes,
+		.truncate = sac_truncate
 };
 
 
@@ -456,7 +460,7 @@ static struct fuse_opt fuse_options[] = {
 int main(int argc, char *argv[]) {
 
    /*============= MAIN DE PRUEBA =============*/
-	system("fusermount -u fs");
+//	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
 
