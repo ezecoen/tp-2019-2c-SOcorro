@@ -335,40 +335,47 @@ static int sac_chmod(const char *path, mode_t mode)
  * 		la cantidad de bytes leidos o -ENOENT si ocurrio un error. ( Este comportamiento es igual
  * 		para la funcion write )
  */
-static int sac_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
-	size_t len;
-	(void) fi;
-	if (strcmp(path, DEFAULT_FILE_PATH) != 0)
-		return -ENOENT;
-
-	len = strlen(DEFAULT_FILE_CONTENT);
-	if (offset < len) {
-		if (offset + size > len)
-			size = len - offset;
-		memcpy(buf, DEFAULT_FILE_CONTENT + offset, size);
-	} else
-		size = 0;
-
-	return size;
-}
-int sac_write (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
-	t_write* wwrite = crear_write(path,buf,tam,offset);
+static int sac_write(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+	t_write* wwrite = crear_write(path,buf,size,offset);
 	int _tam;
 	void* magic = serializar_write(wwrite);
 	memcpy(&_tam,magic+4,4);
 	send(_socket,magic,_tam,0);
 	free(magic);
-
-
 	operaciones op = recibir_op(_socket);
-	void* _respuesta;
 	int error;
 	if(op == ERROR){
-//		recv(_socket,&error,4,0);
+		recv(_socket,&error,4,MSG_WAITALL);
+		return -1;
+	}
+	else{// recibir buf
+		int cantidad_escrita;
+		recv(_socket,&cantidad_escrita,4,MSG_WAITALL);
+		return cantidad_escrita;
+	}
+}
+int sac_read (const char *path, const char *buf, size_t tam, off_t offset, struct fuse_file_info *fi){
+	t_write* wwrite = crear_write(path,buf,tam,offset);
+	int _tam;
+	void* magic = serializar_read(wwrite);
+	memcpy(&_tam,magic+4,4);
+	send(_socket,magic,_tam,0);
+	free(magic);
+	operaciones op = recibir_op(_socket);
+	int error;
+	if(op == ERROR){
+		recv(_socket,&error,4,MSG_WAITALL);
 		return -1;
 	}
 	else{
-		return 0;
+		recv(_socket,&_tam,sizeof(int),MSG_WAITALL);
+		magic = malloc(_tam);
+		recv(_socket,magic,_tam-8,MSG_WAITALL);
+		t_write* _wwrite = deserializar_write(magic);
+		free(buf);
+		buf = malloc(_wwrite->size_buff);
+		memcpy(buf,_wwrite->buff,_wwrite->size_buff);
+		return _wwrite->size_buff;
 	}
 }
 
@@ -408,8 +415,8 @@ static struct fuse_operations sac_oper = {
 		.open = sac_open,
 		.release = sac_release,
 //		.opendir = sac_opendir,
-//		.read = sac_read,
-//		.write = sac_write,
+		.read = sac_read,
+		.write = sac_write,
 		.mknod = sac_mknod,
 		.unlink = sac_unlink,
 		.mkdir = sac_mkdir,

@@ -39,7 +39,27 @@ void* serializar_write(t_write* wwrite){
 	puntero += sizeof(uint32_t);
 	memcpy(magic+puntero,wwrite->path,wwrite->size_path);
 	puntero += wwrite->size_path;
-
+	return magic;
+}
+void* serializar_read(t_write* wwrite){
+	uint32_t bytes = sizeof(uint32_t)*5 + wwrite->size_buff + wwrite->size_path;
+	uint32_t comando = READ;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&wwrite->offset,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&wwrite->size_buff,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,wwrite->buff,wwrite->size_buff);
+	puntero += wwrite->size_buff;
+	memcpy(magic+puntero,&wwrite->size_path,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,wwrite->path,wwrite->size_path);
+	puntero += wwrite->size_path;
 	return magic;
 }
 t_write* deserializar_write(void* magic){

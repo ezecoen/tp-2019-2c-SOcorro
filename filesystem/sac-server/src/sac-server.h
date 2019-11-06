@@ -107,7 +107,7 @@ char* acomodamelo_papi_local(char* path_al_reves);
 uint32_t dame_un_bloque_libre();
 void limpiar_nodo(nodo* nodox);
 int _unlink (char* path);
-int _write(t_write* wwrite);
+t_write* _read(t_write* wwrite);
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido);
 void levantar_diccionario();
 void init_semaforos();

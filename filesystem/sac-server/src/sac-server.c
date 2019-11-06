@@ -19,9 +19,9 @@ int main(int argc,char* argv[]) {
 	log_info(logger,"El fileSystem fue cargado");
 	int _servidor = crear_servidor(8080);
 	while(1){
-		esperar_conexion(_servidor);
-//		int cliente = aceptar_cliente(servidor);
-//		atender_cliente(cliente);
+//		esperar_conexion(_servidor);
+		int cliente = aceptar_cliente(_servidor);
+		atender_cliente(cliente);
 	}
 	destroy_semaforos();
 
@@ -132,6 +132,7 @@ int _rmdir(char* path){
 			sem_wait(&s_diccionario);
 			indice_de_nodo = dictionary_get(diccionario_de_path,path);
 			nodo* nodox = (nodo*)bloque_de_nodo(indice_de_nodo);
+			nodox->tamanio_de_archivo = 0;
 			nodox->estado = 0;
 			dictionary_remove(diccionario_de_path,path);
 			sem_post(&s_diccionario);
@@ -300,7 +301,7 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->fecha_de_creacion=timestamp();
 			nodo_vacio->fecha_de_modificacion=timestamp();
 			strcpy(nodo_vacio->nombre_de_archivo,"/");
-			for(int x = 0;x<1000;i++){
+			for(int x = 0;x<1000;x++){
 				nodo_vacio->punteros_indirectos[x].punteros = 0;
 			}
 			nodo_vacio->tamanio_de_archivo=0;
@@ -310,13 +311,12 @@ void escribir_tabla_de_nodos(bloque* _bloque){//disco+1+tam_de_bitmap){
 			nodo_vacio->estado=0;
 			nodo_vacio->fecha_de_creacion=0;
 			nodo_vacio->fecha_de_modificacion=0;
-			for(int j = 0;j<71;i++){
+			for(int j = 0;j<71;j++){
 				nodo_vacio->nombre_de_archivo[j] = '\0';
 			}
-			for(int x = 0;x<1000;i++){
+			for(int x = 0;x<1000;x++){
 				nodo_vacio->punteros_indirectos[x].punteros = 0;
 			}
-			nodo_vacio->punteros_indirectos[i].punteros = 0; //descomentar cuando este testeado
 			nodo_vacio->tamanio_de_archivo=0;
 			}
 		_bloque++;
@@ -465,7 +465,7 @@ void atender_cliente(int cliente){
 			free(magic);
 			res = _rmdir(path_pedido);
 			if(res == 1){
-				res = MKDIR;
+				res = RMDIR;
 				send(cliente,&res,4,0);
 			}else{
 				void* error = armar_error(res);
@@ -536,7 +536,22 @@ void atender_cliente(int cliente){
 			free(magic);
 			break;
 		case READ:
-			log_info(logger,"Llego la instruccion READ");
+			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
+			magic = malloc(_tam);
+			recv(cliente,magic,_tam-8,MSG_WAITALL);
+			t_write* wwrite = deserializar_write(magic);
+			log_info(logger,"Llego la instruccion READ %s",wwrite->path);
+			t_write* res_write = _read(wwrite);
+			if(res_write == -1){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				int _tam;
+				void* magic = serializar_read(res_write);
+				memcpy(&_tam,magic+4,4);
+				send(cliente,magic,_tam,0);
+				free(magic);
+			}
 			break;
 		case MKNOD:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
@@ -610,17 +625,23 @@ void atender_cliente(int cliente){
 			log_info(logger,"Llego la instruccion CHMOD");
 			break;
 		case WRITE:
-			log_info(logger,"Llego la instruccion WRITE");
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
-			t_write* wwrite = deserializar_write(magic);
-//			len = strlen(DEFAULT_FILE_CONTENT);
-//			if (offset < len) {
-//				if (offset + size > len)
-//					size = len - offset;
-//			memcpy(buf, DEFAULT_FILE_CONTENT + offset, size);
-			res = _write(wwrite);
+			t_write* _wwrite = deserializar_write(magic);
+			log_info(logger,"Llego la instruccion WRITE %s",_wwrite->path);
+			res = _write(_wwrite);
+			if(res == -1){
+				int err = ERROR;
+				send(cliente,&err,4,0);
+			}else{
+				void* magic = malloc(8);
+				int r = WRITE;
+				memcpy(magic,&r,4);
+				memcpy(magic+4,&res,4);
+				send(cliente,magic,8,0);
+
+			}
 			break;
 		case UTIMES:
 			recv(cliente,&_tam,4,MSG_WAITALL);
@@ -638,26 +659,76 @@ void atender_cliente(int cliente){
 		}
 	}
 }
+t_write* _read(t_write* wwrite){
+	nodo* _nodo = dame_el_nodo_de(wwrite->path);
+	int base = pow(2,22);
+	int bbase = pow(2,12);
+	int indice_de_PIS = wwrite->offset/base;
+	int resto = wwrite->offset%base;
+	if(_nodo->punteros_indirectos[indice_de_PIS].punteros == 0){// no tiene ningun bloque asignado
+		return -1;// no esta el puntero
+	}
+	t_punteros_a_bloques_de_datos* BPD;
+	BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+_nodo->punteros_indirectos[indice_de_PIS].punteros);
+	int _bloque = resto/bbase;
+	int byte = resto%bbase;
+	if(BPD->punteros_a_bloques_de_datos[_bloque] == 0){
+			return -1;//no esta el bloque de dato
+	}
+	bloque* _bloq = (bloque*) primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
+	int espacio = 4096-byte;
+	t_write* res;
+	if(espacio > wwrite->size_buff){
+		char* buff = malloc(wwrite->size_buff);
+		memcpy(buff,_bloq+byte,wwrite->size_buff);
+		res = crear_write(wwrite->path,buff,wwrite->size_buff,wwrite->offset);
+	}else{
+		char* buff = malloc(espacio);
+		memcpy(buff,_bloq+byte,espacio);
+		res = crear_write(wwrite->path,buff,espacio,wwrite->offset);
+	}
+	return res;
+}
 int _write(t_write* wwrite){
 	nodo* _nodo = dame_el_nodo_de(wwrite->path);
 	int base = pow(2,22);
+	int bbase = pow(2,12);
 	int indice_de_PIS = wwrite->offset/base;
+	int resto = wwrite->offset%base;
 	if(_nodo->punteros_indirectos[indice_de_PIS].punteros == 0){// no tiene ningun bloque asignado
 		uint32_t bloque_a_usar = dame_un_bloque_libre();
 		if(bloque_a_usar == -1){
 			return -1;
 		}
-
 		_nodo->punteros_indirectos[indice_de_PIS].punteros = bloque_a_usar;
-	}else{ //ya tiene el bloque inicializado
-	return 0;
 	}
-	return 0;
+	t_punteros_a_bloques_de_datos* BPD;
+	BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+_nodo->punteros_indirectos[indice_de_PIS].punteros);
+	int _bloque = resto/bbase;
+	int byte = resto%bbase;
+	if(BPD->punteros_a_bloques_de_datos[_bloque] == 0){
+		uint32_t bloque_de_dato_a_usar = dame_un_bloque_libre();
+		if(bloque_de_dato_a_usar == -1){
+			return -1;
+		}
+		BPD->punteros_a_bloques_de_datos[_bloque] = bloque_de_dato_a_usar;
+	}
+	bloque* _bloq = (bloque*) primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
+	int espacio = 4096-byte;
+	if(espacio > wwrite->size_buff){
+		memcpy(_bloq+byte,wwrite->buff,wwrite->size_buff);
+		_nodo->tamanio_de_archivo += wwrite->size_buff;
+		return wwrite->size_buff;
+	}
+	memcpy(_bloq+byte,wwrite->buff,espacio);
+	_nodo->tamanio_de_archivo += espacio;
+	return espacio;
 }
 uint32_t dame_un_bloque_libre(){
 	sem_wait(&s_bitarray);
 	for(int i = 0;i<tam_de_bitmap*4096;i++){
 		if(bitarray_test_bit(bitarray,i) == 0){
+			bitarray_set_bit(bitarray,i);
 			sem_post(&s_bitarray);
 			return i;
 		}
@@ -725,20 +796,8 @@ void limpiar_nodo(nodo* nodox){
 		i++;
 	}
 	nodox->estado = 0;
+	nodox->tamanio_de_archivo = 0;
 }
-
-
-//int escribime_en(t_write* wwrite, nodo* nodo){
-//	if()//todo
-//}
-//bloque* dame_el_bloque_para_escribir_de(nodo* mi_nodo){
-//	if(no_tengo_bloques_asignados(mi_nodo) || el_ultimo){
-//		asignar_bloque(mi_nodo);
-//		return dame_el_bloque_para_escribir_de(mi_nodo);
-//	}else{
-//		return (bloque*)primer_bloque_de_disco+1+tam_de_bitmap+bloque_para_escribir(mi_nodo->punteros_indirectos);
-//	}
-//}
 
 int encontrame_las_entradas_de(t_list* entradas,char* path_pedido){
 	sem_wait(&s_diccionario);
