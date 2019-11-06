@@ -436,7 +436,6 @@ static struct fuse_operations sac_oper = {
 		.readdir = sac_readdir,
 		.open = sac_open,
 		.release = sac_release,
-//		.opendir = sac_opendir,
 		.read = sac_read,
 		.write = sac_write,
 		.mknod = sac_mknod,
@@ -447,6 +446,7 @@ static struct fuse_operations sac_oper = {
 		.utime = sac_utimes,
 		.truncate = sac_truncate,
 		.rename = sac_rename,
+//		.flush = sac_flush //hay que implementarla?
 };
 
 

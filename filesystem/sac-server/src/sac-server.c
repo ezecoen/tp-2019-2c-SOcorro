@@ -731,7 +731,7 @@ int _write(t_write* wwrite){
 		}
 		_nodo->punteros_indirectos[indice_de_PIS].punteros = bloque_a_usar;
 	}
-	t_punteros_a_bloques_de_datos* BPD;
+	t_punteros_a_bloques_de_datos* BPD; //Bloque de Punteros a bloques de Datos
 	BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+_nodo->punteros_indirectos[indice_de_PIS].punteros);
 	int _bloque = resto/bbase;
 	int byte = resto%bbase;
@@ -742,7 +742,7 @@ int _write(t_write* wwrite){
 		}
 		BPD->punteros_a_bloques_de_datos[_bloque] = bloque_de_dato_a_usar;
 	}
-	bloque* _bloq = (bloque*) primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
+	bloque* _bloq = primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
 	int espacio = 4096-byte;
 	if(espacio > wwrite->size_buff){
 		memcpy(_bloq+byte,wwrite->buff,wwrite->size_buff);
