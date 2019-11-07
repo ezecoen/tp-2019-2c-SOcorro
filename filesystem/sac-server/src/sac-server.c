@@ -17,6 +17,13 @@ int main(int argc,char* argv[]) {
 	load_fs(argv[1]);
 
 	log_info(logger,"El fileSystem fue cargado");
+//
+//	t_write* w1 = crear_write("/g","aaaaaa",7,0);
+//	t_write* w2 = crear_write("/g","chau",5,5);
+//
+//	_write(w1);
+//	_write(w2);
+
 	int _servidor = crear_servidor(8080);
 	while(1){
 //		esperar_conexion(_servidor);
@@ -27,6 +34,8 @@ int main(int argc,char* argv[]) {
 
 	return 0;
 }
+
+
 void destroy_semaforos(){
 	sem_destroy(&s_bitarray);
 	sem_destroy(&s_diccionario);	
@@ -894,11 +903,17 @@ int _write(t_write* wwrite){
 	bloque* _bloq = primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
 	int espacio = 4096-byte;
 	if(espacio > wwrite->size_buff){
-		memcpy(_bloq+byte,wwrite->buff,wwrite->size_buff);
+		for(int i=wwrite->offset;i<(wwrite->size_buff+wwrite->offset);i++){
+			_bloq->bytes[i] = wwrite->buff[i-(wwrite->offset)];
+		}
+//		memcpy(_bloq+byte,wwrite->buff,wwrite->size_buff);
 		_nodo->tamanio_de_archivo += wwrite->size_buff;
 		return wwrite->size_buff;
 	}
-	memcpy(_bloq+byte,wwrite->buff,espacio);
+	for(int i=wwrite->offset;i<(espacio+wwrite->offset);i++){
+		_bloq->bytes[i] = wwrite->buff[i-(wwrite->offset)];
+	}
+//	memcpy(_bloq+byte,wwrite->buff,espacio);
 	_nodo->tamanio_de_archivo += espacio;
 	return espacio;
 }
@@ -955,23 +970,25 @@ int _unlink (char* path){
 }
 
 void limpiar_nodo(nodo* nodox){
-	int i = 0, j;
 	t_punteros_a_bloques_de_datos* BPD; //Bloque de Punteros a Datos
-	while(i<1000 && nodox->punteros_indirectos[i].punteros != 0){
-		j = 0;
+	for(int i=0;i<1000;i++){
+		if(nodox->punteros_indirectos[i].punteros == 0){
+			continue;
+		}
 		BPD = (t_punteros_a_bloques_de_datos*)(primer_bloque_de_disco+nodox->punteros_indirectos[i].punteros);
-		while(j<1024 && BPD->punteros_a_bloques_de_datos[j] != 0){
+		for(int j=0;j<1024;j++){
+			if(BPD->punteros_a_bloques_de_datos[j] == 0){
+				continue;
+			}
 			sem_wait(&s_bitarray);
 			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
 			sem_post(&s_bitarray);
 			BPD->punteros_a_bloques_de_datos[j] = 0;
-			j++;
 		}
 		sem_wait(&s_bitarray);
 		bitarray_clean_bit(bitarray,nodox->punteros_indirectos[i].punteros);
 		sem_post(&s_bitarray);
 		nodox->punteros_indirectos[i].punteros = 0;
-		i++;
 	}
 	nodox->estado = 0;
 	nodox->tamanio_de_archivo = 0;
