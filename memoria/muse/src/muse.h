@@ -29,14 +29,15 @@ typedef struct programa_t{
 }programa_t;
 
 typedef struct segmento{
-	_Bool mmapeado;
-	_Bool compartido;
-	char* path_mapeo;
 	uint32_t num_segmento;
 	uint32_t base_logica;
 	uint32_t tamanio;
 	t_list* paginas;
 	t_list* info_heaps;
+	_Bool mmapeado;
+	_Bool compartido;
+	char* path_mapeo;
+	uint32_t tamanio_mapeo;
 }segmento;
 
 typedef struct mapeo_t{
@@ -44,6 +45,7 @@ typedef struct mapeo_t{
 	uint32_t contador;
 	t_list* paginas;
 	int tamanio;
+	int tamanio_de_pags;
 }mapeo_t;
 
 typedef struct heap_metadata{
@@ -230,6 +232,8 @@ t_list* buscar_mapeo_existente(char* path, int tamanio);
 void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
+void bajar_mapeo(char* path_mapeo, int tam_mapeo);
+void mapeo_destroy(mapeo_t* _mapeo);
 int muse_close(char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
 void mandar_char(char* _char, uint32_t _socket,uint32_t com);
