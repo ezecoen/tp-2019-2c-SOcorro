@@ -150,6 +150,11 @@ typedef struct memoria_liberada{
 	int memoria_liberada_acumulada;
 }memoria_liberada;
 
+typedef struct memoria_pedida{
+	char* programa_id;
+	int memoria_pedida_acumulada;
+}memoria_pedida;
+
 typedef struct s_config{
 	uint32_t puerto;
 	uint32_t tam_mem;
@@ -187,6 +192,7 @@ int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
 t_list* tabla_de_memoria_liberada;
+t_list* tabla_de_memoria_pedida;
 
 
 struct sockaddr_in direccionServidor;
@@ -194,6 +200,7 @@ uint32_t servidor;
 s_config* configuracion;
 t_config* g_config;
 t_log* logg;
+t_log* log_metricas;
 
 //SEMAFOROS
 
@@ -287,5 +294,6 @@ void metrica_del_sistema();
 void metrica_por_programa();
 void metrica_por_socket_conectado();
 void acumular_espacio_liberado(char* programa, int cuanto);
+void acumular_espacio_pedido(char* programa, int cuanto);
 
 #endif /* MUSE_H_ */
