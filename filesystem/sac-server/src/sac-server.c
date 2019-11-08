@@ -986,6 +986,7 @@ void limpiar_nodo(nodo* nodox){
 			sem_wait(&s_bitarray);
 			bitarray_clean_bit(bitarray,BPD->punteros_a_bloques_de_datos[j]);
 			sem_post(&s_bitarray);
+			llenar_de_barraceros(BPD->punteros_a_bloques_de_datos[j]);
 			BPD->punteros_a_bloques_de_datos[j] = 0;
 		}
 		sem_wait(&s_bitarray);
