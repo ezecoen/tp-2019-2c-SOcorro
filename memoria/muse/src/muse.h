@@ -29,14 +29,15 @@ typedef struct programa_t{
 }programa_t;
 
 typedef struct segmento{
-	_Bool mmapeado;
-	_Bool compartido;
-	char* path_mapeo;
 	uint32_t num_segmento;
 	uint32_t base_logica;
 	uint32_t tamanio;
 	t_list* paginas;
 	t_list* info_heaps;
+	_Bool mmapeado;
+	_Bool compartido;
+	char* path_mapeo;
+	uint32_t tamanio_mapeo;
 }segmento;
 
 typedef struct mapeo_t{
@@ -44,6 +45,7 @@ typedef struct mapeo_t{
 	uint32_t contador;
 	t_list* paginas;
 	int tamanio;
+	int tamanio_de_pags;
 }mapeo_t;
 
 typedef struct heap_metadata{
@@ -150,6 +152,11 @@ typedef struct memoria_liberada{
 	int memoria_liberada_acumulada;
 }memoria_liberada;
 
+typedef struct memoria_pedida{
+	char* programa_id;
+	int memoria_pedida_acumulada;
+}memoria_pedida;
+
 typedef struct s_config{
 	uint32_t puerto;
 	uint32_t tam_mem;
@@ -187,6 +194,7 @@ int CANT_PAGINAS_MEMORIA_VIRTUAL;
 bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
 t_list* tabla_de_memoria_liberada;
+t_list* tabla_de_memoria_pedida;
 
 
 struct sockaddr_in direccionServidor;
@@ -194,6 +202,7 @@ uint32_t servidor;
 s_config* configuracion;
 t_config* g_config;
 t_log* logg;
+t_log* log_metricas;
 
 //SEMAFOROS
 
@@ -230,6 +239,8 @@ t_list* buscar_mapeo_existente(char* path, int tamanio);
 void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
+void bajar_mapeo(char* path_mapeo, int tam_mapeo);
+void mapeo_destroy(mapeo_t* _mapeo);
 int muse_close(char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
 void mandar_char(char* _char, uint32_t _socket,uint32_t com);
@@ -284,8 +295,9 @@ void destroy_segmento(segmento* seg);
 void destroy_programa(programa_t* prog);
 void metricas();
 void metrica_del_sistema();
-void metrica_por_programa();
+void metrica_por_programa(char* id_cliente);
 void metrica_por_socket_conectado();
 void acumular_espacio_liberado(char* programa, int cuanto);
+void acumular_espacio_pedido(char* programa, int cuanto);
 
 #endif /* MUSE_H_ */

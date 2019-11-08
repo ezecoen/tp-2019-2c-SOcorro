@@ -8,6 +8,7 @@
 #include <semaphore.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
+#include <string.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
@@ -35,10 +36,10 @@ typedef struct{
 	uint32_t LISTEN_PORT;
 	uint32_t METRICS_TIMER;
 	uint32_t MAX_MULTIPROG;
-	char SEM_IDS[2];
-	uint32_t SEM_INIT[2];
-	uint32_t ALPHA_SJF;
-	uint32_t SEM_MAX[];
+	char SEM_IDS[4];
+	uint32_t SEM_INIT[4];
+	double ALPHA_SJF;
+	uint32_t SEM_MAX[4];
 }p_config;
 
 typedef enum operaciones_t{
@@ -62,8 +63,8 @@ int randomEntre1y10(int numero);
 
 
 //FUNCIONES PARA INICIALIZAR COSAS
-p_config* leer_config();
-void iniciar_log();
+p_config* leer_config(char* path);
+void iniciar_log(char* path);
 void inicializarSemaforos();
 void inicializarEstadosComunes();
 void inicializarOtrasListas();
@@ -103,7 +104,7 @@ sem_t sem_mutConfig;
 sem_t sem_mutNew;
 sem_t mut_multiprogramacion;
 sem_t mut_numeroDePrograma;
-
+int cantidad_de_semaforos;
 
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/

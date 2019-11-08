@@ -40,9 +40,25 @@ static struct hilolay_operations hiloops = {
 };
 
 void hilolay_init(void){
-	init_internal(&hiloops);
 	//Aca tengo que decirle a suse que inicialice las cosas (estados del planificador, semaforos, etc)
 	//tambien hay que hacer el connect con suse
+	init_internal(&hiloops);
+	//se fija si ya se levanto la config, sino la levanta
+	//por ahora el path esta hardcodeado
+	leer_config("/home/utnso/tp-2019-2c-SOcorro/planificador/hilolay/Debug/hilolay.config");
+	int sock = conectar_socket_a(configuracion->ip_suse,configuracion->puerto_suse);
+	if(sock > 0){
+		socket_suse = sock;
+		//envio el init a suse
+		void* mensaje = malloc(8);
+		int op = INIT;
+		int pid = getpid();
+		memcpy(mensaje,&op,4);
+		memcpy(mensaje+4,&pid,4);
+	}
+	else{
+		perror("error en la conexion: ");
+	}
 }
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	struct sockaddr_in direccionServidor;
@@ -56,5 +72,19 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 		return -1;
 	}
 	return cliente;
+}
+s_config* leer_config(char* path){
+	if(config_levantada){
+		return configuracion;
+	}
+	g_config = config_create(path);
+	configuracion = malloc(sizeof(s_config));
+
+	configuracion->puerto_suse = config_get_int_value(g_config,"PUERTO_SUSE");
+	configuracion->ip_suse = string_duplicate(config_get_string_value(g_config,"IP_SUSE"));
+	puts("config de hilolay levantada");
+
+	config_destroy(g_config);
+	return configuracion;
 }
 

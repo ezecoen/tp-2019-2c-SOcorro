@@ -9,6 +9,7 @@ int main(int argc, char **argv) {
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
+	log_info(log_metricas,"NUEVA EJECUCION");
 
 	programa_t* programa2 = malloc(sizeof(programa_t));
 	programa2->tabla_de_segmentos = list_create();
@@ -16,58 +17,33 @@ int main(int argc, char **argv) {
 	string_append(&programa2->id_programa,"prog2");
 	list_add(tabla_de_programas,programa2);
 
-
-	muse_alloc_t* matp = crear_muse_alloc(100,"prog2");
-	int resup = muse_alloc(matp);
-	printf("\nDireccion virtual del mat: %d",resup);
-	fflush(stdout);
-
-
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"prog0");
-	list_add(tabla_de_programas,programa);
-
-
-	muse_alloc_t* mat = crear_muse_alloc(100,"prog0");
+	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
 	int resu = muse_alloc(mat);
 	printf("\nDireccion virtual del mat: %d",resu);
 	fflush(stdout);
+	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog2");
+	int resu2 = muse_alloc(mat2);
+	printf("\nDireccion virtual del mat: %d",resu2);
+	fflush(stdout);
 
-
-	muse_map_t* mmt = crear_muse_map(100,"prog0",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+	muse_map_t* mmt = crear_muse_map(100,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map = muse_map(mmt);
 	printf("\nDireccion virtual del map: %d",puntero_map);
 	fflush(stdout);
 
-	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog0");
-	int resu2 = muse_alloc(mat2);
-	printf("\nDireccion virtual del mat: %d",resu2);
-		fflush(stdout);
-
-
-	muse_alloc_t* mat3 = crear_muse_alloc(13,"prog0");
+	muse_alloc_t* mat3 = crear_muse_alloc(100,"prog2");
 	int resu3 = muse_alloc(mat3);
 	printf("\nDireccion virtual del mat: %d",resu3);
-		fflush(stdout);
+	fflush(stdout);
 
-	metricas();
-	muse_free_t* mft = crear_muse_free("prog0",resu);
+	muse_free_t* mft = crear_muse_free("prog2",resu3);
 	muse_free(mft);
 
-	muse_alloc_t* mat4 = crear_muse_alloc(30,"prog0");
-	int resu4 = muse_alloc(mat4);
-	printf("\nDireccion virtual del mat: %d",resu4);
-	fflush(stdout);
-	muse_alloc_t* mat5 = crear_muse_alloc(30,"prog0");
-	int resu5 = muse_alloc(mat5);
-	printf("\nDireccion virtual del mat: %d",resu5);
-	fflush(stdout);
-	muse_free_t* mft2 = crear_muse_free("prog0",resu4);
+	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
 	muse_free(mft2);
-	metricas();
 
+	muse_close("prog2");
+	//metricas();
 	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -85,6 +61,7 @@ void init_estructuras(char* path){
 	tabla_de_programas = list_create();
 	tabla_de_mapeo = list_create();
 	tabla_de_memoria_liberada=list_create();
+	tabla_de_memoria_pedida=list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
 	CANT_PAGINAS_MEMORIA_VIRTUAL = configuracion->tam_swap/configuracion->tam_pag;
 
@@ -106,17 +83,13 @@ void iniciar_memoria_virtual(char* path_swap){
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
 
-	FILE* fSwap;
-	if(!fopen(path_swap,"rb")){
-		log_info(logg,"no se pudo abrir el archivo de swap");
-	}else{
-		fSwap =fopen(path_swap,"w+");
-		log_info(logg,"se pudo abrir el archivo de swap");
-		fprintf(fSwap,"holiiiiiii eeeeeee aaaaaaaaa");
-		fclose(fSwap);
-	}
 
-	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE,fSwap, 0);
+	int fd = open(path_swap,O_RDWR);
+	if(fd<0){
+		printf("no se pudo abrir el archivo de swap");
+	}
+	//creo que si funciona!!
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
@@ -137,6 +110,11 @@ void iniciar_log(char* path){//0 es archivo, 1 es consola
 	string_append(&nombre,path);
 	string_append(&nombre,".log");
 	logg = log_create(nombre,"muse",1,LOG_LEVEL_TRACE);
+	free(nombre);
+
+	nombre = string_new();
+	string_append(&nombre,"metricas.log");
+	log_metricas = log_create(nombre,"muse",0,LOG_LEVEL_TRACE);
 	free(nombre);
 }
 s_config* leer_config(char* path){
@@ -537,6 +515,8 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	}
 
 	//retorno la direccion de memoria (virtual) que le asigne
+	acumular_espacio_pedido(datos->id,datos->tamanio);
+	metricas("-1"); //para no muestre leaks
 	return direccion_return;
 	}
 else{//no hay lugar
@@ -842,7 +822,7 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
-				acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
+			//	acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 				reemplazar_heap_en_memoria(heap_de_lista_anterior,
 						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
@@ -956,8 +936,7 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 		fclose(archivo);
 		int puntero = pagina_inicial*configuracion->tam_pag;
 		//voy copiando las pags necesarias a los marcos en memoria
-		for(int i = pagina_inicial;i<segmento_buscado->paginas->elements_count;i++,
-		puntero += configuracion->tam_pag, bytes_a_leer-= configuracion->tam_pag){
+		for(int i = pagina_inicial;i<=pagina_final;i++,puntero += configuracion->tam_pag, bytes_a_leer-= configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,i);
 			if(pag->bit_marco==NULL && pag->bit_swap == NULL){
 				//hay q traerla a memoria
@@ -971,6 +950,7 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag-padding);
 					memcpy(puntero_a_marco+configuracion->tam_pag-padding,void_padding,padding);
 					//padding => se llena de \0 al final
+
 				}
 				else{
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag);
@@ -1129,15 +1109,16 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 */
 int muse_map(muse_map_t* datos){
 	if(lugar_disponible >= datos->tamanio){
-		lugar_disponible -= datos->tamanio;
+
 		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 		segmento* segmento_nuevo = malloc(sizeof(segmento));
 		segmento_nuevo->num_segmento = tabla_de_segmentos->elements_count;
 		segmento_nuevo->mmapeado = true;
-		segmento_nuevo->tamanio = datos->tamanio;
+		segmento_nuevo->tamanio_mapeo = datos->tamanio;
 		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 		segmento_nuevo->info_heaps = NULL;
 		segmento_nuevo->path_mapeo = string_duplicate(datos->path);
+		segmento_nuevo->tamanio = redondear_double_arriba((double)datos->tamanio/configuracion->tam_pag)*configuracion->tam_pag;
 
 		if(datos->flag != MAP_PRIVATE){
 			segmento_nuevo->compartido = true;
@@ -1173,8 +1154,10 @@ int muse_map(muse_map_t* datos){
 		mapeo_tabla->paginas = tabla_de_paginas;
 		mapeo_tabla->path = string_duplicate(datos->path);
 		mapeo_tabla->tamanio = datos->tamanio;
+		mapeo_tabla->tamanio_de_pags = segmento_nuevo->tamanio;
 		list_add(tabla_de_mapeo,mapeo_tabla);
-
+		lugar_disponible -= cantidad_de_paginas*configuracion->tam_pag;
+		acumular_espacio_pedido(datos->id,datos->tamanio);
 		return segmento_nuevo->base_logica;
 	}
 	else{
@@ -1213,7 +1196,37 @@ void* generar_padding(int padding){
 * @note Si `len` es menor que el tamaño de la página en la que se encuentre, se deberá escribir la página completa.
 */
 int muse_sync(muse_sync_t* datos){
-	return 0;
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado != NULL){
+		if(segmento_buscado->mmapeado){
+			int numero_pagina_inicial = datos->direccion / configuracion->tam_pag;
+			int numero_pagina_final = (datos->direccion+datos->tamanio)/configuracion->tam_pag;
+			int cantidad_de_paginas = numero_pagina_final - numero_pagina_inicial + 1;
+			int tam_a_copiar = cantidad_de_paginas * configuracion->tam_pag;
+			void* super_void_con_datos = malloc(tam_a_copiar);
+			int puntero = 0;
+			paginas_de_map_en_memoria(datos->direccion,datos->tamanio,segmento_buscado);
+			for(int i = numero_pagina_inicial;i<=numero_pagina_final;i++,puntero+=configuracion->tam_pag,tam_a_copiar-=configuracion->tam_pag){
+				pagina* pag = list_get(segmento_buscado->paginas,i);
+				void* puntero_a_marco = obtener_puntero_a_marco(pag);
+				memcpy(super_void_con_datos+puntero,puntero_a_marco,configuracion->tam_pag);
+			}
+			int posicion_inicial = numero_pagina_inicial*configuracion->tam_pag;
+			FILE* file = fopen(segmento_buscado->path_mapeo,"r+");
+			if(file != NULL){
+				if(!fseek(file,posicion_inicial,SEEK_SET)){
+					//revisar esto!!
+					fwrite(super_void_con_datos,cantidad_de_paginas*configuracion->tam_pag,1,file);
+					fclose(file);
+					return 0;
+				}
+			}
+		}
+	}
+	//si llega aca es xq fallo
+	perror("Error en muse_sync: ");
+	return -1;
 }
 /**
 * Borra el mappeo a un archivo hecho por muse_map.
@@ -1224,13 +1237,71 @@ int muse_sync(muse_sync_t* datos){
 * @return Si pasa un error, retorna -1. Si la operación se realizó correctamente, retorna 0.
 */
 int muse_unmap(muse_unmap_t* datos){
-	//guarda los cambios realizados a archivo mappeado
-	//solo se puede hacer fclose si todos los programas que
-	// referenciaban al segmento, se cerraron con unmap.
-	// tipo hardlink?
-	return 0;
+	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado!=NULL){
+		if(segmento_buscado->mmapeado){
+//			muse_sync_t* mst = crear_muse_sync(segmento_buscado->tamanio_mapeo,segmento_buscado->path_mapeo,segmento_buscado->base_logica);
+//			muse_sync(mst); //hay que hacer sync?!?!?!
+			bajar_mapeo(segmento_buscado->path_mapeo,segmento_buscado->tamanio_mapeo);
+			segmento_buscado->paginas = NULL;
+			segmento_buscado->info_heaps = NULL;
+			free(segmento_buscado->path_mapeo);
+			//elimino el segm pa siempre??
+			return 0;
+		}
+	}
+	perror("error en unmap: ");
+	return -1;
+}
+void bajar_mapeo(char* path_mapeo, int tam_mapeo){
+	_Bool encontrar_mapeo(mapeo_t* _mapeo){
+		return _mapeo->tamanio == tam_mapeo && string_equals_ignore_case(_mapeo->path,path_mapeo);
+	}
+	void liberar_pags(pagina* pag){
+		if(pag->bit_marco != NULL){
+			pag->bit_marco->ocupado = false;
+			pag->bit_marco = NULL;
+		}
+		else if(pag->bit_swap != NULL){
+			pag->bit_swap->ocupado = false;
+		}
+	}
+	//busco el mapeo
+	mapeo_t* mapeo_encontrado = list_find(tabla_de_mapeo,(void*)encontrar_mapeo);
+	if(mapeo_encontrado != NULL){
+		mapeo_encontrado->contador--;
+		if(mapeo_encontrado->contador==0){//si no quedan mas referenciandolo se elimina
+			//libero los bits de memoria
+			list_iterate(mapeo_encontrado->paginas,(void*)liberar_pags);
+			//elimino el mapeo de la lista
+			list_remove_and_destroy_by_condition(tabla_de_mapeo,(void*)encontrar_mapeo,(void*)mapeo_destroy);
+		}
+	}
+}
+void mapeo_destroy(mapeo_t* _mapeo){
+	free(_mapeo->path);
+	list_destroy_and_destroy_elements(_mapeo->paginas,(void*)free);
+	free(_mapeo);
 }
 int muse_close(char* id_cliente){
+	//sacarlo de la tabla de programas
+	//con el id del cliente tengo que sacar el programa?
+	_Bool esPrograma(programa_t* programa){
+			return string_equals_ignore_case(programa->id_programa,id_cliente);
+	}
+
+	programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
+	if(prog!=NULL)
+	{
+		//encontro el programa del cliente
+		//me conviene tirar antes las metricas, asi me fijo los leaks y eso
+		metricas(prog->id_programa);
+		//hay que sacarlo de la lista
+		list_remove_and_destroy_by_condition(tabla_de_programas,
+				(void*)esPrograma,(void*)destroy_programa);
+	}
+
 	return 0;
 }
 uint32_t crear_servidor(uint32_t puerto){
@@ -1471,6 +1542,7 @@ void ocupate_de_este(int socket){
 				printf("-CLOSE\n");
 //				si no se libera algun muse_alloc-> es un memory leak
 //				liberar tabla de programas
+
 				resultado = muse_close(id_cliente);
 				printf("Se fue %d\n",socket);
 				exit_loop = true;
@@ -1522,6 +1594,8 @@ t_bit_memoria* bit_libre_memoria(){
 	t_bit_memoria* bit_asignado = list_find(bitarray->bitarray_memoria,(void*)bit_libre);
 	if(bit_asignado!=NULL){
 		bit_asignado->ocupado = true;
+		bit_asignado->bit_modificado = false;
+		bit_asignado->bit_uso = true;
 	}
 	return bit_asignado;
 }
@@ -1956,9 +2030,9 @@ muse_void* deserializar_muse_void(void* magic){
 
 void destroy_programa(programa_t* prog)
 {
-	//falta bien liberar segmentos mappeados
-	free(prog->id_programa);
-	free(prog->tabla_de_segmentos);
+	//falta bien liberar segmentos mappeados o ver que onda eso.. mandarle unmap directo?
+	//free(prog->id_programa);
+	//free(prog->tabla_de_segmentos);
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
 	_Bool esPrograma(programa_t* programa){
 			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
@@ -1969,23 +2043,27 @@ void destroy_programa(programa_t* prog)
 void destroy_segmento(segmento* seg)
 {
 	//falta bien liberar segmentos mappeados
-	free(seg->path_mapeo);
 	if(!seg->mmapeado){
 		list_destroy_and_destroy_elements(seg->info_heaps,(void*)free);
+	}else{
+		//muse_unmap_t* mut = crear_muse_unmap()
+		//muse_unmap()
+		free(seg->path_mapeo);
 	}
 	list_destroy_and_destroy_elements(seg->paginas,(void*)free);
 }
 
-void metricas()
+void metricas(char* id_cliente)
 {
 	//Cuando un programa finaliza, tanto correctamente como al generar un segmentation fault
 	//Cuando se realiza una nueva petición de memoria muse_alloc
-	metrica_por_socket_conectado();
+	log_info(log_metricas,"----> METRICAS <----");
+	log_info(log_metricas,"DEL SISTEMA");
 	metrica_del_sistema();
-	metrica_por_programa();
-
-
-
+	log_info(log_metricas,"POR SOCKET CONECTADO");
+	metrica_por_socket_conectado();
+	log_info(log_metricas,"POR PROGRAMA");
+	metrica_por_programa(id_cliente);
 }
 void metrica_por_socket_conectado()
 {
@@ -1993,40 +2071,44 @@ void metrica_por_socket_conectado()
 	//de memoria dinámica pedido
 
 	int total_de_segmentos=0;
+	for (int i=0;i<tabla_de_programas->elements_count;i++){
+		programa_t* prog = list_get(tabla_de_programas,i);
+		total_de_segmentos+=prog->tabla_de_segmentos->elements_count;
+	}
 	for (int i=0;i<tabla_de_programas->elements_count;i++)
 	{ //agarro cada programa
 		programa_t* prog = list_get(tabla_de_programas,i);
-		total_de_segmentos+=prog->tabla_de_segmentos->elements_count;
+		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
+
 		segmento* seg = list_last_element(prog->tabla_de_segmentos);
 		if(!seg->mmapeado){
-			//en bytes ..?? !!
 			//cantidad de memoria disponible al final de cada programa
 			heap_lista* ultimo_heap = list_last_element(seg->info_heaps);
-			log_info(logg,"el espacio en el ultimo segmento %i",ultimo_heap->espacio);
+			log_info(log_metricas,"el espacio en el ultimo segmento %i",ultimo_heap->espacio);
 		}else{
-			log_info(logg,"el ultimo segmento esta mmapeado");
+			log_info(log_metricas,"el ultimo segmento esta mmapeado");
 		}
-	}
 
-	if(total_de_segmentos>0){
-		for (int i=0;i<tabla_de_programas->elements_count;i++)
-		{ //agarro cada programa
-			programa_t* prog = list_get(tabla_de_programas,i);
+		if(total_de_segmentos>0){
+		 //agarro cada programa
 			//porcentaje de todos los segmentos
-			log_info(logg,"%s tiene el %i porciento de los segmentos pedidos",prog->id_programa,prog->tabla_de_segmentos->elements_count*100/total_de_segmentos);
+			log_info(log_metricas,"%s tiene el %i porciento de los segmentos pedidos",prog->id_programa,prog->tabla_de_segmentos->elements_count*100/total_de_segmentos);
 
+		}else{
+			log_info(log_metricas,"No hay segmentos");
 		}
-	}else{
-		log_info(logg,"No hay segmentos");
 	}
+
+
 
 }
 
-void metrica_por_programa()
+void metrica_por_programa(char* id_cliente)
 {
 	for (int i=0;i<tabla_de_programas->elements_count;i++)
 	{ //agarro cada programa
 		programa_t* prog = list_get(tabla_de_programas,i);
+		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
 		//memoria liberada por programa
 		_Bool esMemoriaDelPrograma(memoria_liberada* mem_liberada){
 			return string_equals_ignore_case(mem_liberada->programa_id,prog->id_programa);
@@ -2034,57 +2116,60 @@ void metrica_por_programa()
 		memoria_liberada* mem_liberada = list_find(tabla_de_memoria_liberada,(void*)esMemoriaDelPrograma);
 		if(mem_liberada!=NULL){
 		int memoria_liberada_por_programa = mem_liberada->memoria_liberada_acumulada;
-			log_info(logg,"el espacio liberado acumulado por %s es %i",prog->id_programa,memoria_liberada_por_programa);
+			log_info(log_metricas,"Liberado acumulado: %i",memoria_liberada_por_programa);
 		}else{
-			log_info(logg,"el programa %s aun no ha liberado memoria",prog->id_programa);
+			log_info(log_metricas,"Aun no ha liberado memoria");
+		}
+		memoria_pedida* mem_pedida = list_find(tabla_de_memoria_pedida,(void*)esMemoriaDelPrograma);
+		if(mem_pedida!=NULL){
+		int memoria_pedida_por_programa = mem_pedida->memoria_pedida_acumulada;
+			log_info(log_metricas,"Pedido acumulado: %i",memoria_pedida_por_programa);
+		}else{
+			log_info(log_metricas,"Aun no ha pedido memoria");
 		}
 
-		int memoria_del_programa=0;
+
+		int memoria_ocupada=0;
+		int memoria_leaks=0;
 		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
 		{ //agarro cada segmento del programa
 			segmento* seg = list_get(prog->tabla_de_segmentos,j);
-			memoria_del_programa+=seg->tamanio;
-			//tengo que fijarme que los segmentos mapeados no se repitan o k??!!
+
+			if(!seg->mmapeado){
+				memoria_ocupada+=seg->tamanio; //todas las paginas reservadas del segmento
+				for(int i = 0;i<seg->info_heaps->elements_count;i++)
+				{
+					heap_lista* heap_lista = list_get(seg->info_heaps,i);
+					if(!heap_lista->is_free)
+					{
+						memoria_leaks+=heap_lista->espacio+sizeof(heap_metadata);
+					}
+				}
+			}else{
+				memoria_ocupada+=seg->tamanio_mapeo;
+			}
 		}
-		log_info(logg,"el espacio total pedido por %s es %i",prog->id_programa,memoria_del_programa);
+		log_info(log_metricas,"Espacio reservado: %i",memoria_ocupada);
+		if(string_equals_ignore_case(id_cliente,prog->id_programa)){
+			//es un socket que esta cerrandose, miro los leaks
+			//leaks deberia ser solo si el programa hizo muse_close
+			log_info(log_metricas,"Cerrandose con",memoria_leaks);
+			log_info(log_metricas,"Leaks: %i",memoria_leaks);
+		}
+
 	}
-
-
-	//Memoria total liberada ??
-	//var global? lista?
-	//Memory leaks totales ??
-	//los leaks serian cuando se cierra mal el programa..
-	//contar que cosas quedaron alloc
-
-
 }
 
 void metrica_del_sistema()
 {
 //Del sistema:
 //Cantidad de memoria disponible (en bytes)
-	int memoria_ocupada=0;
-
-	for (int i=0;i<tabla_de_programas->elements_count;i++)
-	{ //agarro cada programa
-		programa_t* prog = list_get(tabla_de_programas,i);
-		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
-		{ //agarro cada segmento del programa
-			segmento* seg = list_get(prog->tabla_de_segmentos,j);
-			memoria_ocupada+=seg->tamanio;
-			//tengo que fijarme que los segmentos mapeados no se repitan o k??!!
-		}
-
-	}
-	//sin tener en cuenta la memoria virtual
-	int memoria_disponible = configuracion->tam_mem-memoria_ocupada;
-	log_info(logg,"el espacio disponible en la memoria es %i",memoria_disponible);
+	log_info(log_metricas,"el espacio disponible en la memoria es %i",lugar_disponible);
 
 }
 
 void acumular_espacio_liberado(char* programa, int cuanto)
 {
-
 	_Bool esMemoriaDelPrograma(memoria_liberada* mem_liberada){
 				return string_equals_ignore_case(mem_liberada->programa_id,programa);
 	}
@@ -2101,37 +2186,26 @@ void acumular_espacio_liberado(char* programa, int cuanto)
 	}else {
 		mem_liberada->memoria_liberada_acumulada+=cuanto;
 	}
-
-
-
 }
 
 
+void acumular_espacio_pedido(char* programa, int cuanto)
+{
+	_Bool esMemoriaDelPrograma(memoria_pedida* mem_pedida){
+				return string_equals_ignore_case(mem_pedida->programa_id,programa);
+	}
+	memoria_pedida* mem_pedida = list_find(tabla_de_memoria_pedida,(void*)esMemoriaDelPrograma);
 
-// Sobre asignacion de memoria
-// crear un segmento:
-// Leer metadata -> saber si esta vacio o cuanto tamano tiene
-// verificar si puede agrandar su tamano
-// cambiar el tamano de un segmento a una cantidad de paginas determinada
-//o achicarse si libero memoria
-// si no pudiera extenderse mas, deberia crear un nuevo segmento
-// definir disposicion de segmentos en memoria
-//
-// Memoria virtual
-// El algoritmo de reemplazo será de asignación variable,
-// alcance global, utilizando clock modificado
-// ver si la pagina esta cargada en memoria
-// si no esta, page fault y buscar la pagina
-// area de swap -> archivo de swap ,
-// muse debe saber siempre cuales pags estan en memoria y cuales en swap
-// swap va a estar dividida en paginas para ser indexada
-//
-// Memoria compartida
-// Al tener porciones de memoria compartida mapeada a un archivo diferente
-//al de swap, es necesario poder distinguirlas a nivel metadatos.
-//Es por eso, que existirán 2 tipos de segmentos en la tabla de segmentos,
-//los comunes (o dinámicos) y los compartidos (o “mappeados”):
-// segmentos que comparten las mismas paginas IPC
-// separar logicamente el arcihvo en paginas
-// cambiar bit de presencia
-//
+	if(mem_pedida==NULL)
+	{ //si no hay, creo uno
+		memoria_pedida* mem_pedida = malloc(sizeof(memoria_pedida));
+		mem_pedida->programa_id = string_new();
+		string_append(&mem_pedida->programa_id,programa);
+		mem_pedida->memoria_pedida_acumulada=cuanto;
+		list_add(tabla_de_memoria_pedida,mem_pedida);
+
+	}else {
+		mem_pedida->memoria_pedida_acumulada+=cuanto;
+	}
+}
+
