@@ -1,13 +1,14 @@
 #include "suse.h"
 
-int main(void) {
+int main(int argc, char **argv) {
+	char* path_de_config = string_duplicate(argv[1]);
+
+	iniciar_log(path_de_config);
+
+	leer_config(path_de_config);
 
 	//Inicializo variables globales
 	numeroDePrograma = 0;
-
-	iniciar_log();
-
-	configuracion = leer_config();
 
 	inicializarSemaforos();
 
@@ -109,18 +110,33 @@ int randomEntre1y10(int numero){
 
 
 //FUNCIONES PARA INICIALIZAR COSAS
-p_config* leer_config(){//TODO: tengo que ver como levantar los arrays de la config
+p_config* leer_config(char* path){//TODO: tengo que ver como levantar los arrays de la config
 
-	g_config = config_create("plani.config");
+	g_config = config_create(path);
 	configuracion = malloc(sizeof(p_config));
 
 	configuracion->LISTEN_PORT = config_get_int_value(g_config, "LISTEN_PORT");
 	configuracion->METRICS_TIMER = config_get_int_value(g_config, "METRICS_TIMER");
 	configuracion->MAX_MULTIPROG = config_get_int_value(g_config, "MAX_MULTIPROG");
-//	configuracion->SEM_IDS = config_get_array_value(g_config, "SEM_IDS");
-//	configuracion->SEM_INIT = config_get_array_value(g_config, "SEM_INIT");
-//	configuracion->SEM_MAX = config_get_array_value(g_config, "SEM_MAX");
-	configuracion->ALPHA_SJF = config_get_int_value(g_config, "ALPHA_SJF");
+	char** aux_sem_ids = config_get_array_value(g_config, "SEM_IDS");
+	char** aux_sem_init = config_get_array_value(g_config, "SEM_INIT");
+	char** aux_sem_max = config_get_array_value(g_config, "SEM_MAX");
+	configuracion->ALPHA_SJF = config_get_double_value(g_config, "ALPHA_SJF");
+
+	int i=0,j=0,k=0;
+	while(aux_sem_init[i] != NULL){
+		configuracion->SEM_INIT[i] = atoi(aux_sem_init[i]);
+		i++;
+	}
+	while(aux_sem_max[j] != NULL){
+		configuracion->SEM_INIT[j] = atoi(aux_sem_max[j]);
+		j++;
+	}
+	while(aux_sem_ids[k] != NULL){
+		configuracion->SEM_IDS[k] = aux_sem_ids[k][0];
+		k++;
+		cantidad_de_semaforos++;
+	}
 
 	//Imprimo las variables
 //	log_info(logg, "Puerto de escucha: %d",configuracion->LISTEN_PORT);
@@ -136,8 +152,11 @@ p_config* leer_config(){//TODO: tengo que ver como levantar los arrays de la con
 
 }
 
-void iniciar_log(){
-	logg = log_create("suse.log","suse",1,LOG_LEVEL_TRACE);
+void iniciar_log(char* path){
+	char* nombre = string_new();
+	string_append(&nombre,path);
+	string_append(&nombre,".log");
+	logg = log_create(nombre,"suse",1,LOG_LEVEL_TRACE);
 	log_info(logg, "Log creado!");
 }
 
@@ -206,8 +225,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	int pid;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
-			case INIT:
+			case INIT://recive elpid
 				//se hace 1 vez por proceso
+				recv(cliente,&pid,4,0);
 				break;
 			case CREATE:
 				//planificarNuevoProceso(pid, tid);
