@@ -36,8 +36,14 @@ int main(int argc, char **argv) {
 	printf("\nDireccion virtual del mat: %d",resu3);
 	fflush(stdout);
 
+	muse_free_t* mft = crear_muse_free("prog2",resu3);
+	muse_free(mft);
 
-	metricas();
+	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
+	muse_free(mft2);
+
+	muse_close("prog2");
+	//metricas();
 	return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -510,6 +516,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 
 	//retorno la direccion de memoria (virtual) que le asigne
 	acumular_espacio_pedido(datos->id,datos->tamanio);
+	metricas("-1"); //para no muestre leaks
 	return direccion_return;
 	}
 else{//no hay lugar
@@ -815,7 +822,7 @@ int muse_free(muse_free_t* datos){
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
-				acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
+			//	acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 				reemplazar_heap_en_memoria(heap_de_lista_anterior,
 						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
@@ -943,7 +950,7 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag-padding);
 					memcpy(puntero_a_marco+configuracion->tam_pag-padding,void_padding,padding);
 					//padding => se llena de \0 al final
-					int b = 0;
+
 				}
 				else{
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag);
@@ -1278,6 +1285,23 @@ void mapeo_destroy(mapeo_t* _mapeo){
 	free(_mapeo);
 }
 int muse_close(char* id_cliente){
+	//sacarlo de la tabla de programas
+	//con el id del cliente tengo que sacar el programa?
+	_Bool esPrograma(programa_t* programa){
+			return string_equals_ignore_case(programa->id_programa,id_cliente);
+	}
+
+	programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
+	if(prog!=NULL)
+	{
+		//encontro el programa del cliente
+		//me conviene tirar antes las metricas, asi me fijo los leaks y eso
+		metricas(prog->id_programa);
+		//hay que sacarlo de la lista
+		list_remove_and_destroy_by_condition(tabla_de_programas,
+				(void*)esPrograma,(void*)destroy_programa);
+	}
+
 	return 0;
 }
 uint32_t crear_servidor(uint32_t puerto){
@@ -1518,6 +1542,7 @@ void ocupate_de_este(int socket){
 				printf("-CLOSE\n");
 //				si no se libera algun muse_alloc-> es un memory leak
 //				liberar tabla de programas
+
 				resultado = muse_close(id_cliente);
 				printf("Se fue %d\n",socket);
 				exit_loop = true;
@@ -2005,9 +2030,9 @@ muse_void* deserializar_muse_void(void* magic){
 
 void destroy_programa(programa_t* prog)
 {
-	//falta bien liberar segmentos mappeados
-	free(prog->id_programa);
-	free(prog->tabla_de_segmentos);
+	//falta bien liberar segmentos mappeados o ver que onda eso.. mandarle unmap directo?
+	//free(prog->id_programa);
+	//free(prog->tabla_de_segmentos);
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
 	_Bool esPrograma(programa_t* programa){
 			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
@@ -2018,14 +2043,17 @@ void destroy_programa(programa_t* prog)
 void destroy_segmento(segmento* seg)
 {
 	//falta bien liberar segmentos mappeados
-	free(seg->path_mapeo);
 	if(!seg->mmapeado){
 		list_destroy_and_destroy_elements(seg->info_heaps,(void*)free);
+	}else{
+		//muse_unmap_t* mut = crear_muse_unmap()
+		//muse_unmap()
+		free(seg->path_mapeo);
 	}
 	list_destroy_and_destroy_elements(seg->paginas,(void*)free);
 }
 
-void metricas()
+void metricas(char* id_cliente)
 {
 	//Cuando un programa finaliza, tanto correctamente como al generar un segmentation fault
 	//Cuando se realiza una nueva petición de memoria muse_alloc
@@ -2035,7 +2063,7 @@ void metricas()
 	log_info(log_metricas,"POR SOCKET CONECTADO");
 	metrica_por_socket_conectado();
 	log_info(log_metricas,"POR PROGRAMA");
-	metrica_por_programa();
+	metrica_por_programa(id_cliente);
 }
 void metrica_por_socket_conectado()
 {
@@ -2075,11 +2103,10 @@ void metrica_por_socket_conectado()
 
 }
 
-void metrica_por_programa()
+void metrica_por_programa(char* id_cliente)
 {
 	for (int i=0;i<tabla_de_programas->elements_count;i++)
 	{ //agarro cada programa
-
 		programa_t* prog = list_get(tabla_de_programas,i);
 		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
 		//memoria liberada por programa
@@ -2100,6 +2127,8 @@ void metrica_por_programa()
 		}else{
 			log_info(log_metricas,"Aun no ha pedido memoria");
 		}
+
+
 		int memoria_ocupada=0;
 		int memoria_leaks=0;
 		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
@@ -2121,8 +2150,13 @@ void metrica_por_programa()
 			}
 		}
 		log_info(log_metricas,"Espacio reservado: %i",memoria_ocupada);
-		//leaks deberia ser solo si el programa hizo muse_close
-		log_info(log_metricas,"Leaks: %i",memoria_leaks);
+		if(string_equals_ignore_case(id_cliente,prog->id_programa)){
+			//es un socket que esta cerrandose, miro los leaks
+			//leaks deberia ser solo si el programa hizo muse_close
+			log_info(log_metricas,"Cerrandose con",memoria_leaks);
+			log_info(log_metricas,"Leaks: %i",memoria_leaks);
+		}
+
 	}
 }
 

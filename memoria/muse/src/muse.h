@@ -295,7 +295,7 @@ void destroy_segmento(segmento* seg);
 void destroy_programa(programa_t* prog);
 void metricas();
 void metrica_del_sistema();
-void metrica_por_programa();
+void metrica_por_programa(char* id_cliente);
 void metrica_por_socket_conectado();
 void acumular_espacio_liberado(char* programa, int cuanto);
 void acumular_espacio_pedido(char* programa, int cuanto);
