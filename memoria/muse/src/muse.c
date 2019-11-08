@@ -2121,6 +2121,7 @@ void metrica_por_programa()
 			}
 		}
 		log_info(log_metricas,"Espacio reservado: %i",memoria_ocupada);
+		//leaks deberia ser solo si el programa hizo muse_close
 		log_info(log_metricas,"Leaks: %i",memoria_leaks);
 	}
 }
