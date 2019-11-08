@@ -502,7 +502,7 @@ void atender_cliente(int cliente){
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
-//			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
+			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
 			free(magic);
 			t_getattr* attr = _getattr(path_pedido);
 			free(path_pedido);
@@ -683,6 +683,7 @@ void atender_cliente(int cliente){
 			t_rename* _rename = deserializar_rename(magic);
 			char** split = string_split(_rename->new,"/");
 			char* new = dame_el_nombre(split,1);
+			char* new_pather = dame_path_padre(_rename->new);
 			nodo* __nodo = dame_el_nodo_de(_rename->old);
 			if(__nodo == -1){
 				int err = ERROR;
@@ -691,9 +692,15 @@ void atender_cliente(int cliente){
 				memcpy(__nodo->nombre_de_archivo,new,strlen(new)+1);
 				sem_wait(&s_diccionario);
 				int key = dictionary_get(diccionario_de_path,_rename->old);
+				int new_father = dictionary_get(diccionario_de_path,new_pather);
 				dictionary_remove(diccionario_de_path,_rename->old);
 				dictionary_put(diccionario_de_path,_rename->new,key);
 				sem_post(&s_diccionario);
+				if(new_father!=0){
+					__nodo->bloque_padre = new_father+1+tam_de_bitmap;
+				}else{
+					__nodo->bloque_padre = new_father;
+				}
 				int a = RENAME;
 				send(cliente,&a,4,0);
 			}
