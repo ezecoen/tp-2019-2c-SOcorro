@@ -502,7 +502,7 @@ void atender_cliente(int cliente){
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
-			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
+//			log_info(logger,"Llego la instruccion GETATTR %s",path_pedido);
 			free(magic);
 			t_getattr* attr = _getattr(path_pedido);
 			free(path_pedido);
@@ -523,7 +523,7 @@ void atender_cliente(int cliente){
 			recv(cliente,magic,_tam,MSG_WAITALL);
 			path_pedido = string_new();
 			string_append(&path_pedido,magic);
-			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
+//			log_info(logger,"Llego la instruccion READDIR de %s",path_pedido);
 			free(magic);
 //			busco las entradas y las pongo en una lista
 			t_list* entradas = list_create(); //hay que liberar esta lista?
@@ -652,7 +652,7 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_write* _wwrite = deserializar_write(magic);
-			log_info(logger,"Llego la instruccion WRITE %s",_wwrite->path);
+			log_info(logger,"Llego la instruccion WRITE de %s",_wwrite->path);
 			res = _write(_wwrite);
 			if(res == -1){
 				int err = ERROR;
@@ -902,16 +902,19 @@ int _write(t_write* wwrite){
 	}
 	bloque* _bloq = primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
 	int espacio = 4096-byte;
+//	rompia porque al separar el write en 2 porque tiene que escribir dos bloques de datos el offser para
+//	el 2do write es 4096 entonces caga la cuenta que hace el for que escribe. en vez de usar wwrite->offset
+//	hay que usar "byte" que tiene el offset real dentro del bloque de datos actual que esta escribiendo
 	if(espacio > wwrite->size_buff){
-		for(int i=wwrite->offset;i<(wwrite->size_buff+wwrite->offset);i++){
-			_bloq->bytes[i] = wwrite->buff[i-(wwrite->offset)];
+		for(int i=byte;i<(wwrite->size_buff+byte);i++){
+			_bloq->bytes[i] = wwrite->buff[i-(byte)];
 		}
 //		memcpy(_bloq+byte,wwrite->buff,wwrite->size_buff);
 		_nodo->tamanio_de_archivo += wwrite->size_buff;
 		return wwrite->size_buff;
 	}
-	for(int i=wwrite->offset;i<(espacio+wwrite->offset);i++){
-		_bloq->bytes[i] = wwrite->buff[i-(wwrite->offset)];
+	for(int i=byte;i<(espacio+byte);i++){
+		_bloq->bytes[i] = wwrite->buff[i-(byte)];
 	}
 //	memcpy(_bloq+byte,wwrite->buff,espacio);
 	_nodo->tamanio_de_archivo += espacio;
