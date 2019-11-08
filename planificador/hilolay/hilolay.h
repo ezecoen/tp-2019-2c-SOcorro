@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <commons/config.h>
 
 /* Interface for programs, this is what the programs should use and is implemented in hilolay_internal */
 
@@ -24,7 +25,10 @@ typedef struct hilolay_sem_t {
 	char *name;
 } hilolay_sem_t;
 
-//Estructuras para mandar por sockets
+typedef struct s_config{
+	uint32_t puerto_suse;
+	char* ip_suse;
+}s_config;
 
 //Enum de operaciones
 typedef enum operaciones_t{
@@ -37,7 +41,14 @@ typedef enum operaciones_t{
 	SIGNAL
 }operaciones_t;
 
+//VARIABLES GLOBALES
+s_config* configuracion;
+t_config* g_config;
+_Bool config_levantada = false;
 
+int socket_suse;
+
+//FUNCIONES
 int suse_create(int tid);
 int suse_schedule_next(void);
 int suse_join(int tid);
