@@ -6,9 +6,14 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <commons/config.h>
+#include <commons/string.h>
+
 
 /* Interface for programs, this is what the programs should use and is implemented in hilolay_internal */
 
@@ -30,6 +35,17 @@ typedef struct s_config{
 	char* ip_suse;
 }s_config;
 
+typedef struct suse_wait_t{
+	uint32_t tid;
+	uint32_t size_id;
+	char* id_semaforo;
+}suse_wait_t;
+
+typedef struct suse_signal_t{
+	uint32_t tid;
+	uint32_t size_id;
+	char* id_semaforo;
+}suse_signal_t;
 //Enum de operaciones
 typedef enum operaciones_t{
 	INIT,
@@ -55,6 +71,9 @@ int suse_join(int tid);
 int suse_close(int tid);
 int suse_wait(int, char *);
 int suse_signal(int, char *);
+
+uint32_t conectar_socket_a(char* ip, uint32_t puerto);
+s_config* leer_config(char* path);
 
 /**
  * Initializes the library. Implemented in the client interface.
