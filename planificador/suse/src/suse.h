@@ -38,10 +38,10 @@ typedef struct{
 	uint32_t LISTEN_PORT;
 	uint32_t METRICS_TIMER;
 	uint32_t MAX_MULTIPROG;
-	char SEM_IDS[4];
-	uint32_t SEM_INIT[4];
+	t_list* SEM_IDS;
+	t_list* SEM_INIT;
 	double ALPHA_SJF;
-	uint32_t SEM_MAX[4];
+	t_list* SEM_MAX;
 }p_config;
 
 typedef struct suse_wait_t{
@@ -118,7 +118,6 @@ sem_t* sem_mutConfig;
 sem_t* sem_mutNew;
 sem_t* mut_multiprogramacion;
 sem_t* mut_numeroDePrograma;
-int cantidad_de_semaforos;
 
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/

@@ -122,20 +122,22 @@ p_config* leer_config(char* path){//TODO: tengo que ver como levantar los arrays
 	char** aux_sem_init = config_get_array_value(g_config, "SEM_INIT");
 	char** aux_sem_max = config_get_array_value(g_config, "SEM_MAX");
 	configuracion->ALPHA_SJF = config_get_double_value(g_config, "ALPHA_SJF");
+	configuracion->SEM_INIT = list_create();
+	configuracion->SEM_IDS = list_create();
+	configuracion->SEM_MAX = list_create();
 
 	int i=0,j=0,k=0;
 	while(aux_sem_init[i] != NULL){
-		configuracion->SEM_INIT[i] = atoi(aux_sem_init[i]);
+		list_add(configuracion->SEM_INIT,(void*)atoi(aux_sem_init[i]));
 		i++;
 	}
 	while(aux_sem_max[j] != NULL){
-		configuracion->SEM_INIT[j] = atoi(aux_sem_max[j]);
+		list_add(configuracion->SEM_MAX,(void*)atoi(aux_sem_max[j]));
 		j++;
 	}
 	while(aux_sem_ids[k] != NULL){
-		configuracion->SEM_IDS[k] = aux_sem_ids[k][0];
+		list_add(configuracion->SEM_IDS,string_duplicate(aux_sem_ids[k]));
 		k++;
-		cantidad_de_semaforos++;
 	}
 
 	//Imprimo las variables
