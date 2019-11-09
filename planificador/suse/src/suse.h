@@ -13,6 +13,8 @@
 #include <commons/config.h>
 #include <commons/temporal.h>
 #include <commons/collections/list.h>
+#include <commons/string.h>
+
 
 /* ESTRUCTURAS -----------------------------------------------------------------------------------------------------*/
 typedef struct{
@@ -41,6 +43,18 @@ typedef struct{
 	double ALPHA_SJF;
 	uint32_t SEM_MAX[4];
 }p_config;
+
+typedef struct suse_wait_t{
+	uint32_t tid;
+	uint32_t size_id;
+	char* id_semaforo;
+}suse_wait_t;
+
+typedef struct suse_signal_t{
+	uint32_t tid;
+	uint32_t size_id;
+	char* id_semaforo;
+}suse_signal_t;
 
 typedef enum operaciones_t{
 	INIT,
@@ -78,11 +92,11 @@ int aceptarConexion(int);
 
 
 //FUNCIONES PARA HACER LO QUE ME PIDA HILOLAY, O SEA, LA IMPLEMENTACION DE SUSE
-void planificarNuevoProceso(uint32_t pid, uint32_t tid);
-pcb* crearPCB();
-void crearTCB(uint32_t, uint32_t);
+pcb* crearPCB(int pid);
+tcb* crearTCB(uint32_t, uint32_t);
 pcb* buscarProcesoEnListaDeProcesos(int pid);
-
+void sacarDeNew(tcb* _tcb);
+void sacarDeReady(tcb* _tcb,t_list* colaReady);
 
 //OTRAS FUNCIONES
 
@@ -100,10 +114,10 @@ uint32_t multiprogramacion;
 
 
 /* SEMAFOROS ------------------------------------------------------------------------------------------------------*/
-sem_t sem_mutConfig;
-sem_t sem_mutNew;
-sem_t mut_multiprogramacion;
-sem_t mut_numeroDePrograma;
+sem_t* sem_mutConfig;
+sem_t* sem_mutNew;
+sem_t* mut_multiprogramacion;
+sem_t* mut_numeroDePrograma;
 int cantidad_de_semaforos;
 
 

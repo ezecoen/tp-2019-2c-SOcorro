@@ -4,15 +4,12 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/lilLibrary.c \
 ../src/suse.c 
 
 OBJS += \
-./src/lilLibrary.o \
 ./src/suse.o 
 
 C_DEPS += \
-./src/lilLibrary.d \
 ./src/suse.d 
 
 

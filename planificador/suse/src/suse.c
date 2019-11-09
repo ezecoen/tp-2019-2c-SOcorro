@@ -18,9 +18,9 @@ int main(int argc, char **argv) {
 
 	int servidor = crearServidor();
 
-//	while(1){
-//		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
-//	}
+	while(1){
+		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
+	}
 //
 //	pthread_t hiloDePrueba;
 //	if(pthread_create(&hiloDePrueba, NULL, (void*)funcionDePrueba, NULL) != 0){
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
 
 //	pthread_detach(hiloDePrueba);
 
-	while(1){};
+//	while(1){};
 
 	return 0;
 
@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 //FUNCIONES PARA PRUEBAS LOCALES
 void funcionDePrueba(){
 	for(int i = 0; i<4; i++){
-		sem_wait(&mut_multiprogramacion);
+		sem_wait(mut_multiprogramacion);
 			crearHilo(i+1);
 			usleep(5000000);
 	}
@@ -62,7 +62,7 @@ void printearNumeroDeHilo(tcb* threadControlBlock){
 
 	}
 
-	sem_post(&mut_multiprogramacion);
+	sem_post(mut_multiprogramacion);
 
 	log_info(logg, "Termine de printear, soy el hilo numero %d y me printee %d veces", threadControlBlock->t_id, cantidadLoops);
 
@@ -91,9 +91,9 @@ void crearHilo(int numero){
 
 	pthread_detach(hiloDeNumero);
 
-	sem_wait(&sem_mutNew);
+	sem_wait(sem_mutNew);
 		list_add(estadoNew, threadControlBlock);
-	sem_post(&sem_mutNew);
+	sem_post(sem_mutNew);
 }
 
 int randomEntre1y10(int numero){
@@ -162,10 +162,10 @@ void iniciar_log(char* path){
 
 void inicializarSemaforos(){
 
-	sem_init(&sem_mutNew, 0, 1);
-	sem_init(&sem_mutConfig, 0, 1);
-	sem_init(&mut_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
-	sem_init(&mut_numeroDePrograma, 0, 1);
+	sem_init(sem_mutNew, 0, 1);
+	sem_init(sem_mutConfig, 0, 1);
+	sem_init(mut_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
+	sem_init(mut_numeroDePrograma, 0, 1);
 
 }
 
@@ -222,22 +222,47 @@ void escucharServidor(int servidor){//Esta funcion es la que va a hacer de escuc
 void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pida hilolay y lo ejecuto
 	log_info(logg, "Tengo a este cliente %d",cliente);
 	int operacion;
-	int pid;
+	int pid,tid;
+	t_list* colaDeReady;
+	tcb* excec;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
 			case INIT://recive elpid
 				//se hace 1 vez por proceso
 				recv(cliente,&pid,4,0);
+				crearPCB(pid);
+				colaDeReady = list_create();
 				break;
-			case CREATE:
-				//planificarNuevoProceso(pid, tid);
-
+			case CREATE:;
+				recv(cliente,&tid,4,0);
+				tcb* _tcb = crearTCB(pid,tid);
+				if(multiprogramacion>0){
+					//pongo en ready y saco de new
+					list_add(colaDeReady,_tcb);
+					//me fijo si no hay nadie en exec, si esta vacia, me meto
+					sacarDeNew(_tcb);
+					if(excec == NULL){
+						excec = _tcb;
+						sacarDeReady(_tcb,colaDeReady);
+					}
+				}
+				int resultado = 0;
+				send(cliente,&resultado,4,0);
 				break;
-			case SCHEDULE_NEXT:
+			case SCHEDULE_NEXT:;
 				//lo que tenga que hacer para suse_schedule_next
+				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
+					return tcb1->estimacion < tcb2->estimacion;
+				}
+				list_sort(colaDeReady,(void*)ordenamientoSjf);
+				tcb* tcbAEjecutar = list_get(colaDeReady,0);
+				send(cliente,&tcbAEjecutar->t_id,4,0);
 				break;
-			case JOIN:
-				//lo que tenga que hacer para suse_join
+			case JOIN:;
+				int tid_actual;
+				recv(cliente,&tid_actual,4,0);
+				recv(cliente,&tid,4,0);
+				//tid actual se bloquea esperando a que termine tid
 				break;
 			case CLOSE:
 				//lo que tenga que hacer para suse_close
@@ -269,25 +294,20 @@ int aceptarConexion(int servidor){
 
 
 //FUNCIONES PARA HACER LO QUE ME PIDA HILOLAY, O SEA, LA IMPLEMENTACION DE SUSE
-pcb* crearPCB(){//Esto es mas para gestion interna, no tiene mucho que ver con el planificador
+pcb* crearPCB(int pid){//Esto es mas para gestion interna, no tiene mucho que ver con el planificador
 
 	pcb* pcb = malloc(sizeof(pcb));
-
 	pcb->ejecutando = false; //Me dice si tiene algun hilo ejecutando
-	sem_wait(&mut_numeroDePrograma);//Clavo este semaforo por si me levantan dos programa al mismo tiempo
-		pcb->p_id = numeroDePrograma;
-		numeroDePrograma++;
-	sem_post(&mut_numeroDePrograma);
+	pcb->p_id = pid;
 	pcb->ults = list_create();//Lista de ults de este proceso
 
 	list_add(listaDeProgramas, pcb);
-
+	return pcb;
 }
 
-void crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero como todavia nose que int lo dejo como un void
+tcb* crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero como todavia nose que int lo dejo como un void
 
 	tcb* tcb = malloc(sizeof(tcb));
-
 	tcb->estimacion = 0; //De entrada siempre es 0
 	tcb->p_id = pid;
 	tcb->t_id = tid;
@@ -296,19 +316,117 @@ void crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero
 
 	list_add(procesoPadre->ults, tcb);
 
+	//pasa a cola de new
+	list_add(estadoNew,tcb);
+
+	return tcb;
 }
 
-void planificarNuevoProceso(uint32_t pid, uint32_t tid){//Con esto creo un nuevo PCB y lo meto a la cola de New
-
-	pcb* pcb;
-	pcb  = crearPCB();
-
-	list_add(estadoNew, pcb);
-
-}
 pcb* buscarProcesoEnListaDeProcesos(int pid){
-
+	_Bool buscar_pid(pcb* _pcb){
+		return _pcb->p_id == pid;
+	}
+	return list_find(listaDeProgramas,(void*)buscar_pid);
 }
-//OTRAS FUNCIONES
+void sacarDeNew(tcb* _tcb){
+	_Bool buscar_tcb(tcb* tcb_lista){
+		return tcb_lista->t_id == _tcb->t_id && tcb_lista->p_id == _tcb->p_id;
+	}
+	sem_wait(sem_mutNew);
+	list_remove_by_condition(estadoNew,(void*)buscar_tcb);
+	sem_post(sem_mutNew);
+}
 
+void sacarDeReady(tcb* _tcb,t_list* colaReady){
+	_Bool buscar_tcb(tcb* tcb_lista){
+		return tcb_lista->t_id == _tcb->t_id && tcb_lista->p_id == _tcb->p_id;
+	}
+	list_remove_by_condition(colaReady,(void*)buscar_tcb);
+}
+
+//OTRAS FUNCIONES
+suse_wait_t* crear_suse_wait(int tid, char* id_semaforo){
+	suse_wait_t* swt = malloc(sizeof(suse_wait_t));
+	swt->tid = tid;
+	swt->size_id = strlen(id_semaforo)+1;
+	swt->id_semaforo = string_duplicate(id_semaforo);
+	return swt;
+}
+
+void* serializar_suse_wait(suse_wait_t* swt){
+	int bytes = sizeof(uint32_t)*2+ swt->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de swt y 2 int de comando y tamanio
+	int comando = WAIT;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&swt->tid,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&swt->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,swt->id_semaforo,swt->size_id);
+	puntero += swt->size_id;
+	return magic;
+}
+suse_wait_t* deserializar_suse_wait(void* magic){
+	suse_wait_t* mmt = malloc(sizeof(suse_wait_t));
+	uint32_t puntero = 0;
+	memcpy(&mmt->tid,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(&mmt->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mmt->id_semaforo = malloc(mmt->size_id);
+	memcpy(mmt->id_semaforo,magic+puntero,mmt->size_id);
+	puntero+=mmt->size_id;
+	return mmt;
+}
+void suse_wait_destroy(suse_wait_t* swt){
+	free(swt->id_semaforo);
+	free(swt);
+}
+
+suse_signal_t* crear_suse_signal(int tid, char* id_semaforo){
+	suse_signal_t* sst = malloc(sizeof(suse_signal_t));
+	sst->tid = tid;
+	sst->size_id = strlen(id_semaforo)+1;
+	sst->id_semaforo = string_duplicate(id_semaforo);
+	return sst;
+}
+void* serializar_suse_signal(suse_signal_t* swt){
+	int bytes = sizeof(uint32_t)*2+ swt->size_id + sizeof(uint32_t)*2;
+	//2 int de adentro de swt y 2 int de comando y tamanio
+	int comando = SIGNAL;
+	int puntero = 0;
+	void* magic = malloc(bytes);
+	memcpy(magic+puntero,&comando,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&swt->tid,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,&swt->size_id,sizeof(uint32_t));
+	puntero += sizeof(uint32_t);
+	memcpy(magic+puntero,swt->id_semaforo,swt->size_id);
+	puntero += swt->size_id;
+	return magic;
+}
+suse_signal_t* deserializar_suse_signal(void* magic){
+	suse_signal_t* mmt = malloc(sizeof(suse_signal_t));
+	uint32_t puntero = 0;
+	memcpy(&mmt->tid,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	memcpy(&mmt->size_id,magic+puntero,sizeof(uint32_t));
+	puntero+=sizeof(uint32_t);
+	mmt->id_semaforo = malloc(mmt->size_id);
+	memcpy(mmt->id_semaforo,magic+puntero,mmt->size_id);
+	puntero+=mmt->size_id;
+	return mmt;
+}
+void suse_signal_destroy(suse_signal_t* swt){
+	free(swt->id_semaforo);
+	free(swt);
+}
 
