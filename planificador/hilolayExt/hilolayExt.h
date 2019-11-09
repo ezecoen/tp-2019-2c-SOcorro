@@ -7,7 +7,10 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <commons/config.h>
+#include <commons/string.h>
 #include <hilolay/alumnos.h>
 
 typedef struct s_config{
@@ -50,5 +53,8 @@ int suse_schedule_next(void);
 int suse_close(int);
 int suse_wait(int, char *);
 int suse_signal(int, char *);
+
+uint32_t conectar_socket_a(char* ip, uint32_t puerto);
+s_config* leer_config(char* path);
 
 #endif /* HILOLAYEXTENDED_H_ */

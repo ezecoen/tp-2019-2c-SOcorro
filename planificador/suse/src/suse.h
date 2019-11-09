@@ -14,13 +14,17 @@
 #include <commons/temporal.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
+#include <sys/time.h>
 
 
 /* ESTRUCTURAS -----------------------------------------------------------------------------------------------------*/
 typedef struct{
 	int p_id; //Process Id
 	int t_id; //Thread id
-	float estimacion; //La inicial siempre es 0
+	uint64_t tiempoDeInicio;
+	double estimacion; //La inicial siempre es 0
+	double estimacionAnterior;
+	double realAnterior;
 }tcb;
 
 typedef struct{
@@ -97,6 +101,8 @@ tcb* crearTCB(uint32_t, uint32_t);
 pcb* buscarProcesoEnListaDeProcesos(int pid);
 void sacarDeNew(tcb* _tcb);
 void sacarDeReady(tcb* _tcb,t_list* colaReady);
+uint64_t timestamp();
+void actualizarEstimacion(tcb* _tcb);
 
 //OTRAS FUNCIONES
 

@@ -252,19 +252,20 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				send(cliente,&resultado,4,0);
 				break;
 			case SCHEDULE_NEXT:;
-				//lo que tenga que hacer para suse_schedule_next
 				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
 					return tcb1->estimacion < tcb2->estimacion;
 				}
+				actualizarEstimacion(excec);
 				list_sort(colaDeReady,(void*)ordenamientoSjf);
 				tcb* tcbAEjecutar = list_get(colaDeReady,0);
+				excec = tcbAEjecutar;
+				sacarDeReady(tcbAEjecutar,colaDeReady);
 				send(cliente,&tcbAEjecutar->t_id,4,0);
 				break;
 			case JOIN:;
-				int tid_actual;
-				recv(cliente,&tid_actual,4,0);
-				recv(cliente,&tid,4,0);
-				//tid actual se bloquea esperando a que termine tid
+				int tid_para_join;
+				recv(cliente,&tid_para_join,4,0);
+				//tid actual se bloquea esperando a que termine tid exec->tid
 				break;
 			case CLOSE:
 				//lo que tenga que hacer para suse_close
@@ -344,6 +345,18 @@ void sacarDeReady(tcb* _tcb,t_list* colaReady){
 		return tcb_lista->t_id == _tcb->t_id && tcb_lista->p_id == _tcb->p_id;
 	}
 	list_remove_by_condition(colaReady,(void*)buscar_tcb);
+}
+
+void actualizarEstimacion(tcb* _tcb){
+
+}
+
+uint64_t timestamp(){
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	unsigned long long result = (((unsigned long long )tv.tv_sec) * 1000 + ((unsigned long) tv.tv_usec) / 1000);
+	uint64_t a = result;
+	return a;
 }
 
 //OTRAS FUNCIONES
