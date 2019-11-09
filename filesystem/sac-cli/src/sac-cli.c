@@ -83,7 +83,11 @@ static int sac_getattr(const char *path, struct stat *stbuf) {
 	int _tam;
 
 	memset(stbuf, 0, sizeof(struct stat));
-
+	if (strcmp(path,"/tls") == 0 || strcmp(path,"/i686") == 0 || strcmp(path,"/sse2") == 0
+			|| strcmp(path,"/cmov") == 0 || strcmp(path,"/libselinux.so.1") == 0 || strcmp(path,"/libc.so.6") == 0 || strcmp(path,"/libpcre.so.3") == 0
+			|| strcmp(path,"/libpthread.so.0") == 0 || strcmp(path,"/libdl.so.2") == 0){
+		return -ENOENT;
+	}
 	void* peticion = serializar_path(path, GETATTR);
 	memcpy(&_tam, peticion+4, 4);
 	send(_socket, peticion, _tam+8,0);
@@ -427,7 +431,9 @@ int sac_rename(const char* old,const char* new){
 		return 0;
 	}
 }
-
+int sac_setattr (const char * path, const char * name, const char * value, size_t size, int flags){
+	return 0;
+}
 /*
  * Esta es la estructura principal de FUSE con la cual nosotros le decimos a
  * biblioteca que funciones tiene que invocar segun que se le pida a FUSE.
@@ -449,6 +455,7 @@ static struct fuse_operations sac_oper = {
 		.utime = sac_utimes,
 		.rename = sac_rename,
 		.truncate = sac_truncate,
+		.setxattr = sac_setattr,
 };
 
 
