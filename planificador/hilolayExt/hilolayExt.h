@@ -7,6 +7,8 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <stdbool.h>
+#include <commons/config.h>
+#include <hilolay/alumnos.h>
 
 typedef struct s_config{
 	uint32_t puerto_suse;
