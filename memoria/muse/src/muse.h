@@ -195,8 +195,6 @@ bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
 t_list* tabla_de_memoria_liberada;
 t_list* tabla_de_memoria_pedida;
-
-
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
 s_config* configuracion;
@@ -205,6 +203,12 @@ t_log* logg;
 t_log* log_metricas;
 
 //SEMAFOROS
+//cosas que va a haber que semaforizar
+/*
+ * las 4 tablas, lugar disp
+ *
+ *
+ */
 
 
 //FUNCIONES

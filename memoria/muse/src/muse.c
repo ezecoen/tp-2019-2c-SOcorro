@@ -26,22 +26,27 @@ int main(int argc, char **argv) {
 	printf("\nDireccion virtual del mat: %d",resu2);
 	fflush(stdout);
 
-	muse_map_t* mmt = crear_muse_map(100,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
-	int puntero_map = muse_map(mmt);
-	printf("\nDireccion virtual del map: %d",puntero_map);
-	fflush(stdout);
+//	muse_map_t* mmt = crear_muse_map(100,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+//	int puntero_map = muse_map(mmt);
+//	printf("\nDireccion virtual del map: %d",puntero_map);
+//	fflush(stdout);
 
 	muse_alloc_t* mat3 = crear_muse_alloc(100,"prog2");
 	int resu3 = muse_alloc(mat3);
 	printf("\nDireccion virtual del mat: %d",resu3);
 	fflush(stdout);
 
-	muse_free_t* mft = crear_muse_free("prog2",resu3);
-	muse_free(mft);
-
-	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
-	muse_free(mft2);
-
+	muse_alloc_t* mat4 = crear_muse_alloc(100,"prog2");
+	int resu4 = muse_alloc(mat4);
+	printf("\nDireccion virtual del mat: %d",resu4);
+	fflush(stdout);
+//
+//	muse_free_t* mft = crear_muse_free("prog2",resu3);
+//	muse_free(mft);
+//
+//	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
+//	muse_free(mft2);
+//
 	muse_close("prog2");
 	//metricas();
 	return 0;
@@ -818,11 +823,27 @@ int muse_free(muse_free_t* datos){
 			// si parte del ultimo y el anterior esta vacio
 			heap_lista* heap_de_lista_anterior=list_get(heaps_lista,contador_index-1);
 			if(heap_de_lista_anterior->is_free){
+				//a partir de esta pagina hay que liberar
+				int pagina_heap_anterior = (heap_de_lista_anterior->direccion_heap_metadata+sizeof(heap_metadata)) / configuracion->tam_pag;
+				for(int i = pagina_heap_anterior+1;i<segmento_buscado->paginas->elements_count;){
+						list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
+				}
+				//cambio el tamano del segmento !!
+				segmento_buscado->tamanio=segmento_buscado->paginas->elements_count*configuracion->tam_pag;
+				//estarialiberando espacio
+				// que pasa si quiero volver a agrandar el segmento...
+				//en teoria va a quedar un espacio residual entre
+				//la ultima pagina y el proximo segmento...
+				//podria poner ahi un segmento? en teoria por lo que manejamos no.
+				// podria poner mas paginas? si, pero eso es lo que controlo con los alloc
+				//podria poner una variable que me avise si puedo cambiar el horario o no?
+				// maybe
+				int offset_heap_anterior=heap_de_lista_anterior->direccion_heap_metadata%configuracion->tam_pag;
+				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior-sizeof(heap_metadata);
 				heap_de_lista_anterior->espacio+=heap_de_lista->espacio + sizeof(heap_metadata);
 				heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 				heap_metadata_nuevo->is_free=true;
 				heap_metadata_nuevo->size = heap_de_lista_anterior->espacio;
-			//	acumular_espacio_liberado(datos->id, heap_metadata_nuevo->size);
 				reemplazar_heap_en_memoria(heap_de_lista_anterior,
 						segmento_buscado,heap_metadata_nuevo);
 				if(contador_index>1){
@@ -2031,8 +2052,6 @@ muse_void* deserializar_muse_void(void* magic){
 void destroy_programa(programa_t* prog)
 {
 	//falta bien liberar segmentos mappeados o ver que onda eso.. mandarle unmap directo?
-	//free(prog->id_programa);
-	//free(prog->tabla_de_segmentos);
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
 	_Bool esPrograma(programa_t* programa){
 			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
@@ -2046,11 +2065,10 @@ void destroy_segmento(segmento* seg)
 	if(!seg->mmapeado){
 		list_destroy_and_destroy_elements(seg->info_heaps,(void*)free);
 	}else{
-		//muse_unmap_t* mut = crear_muse_unmap()
-		//muse_unmap()
 		free(seg->path_mapeo);
 	}
 	list_destroy_and_destroy_elements(seg->paginas,(void*)free);
+	free(seg);
 }
 
 void metricas(char* id_cliente)
@@ -2083,8 +2101,17 @@ void metrica_por_socket_conectado()
 		segmento* seg = list_last_element(prog->tabla_de_segmentos);
 		if(!seg->mmapeado){
 			//cantidad de memoria disponible al final de cada programa
-			heap_lista* ultimo_heap = list_last_element(seg->info_heaps);
-			log_info(log_metricas,"el espacio en el ultimo segmento %i",ultimo_heap->espacio);
+			int espacio_libre= 0;
+			for (int i=0;i<seg->info_heaps->elements_count;i++)
+			{
+				heap_lista* heap_lista = list_get(seg->info_heaps,i);
+				if(heap_lista->is_free)
+				{
+					espacio_libre+=heap_lista->espacio;
+				}
+
+			}
+			log_info(log_metricas,"el espacio en el ultimo segmento %i",espacio_libre);
 		}else{
 			log_info(log_metricas,"el ultimo segmento esta mmapeado");
 		}
@@ -2098,9 +2125,6 @@ void metrica_por_socket_conectado()
 			log_info(log_metricas,"No hay segmentos");
 		}
 	}
-
-
-
 }
 
 void metrica_por_programa(char* id_cliente)
@@ -2127,7 +2151,6 @@ void metrica_por_programa(char* id_cliente)
 		}else{
 			log_info(log_metricas,"Aun no ha pedido memoria");
 		}
-
 
 		int memoria_ocupada=0;
 		int memoria_leaks=0;
