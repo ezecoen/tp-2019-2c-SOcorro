@@ -2,8 +2,6 @@
 
 int main(int argc, char **argv) {
 //	INICIANDO
-//	printf("argv0 = %s\n",argv[0]);
-//	printf("argv1 = %s\n",argv[1]);
 	char* path_de_config = string_duplicate(argv[1]);
 	char* path_swap = string_duplicate(argv[0]);
 	iniciar_log(path_de_config);
@@ -64,7 +62,7 @@ void init_estructuras(char* path){
 	tabla_de_memoria_pedida=list_create();
 	CANT_PAGINAS_MEMORIA = configuracion->tam_mem/configuracion->tam_pag;
 	CANT_PAGINAS_MEMORIA_VIRTUAL = configuracion->tam_swap/configuracion->tam_pag;
-
+	init_semaforos();
 	init_bitarray();
 	posicion_puntero_clock = 0;
 }
@@ -94,6 +92,9 @@ void iniciar_memoria_virtual(char* path_swap){
 		perror("error: ");
 	}
 	free(aux);
+}
+void init_semaforos(){
+	pthread_mutex_init(&mutex_lugar_disponible,NULL);
 }
 int log_2(double n){
 	//testea2
@@ -158,15 +159,19 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 int muse_alloc(muse_alloc_t* datos){
 //me fijo si hay lugar disponible
 int direccion_return = -1;
+pthread_mutex_lock(&mutex_lugar_disponible);
 if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
+	pthread_mutex_unlock(&mutex_lugar_disponible);
 	//busco si ya tengo algun segmento
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	if(list_is_empty(tabla_de_segmentos)){
 		//hay que crear el 1er segmento
 		uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
 		int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-datos->tamanio-sizeof(heap_metadata)*2;
+		pthread_mutex_lock(&mutex_lugar_disponible);
 		if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
 			lugar_disponible -= cantidad_de_paginas*configuracion->tam_pag;
+			pthread_mutex_unlock(&mutex_lugar_disponible);
 			segmento* segmento_nuevo = malloc(sizeof(segmento));
 			segmento_nuevo->compartido = false;
 			segmento_nuevo->mmapeado = false;
@@ -242,6 +247,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 		}
 		else{
 			//no hay lugar en el sistema
+			pthread_mutex_unlock(&mutex_lugar_disponible);
 			return -1;
 		}
 	}
@@ -348,8 +354,10 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				uint32_t lugar_extra_necesario = datos->tamanio-lista_ultimo_heap->espacio+sizeof(heap_metadata);
 				uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(lugar_extra_necesario);
 				uint32_t tamanio_paginas_necesarias = paginas_necesarias*configuracion->tam_pag;
+				pthread_mutex_lock(&mutex_lugar_disponible);
 				if(lugar_disponible >= tamanio_paginas_necesarias){//=>hay lugar, reservo las nuevas pags
 					lugar_disponible -= tamanio_paginas_necesarias;
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					ultimo_segmento->tamanio+=tamanio_paginas_necesarias;
 					//agrego las pags a la lista del segmento
 					int espacio_libre_ultima_pag = tamanio_paginas_necesarias-datos->tamanio
@@ -421,6 +429,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					free(nuevo_ultimo_heap);
 				}
 				else{//=>no hay lugar
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					free(ultimo_heap);
 					return -1;
 				}
@@ -429,8 +438,10 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				//no se puede agrandar, hay que crear un segmento nuevo
 				uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
 				int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-datos->tamanio-sizeof(heap_metadata)*2;
+				pthread_mutex_lock(&mutex_lugar_disponible);
 				if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
 					lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					segmento* segmento_nuevo = malloc(sizeof(segmento));
 					segmento_nuevo->compartido = false;
 					segmento_nuevo->mmapeado = false;
@@ -506,6 +517,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					direccion_return = segmento_nuevo->base_logica+sizeof(heap_metadata);//es el principio del segmento nuevo
 				}
 				else{
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					//no hay lugar en el sistema
 					//free el segmento_nuevo
 					return -1;
@@ -520,6 +532,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	return direccion_return;
 	}
 else{//no hay lugar
+	pthread_mutex_unlock(&mutex_lugar_disponible);
 	return -1;
 }
 }
@@ -626,7 +639,6 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	}
 
 	pagina* pagina_a_sacar = buscar_pagina_por_bit(bit_return);
-	//si es un mmap se tendria que hacer un muse_sync?!?!hay que arreglar esto
 	pagina_a_sacar->bit_swap = pasar_marco_a_swap(pagina_a_sacar->bit_marco);
 	pagina_a_sacar->bit_marco = NULL;
 	pagina_a_sacar->presencia = false;
@@ -803,7 +815,6 @@ int muse_free(muse_free_t* datos){
 			//no necesito hacer un heap_metadata porque ya lo hice y lo pegue antes
 			log_info(logg,"Se libero la direccion %i",datos->direccion);
 			log_info(logg,"El segmento %d de %s quedo completamente liberado",segmento_buscado->num_segmento,datos->id);
-
 			return 0;
 		}
 
@@ -1108,8 +1119,12 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 * @note: muse_free no libera la memoria mappeada. @see muse_unmap
 */
 int muse_map(muse_map_t* datos){
-	if(lugar_disponible >= datos->tamanio){
+	int tamanio_paginas = redondear_double_arriba((double)datos->tamanio/configuracion->tam_pag)*configuracion->tam_pag;
 
+	pthread_mutex_lock(&mutex_lugar_disponible);
+	if(lugar_disponible >= datos->tamanio){
+		lugar_disponible-= tamanio_paginas;
+		pthread_mutex_unlock(&mutex_lugar_disponible);
 		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 		segmento* segmento_nuevo = malloc(sizeof(segmento));
 		segmento_nuevo->num_segmento = tabla_de_segmentos->elements_count;
@@ -1118,8 +1133,7 @@ int muse_map(muse_map_t* datos){
 		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 		segmento_nuevo->info_heaps = NULL;
 		segmento_nuevo->path_mapeo = string_duplicate(datos->path);
-		segmento_nuevo->tamanio = redondear_double_arriba((double)datos->tamanio/configuracion->tam_pag)*configuracion->tam_pag;
-
+		segmento_nuevo->tamanio = tamanio_paginas;
 		if(datos->flag != MAP_PRIVATE){
 			segmento_nuevo->compartido = true;
 			t_list* tabla_de_paginas = buscar_mapeo_existente(datos->path,datos->tamanio);
@@ -1156,11 +1170,11 @@ int muse_map(muse_map_t* datos){
 		mapeo_tabla->tamanio = datos->tamanio;
 		mapeo_tabla->tamanio_de_pags = segmento_nuevo->tamanio;
 		list_add(tabla_de_mapeo,mapeo_tabla);
-		lugar_disponible -= cantidad_de_paginas*configuracion->tam_pag;
 		acumular_espacio_pedido(datos->id,datos->tamanio);
 		return segmento_nuevo->base_logica;
 	}
 	else{
+		pthread_mutex_unlock(&mutex_lugar_disponible);
 		//no hay lugar
 		return -1;
 	}
@@ -1241,8 +1255,6 @@ int muse_unmap(muse_unmap_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado!=NULL){
 		if(segmento_buscado->mmapeado){
-//			muse_sync_t* mst = crear_muse_sync(segmento_buscado->tamanio_mapeo,segmento_buscado->path_mapeo,segmento_buscado->base_logica);
-//			muse_sync(mst); //hay que hacer sync?!?!?!
 			bajar_mapeo(segmento_buscado->path_mapeo,segmento_buscado->tamanio_mapeo);
 			segmento_buscado->paginas = NULL;
 			segmento_buscado->info_heaps = NULL;
@@ -2164,8 +2176,9 @@ void metrica_del_sistema()
 {
 //Del sistema:
 //Cantidad de memoria disponible (en bytes)
+	pthread_mutex_lock(&mutex_lugar_disponible);
 	log_info(log_metricas,"el espacio disponible en la memoria es %i",lugar_disponible);
-
+	pthread_mutex_unlock(&mutex_lugar_disponible);
 }
 
 void acumular_espacio_liberado(char* programa, int cuanto)

@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <math.h>
 #include <errno.h>
+#include <pthread.h>
 #include <sys/stat.h>
 #include <pthread.h>
 #include <semaphore.h>
@@ -187,6 +188,7 @@ typedef enum t_comando_muse{
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
+pthread_mutex_t mutex_lugar_disponible;
 t_list* tabla_de_programas;
 t_list* tabla_de_mapeo;
 int CANT_PAGINAS_MEMORIA;
@@ -210,6 +212,7 @@ t_log* log_metricas;
 //FUNCIONES
 void init_estructuras();
 void iniciar_memoria_virtual(char* path);
+void init_semaforos();
 int log_2(double d);
 void iniciar_log(char* path);
 s_config* leer_config(char* path);
