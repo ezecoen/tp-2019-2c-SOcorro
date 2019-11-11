@@ -39,6 +39,7 @@ typedef struct segmento{
 	_Bool compartido;
 	char* path_mapeo;
 	uint32_t tamanio_mapeo;
+	uint32_t paginas_liberadas;
 }segmento;
 
 typedef struct mapeo_t{
@@ -197,8 +198,6 @@ bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
 t_list* tabla_de_memoria_liberada;
 t_list* tabla_de_memoria_pedida;
-
-
 struct sockaddr_in direccionServidor;
 uint32_t servidor;
 s_config* configuracion;
@@ -207,6 +206,12 @@ t_log* logg;
 t_log* log_metricas;
 
 //SEMAFOROS
+//cosas que va a haber que semaforizar
+/*
+ * las 4 tablas, lugar disp
+ *
+ *
+ */
 
 
 //FUNCIONES
@@ -302,5 +307,6 @@ void metrica_por_programa(char* id_cliente);
 void metrica_por_socket_conectado();
 void acumular_espacio_liberado(char* programa, int cuanto);
 void acumular_espacio_pedido(char* programa, int cuanto);
+segmento* buscar_segmento_con_paginas_liberadas(int tamanio, t_list* tabla_segmentos);
 
 #endif /* MUSE_H_ */
