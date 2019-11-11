@@ -305,6 +305,7 @@ void* list_last_element(t_list* lista);
 pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag);
 void destroy_segmento(segmento* seg);
 void destroy_programa(programa_t* prog);
+void destroy_pagina(pagina* pag);
 void metricas();
 void metrica_del_sistema();
 void metrica_por_programa(char* id_cliente);

@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
 	int resu5 = muse_alloc(mat5);
 	log_info(logg,"Direccion virtual del mat: %d",resu5);
 	metricas("prog2");
+
 return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -890,16 +891,7 @@ int muse_free(muse_free_t* datos){
 			int cuantas_paginas_son_liberadas=0;
 			for(int i = 1;i<segmento_buscado->paginas->elements_count;){
 				//dejo solo la pagina 0
-				pagina* p =list_get(segmento_buscado->paginas,i);
-				if(p->bit_marco!=NULL)
-				{
-					p->bit_marco->ocupado=false;
-				}
-				if(p->bit_swap!=NULL)
-				{
-					p->bit_swap->ocupado=false;
-				}
-				list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
+				list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)destroy_pagina);
 				cuantas_paginas_son_liberadas++;
 			}
 			segmento_buscado->paginas_liberadas+=cuantas_paginas_son_liberadas;
@@ -927,16 +919,7 @@ int muse_free(muse_free_t* datos){
 				for(int i = pagina_heap_anterior+1;i<segmento_buscado->paginas->elements_count;){
 					//fijarse si hay otros lugares que libere pagina
 					//destroy_pagina
-					pagina* p =list_get(segmento_buscado->paginas,i);
-					if(p->bit_marco!=NULL)
-					{
-						p->bit_marco->ocupado=false;
-					}
-					if(p->bit_swap!=NULL)
-					{
-						p->bit_swap->ocupado=false;
-					}
-					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)free);
+					list_remove_and_destroy_element(segmento_buscado->paginas,i,(void*)destroy_pagina);
 					cuantas_paginas_son_liberadas++;
 				}
 				//cambio el tamano del segmento !!
@@ -2181,8 +2164,22 @@ void destroy_segmento(segmento* seg)
 	}else{
 		free(seg->path_mapeo);
 	}
-	list_destroy_and_destroy_elements(seg->paginas,(void*)free);
+	list_destroy_and_destroy_elements(seg->paginas,(void*)destroy_pagina);
 	free(seg);
+}
+
+void destroy_pagina(pagina* pag)
+{
+	//libero antes los marcos
+	if(pag->bit_marco!=NULL)
+	{
+		pag->bit_marco->ocupado=false;
+	}
+	if(pag->bit_swap!=NULL)
+	{
+		pag->bit_swap->ocupado=false;
+	}
+	free(pag);
 }
 
 void metricas(char* id_cliente)
