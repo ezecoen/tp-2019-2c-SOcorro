@@ -15,23 +15,23 @@ int main(int argc, char **argv) {
 	string_append(&programa2->id_programa,"prog2");
 	list_add(tabla_de_programas,programa2);
 
-	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
+	muse_alloc_t* mat = crear_muse_alloc(1000,"prog2");
 	int resu = muse_alloc(mat);
 	log_info(logg,"Direccion virtual del mat: %d",resu);
 
-	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog2");
+	muse_alloc_t* mat2 = crear_muse_alloc(1000,"prog2");
 	int resu2 = muse_alloc(mat2);
 	log_info(logg,"Direccion virtual del mat: %d",resu2);
 
-	muse_alloc_t* mat3 = crear_muse_alloc(100,"prog2");
+	muse_alloc_t* mat3 = crear_muse_alloc(1000,"prog2");
 	int resu3 = muse_alloc(mat3);
 	log_info(logg,"Direccion virtual del mat: %d",resu3);
 
-	muse_map_t* mmt = crear_muse_map(100,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+	muse_map_t* mmt = crear_muse_map(1000,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map = muse_map(mmt);
 	log_info(logg,"Direccion virtual del map: %d",puntero_map);
 
-	muse_alloc_t* mat4 = crear_muse_alloc(100,"prog2");
+	muse_alloc_t* mat4 = crear_muse_alloc(1000,"prog2");
 	int resu4 = muse_alloc(mat4);
 	log_info(logg,"Direccion virtual del mat: %d",resu4);
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 	muse_alloc_t* mat5 = crear_muse_alloc(311,"prog2");
 	int resu5 = muse_alloc(mat5);
 	log_info(logg,"Direccion virtual del mat: %d",resu5);
-	//metricas();
+	metricas("prog2");
 return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
@@ -101,12 +101,15 @@ void iniciar_memoria_virtual(char* path_swap){
 }
 void init_semaforos(){
 	pthread_mutex_init(&mutex_lugar_disponible,NULL);
+	pthread_mutex_init(&mutex_tabla_de_programas,NULL);
+	pthread_mutex_init(&mutex_tabla_de_mapeo,NULL);
+	pthread_mutex_init(&mutex_bitarray,NULL);
 }
 int log_2(double n){
 	//testea2
 	//redondea el valor hacia arriba y funciona siempre bien con los bits
      int logValue = 0;
-     while (n>1) {
+     while (n>1){
          logValue++;
          n /= 2;
      }
@@ -159,7 +162,9 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 	_Bool id_programa_igual(programa_t* programa){
 		return string_equals_ignore_case(programa->id_programa,id_programa);
 	}
+	pthread_mutex_lock(&mutex_tabla_de_programas);
 	programa_t* programa_buscado = list_find(tabla_de_programas,(void*)id_programa_igual);
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 	return programa_buscado->tabla_de_segmentos;
 }
 int muse_alloc(muse_alloc_t* datos){
@@ -349,11 +354,13 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 			//hay que ver si hay algun segmento con paginas liberadas tal que entre lo que
 			//quiero guardar
 			segmento* seg = buscar_segmento_con_paginas_liberadas(datos->tamanio,tabla_de_segmentos);
-			if(seg!=NULL)
-			{	heap_lista* heap_lista_ultimo = list_last_element(seg->info_heaps);
+			if(seg!=NULL){
+				heap_lista* heap_lista_ultimo = list_last_element(seg->info_heaps);
 				uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)-heap_lista_ultimo->espacio);
+				pthread_mutex_lock(&mutex_lugar_disponible);
 				if(lugar_disponible>=paginas_necesarias*configuracion->tam_pag){
 					lugar_disponible-=paginas_necesarias*configuracion->tam_pag;
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					uint32_t numero_proxima_pagina = seg->paginas->elements_count;
 					for(int i = 0;i<paginas_necesarias;i++){
 						pagina* pagina_nueva = malloc(sizeof(pagina));
@@ -391,8 +398,9 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					direccion_return = seg->base_logica+sizeof(heap_metadata)+
 							heap_lista_ultimo->direccion_heap_metadata;
 
-				}else
-				{
+				}
+				else{
+					pthread_mutex_unlock(&mutex_lugar_disponible);
 					//no hay espacio disponible
 					return -1;
 				}
@@ -413,8 +421,10 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					uint32_t lugar_extra_necesario = datos->tamanio-lista_ultimo_heap->espacio+sizeof(heap_metadata);
 					uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(lugar_extra_necesario);
 					uint32_t tamanio_paginas_necesarias = paginas_necesarias*configuracion->tam_pag;
+					pthread_mutex_lock(&mutex_lugar_disponible);
 					if(lugar_disponible >= tamanio_paginas_necesarias){//=>hay lugar, reservo las nuevas pags
 						lugar_disponible -= tamanio_paginas_necesarias;
+						pthread_mutex_unlock(&mutex_lugar_disponible);
 						ultimo_segmento->tamanio+=tamanio_paginas_necesarias;
 						//agrego las pags a la lista del segmento
 						int espacio_libre_ultima_pag = tamanio_paginas_necesarias-datos->tamanio
@@ -486,6 +496,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						free(nuevo_ultimo_heap);
 					}
 					else{//=>no hay lugar
+						pthread_mutex_unlock(&mutex_lugar_disponible);
 						free(ultimo_heap);
 						return -1;
 					}
@@ -494,8 +505,10 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 					//no se puede agrandar, hay que crear un segmento nuevo
 					uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
 					int espacio_libre_ultima_pag = cantidad_de_paginas*configuracion->tam_pag-datos->tamanio-sizeof(heap_metadata)*2;
+					pthread_mutex_lock(&mutex_lugar_disponible);
 					if(lugar_disponible>=cantidad_de_paginas*configuracion->tam_pag){
 						lugar_disponible-=cantidad_de_paginas*configuracion->tam_pag;
+						pthread_mutex_unlock(&mutex_lugar_disponible);
 						segmento* segmento_nuevo = malloc(sizeof(segmento));
 						segmento_nuevo->compartido = false;
 						segmento_nuevo->mmapeado = false;
@@ -572,6 +585,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						direccion_return = segmento_nuevo->base_logica+sizeof(heap_metadata);//es el principio del segmento nuevo
 					}
 					else{
+						pthread_mutex_unlock(&mutex_lugar_disponible);
 						//no hay lugar en el sistema
 						//free el segmento_nuevo
 						return -1;
@@ -661,6 +675,7 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 }
 void* obtener_puntero_a_marco(pagina* pag){
 	//fijarse si esta en memoria o en swap
+	pthread_mutex_lock(&mutex_bitarray);
 	if(pag->presencia == false){
 		if(pag->bit_swap!=NULL){
 			void* pagina_a_sacar = malloc(configuracion->tam_pag);
@@ -679,6 +694,7 @@ void* obtener_puntero_a_marco(pagina* pag){
 			//si llega aca estamos en las malas
 		}
 	}
+	pthread_mutex_unlock(&mutex_bitarray);
 	pag->bit_marco->bit_uso = true;
 	return upcm + pag->bit_marco->posicion * configuracion->tam_pag;
 }
@@ -686,11 +702,13 @@ void* obtener_puntero_a_marco(pagina* pag){
 t_bit_memoria* asignar_marco_nuevo(){
 //	retorno un marco nuevo en memoria
 //	esto va a tener q estar mutexeado
+	pthread_mutex_lock(&mutex_bitarray);
 	t_bit_memoria* bit_libre = bit_libre_memoria();
 	if(bit_libre == NULL){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
+	pthread_mutex_unlock(&mutex_bitarray);
 	return bit_libre;
 }
 t_bit_memoria* ejecutar_clock_modificado(){
@@ -700,7 +718,6 @@ t_bit_memoria* ejecutar_clock_modificado(){
 	//primero hay que buscar si hay alguna pagina de memoria en (0,0) -> en el bitarray_memoria
 	//si no se encuentra hay que buscar el (0,1) y pasando los (1,x) a (0,x)
 	//si no se encuentra repetir los pasos devuelta
-
 	t_bit_memoria* bit_return = buscar_0_0();
 	if(bit_return==NULL){
 		bit_return = buscar_0_1();
@@ -732,7 +749,9 @@ pagina* buscar_pagina_por_bit(t_bit_memoria* bit){
 	void iteracion(programa_t* programa){
 		list_iterate(programa->tabla_de_segmentos,(void*)iteracion2);
 	}
+	pthread_mutex_lock(&mutex_tabla_de_programas);
 	list_iterate(tabla_de_programas,(void*)iteracion);
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 	return pagina_return;
 }
 t_bit_memoria* ejecutar_clock_modificado_2vuelta(){
@@ -885,7 +904,9 @@ int muse_free(muse_free_t* datos){
 			}
 			segmento_buscado->paginas_liberadas+=cuantas_paginas_son_liberadas;
 			segmento_buscado->tamanio=segmento_buscado->paginas->elements_count*configuracion->tam_pag;
+			pthread_mutex_lock(&mutex_lugar_disponible);
 			lugar_disponible+=cuantas_paginas_son_liberadas*configuracion->tam_pag;
+			pthread_mutex_unlock(&mutex_lugar_disponible);
 			heap_de_lista->espacio=configuracion->tam_pag-sizeof(heap_metadata);
 			heap_metadata* heap_metadata_nuevo = malloc(sizeof(heap_metadata));
 			heap_metadata_nuevo->is_free=true;
@@ -921,7 +942,9 @@ int muse_free(muse_free_t* datos){
 				//cambio el tamano del segmento !!
 				segmento_buscado->paginas_liberadas+=cuantas_paginas_son_liberadas;
 				segmento_buscado->tamanio=segmento_buscado->paginas->elements_count*configuracion->tam_pag;
+				pthread_mutex_lock(&mutex_lugar_disponible);
 				lugar_disponible+=cuantas_paginas_son_liberadas*configuracion->tam_pag;
+				pthread_mutex_unlock(&mutex_lugar_disponible);
 				int offset_heap_anterior=heap_de_lista_anterior->direccion_heap_metadata%configuracion->tam_pag;
 				heap_de_lista_anterior->espacio=configuracion->tam_pag-offset_heap_anterior-sizeof(heap_metadata);
 
@@ -1263,7 +1286,9 @@ int muse_map(muse_map_t* datos){
 		mapeo_tabla->path = string_duplicate(datos->path);
 		mapeo_tabla->tamanio = datos->tamanio;
 		mapeo_tabla->tamanio_de_pags = segmento_nuevo->tamanio;
+		pthread_mutex_lock(&mutex_tabla_de_mapeo);
 		list_add(tabla_de_mapeo,mapeo_tabla);
+		pthread_mutex_unlock(&mutex_tabla_de_mapeo);
 		acumular_espacio_pedido(datos->id,datos->tamanio);
 		return segmento_nuevo->base_logica;
 	}
@@ -1283,7 +1308,9 @@ t_list* buscar_mapeo_existente(char* path,int tamanio){
 			mapeo->contador++;
 		}
 	}
+	pthread_mutex_lock(&mutex_tabla_de_mapeo);
 	list_iterate(tabla_de_mapeo,(void*)iteracion);
+	pthread_mutex_unlock(&mutex_tabla_de_mapeo);
 	return tabla_de_paginas;
 }
 void* generar_padding(int padding){
@@ -1374,6 +1401,7 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo){
 		}
 	}
 	//busco el mapeo
+	pthread_mutex_lock(&mutex_tabla_de_mapeo);
 	mapeo_t* mapeo_encontrado = list_find(tabla_de_mapeo,(void*)encontrar_mapeo);
 	if(mapeo_encontrado != NULL){
 		mapeo_encontrado->contador--;
@@ -1384,6 +1412,7 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo){
 			list_remove_and_destroy_by_condition(tabla_de_mapeo,(void*)encontrar_mapeo,(void*)mapeo_destroy);
 		}
 	}
+	pthread_mutex_unlock(&mutex_tabla_de_mapeo);
 }
 void mapeo_destroy(mapeo_t* _mapeo){
 	free(_mapeo->path);
@@ -1396,7 +1425,7 @@ int muse_close(char* id_cliente){
 	_Bool esPrograma(programa_t* programa){
 			return string_equals_ignore_case(programa->id_programa,id_cliente);
 	}
-
+	pthread_mutex_lock(&mutex_tabla_de_programas);
 	programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
 	if(prog!=NULL)
 	{
@@ -1407,7 +1436,7 @@ int muse_close(char* id_cliente){
 		list_remove_and_destroy_by_condition(tabla_de_programas,
 				(void*)esPrograma,(void*)destroy_programa);
 	}
-
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 	return 0;
 }
 uint32_t crear_servidor(uint32_t puerto){
@@ -1497,7 +1526,9 @@ void ocupate_de_este(int socket){
 				programa_t* programa = malloc(sizeof(programa_t));
 				programa->tabla_de_segmentos = list_create();
 				programa->id_programa = id_cliente;
+				pthread_mutex_lock(&mutex_tabla_de_programas);
 				list_add(tabla_de_programas,programa);
+				pthread_mutex_unlock(&mutex_tabla_de_programas);
 				free(pid_char);
 				break;
 			case MUSE_ALLOC:;
@@ -2134,16 +2165,14 @@ muse_void* deserializar_muse_void(void* magic){
 	return mv;
 }
 
-void destroy_programa(programa_t* prog)
-{
+void destroy_programa(programa_t* prog){
+	_Bool esPrograma(programa_t* programa){
+		return string_equals_ignore_case(programa->id_programa,prog->id_programa);
+	}
 	//falta bien liberar segmentos mappeados o ver que onda eso.. mandarle unmap directo?
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
-	_Bool esPrograma(programa_t* programa){
-			return string_equals_ignore_case(programa->id_programa,prog->id_programa);
-	}
 	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
-
-	}
+}
 void destroy_segmento(segmento* seg)
 {
 	//falta bien liberar segmentos mappeados
@@ -2161,11 +2190,11 @@ void metricas(char* id_cliente)
 	//Cuando un programa finaliza, tanto correctamente como al generar un segmentation fault
 	//Cuando se realiza una nueva petición de memoria muse_alloc
 	log_info(log_metricas,"----> METRICAS <----");
-	log_info(log_metricas,"DEL SISTEMA");
+	log_info(log_metricas,"-DEL SISTEMA");
 	metrica_del_sistema();
-	log_info(log_metricas,"POR SOCKET CONECTADO");
+	log_info(log_metricas,"-POR SOCKET CONECTADO");
 	metrica_por_socket_conectado();
-	log_info(log_metricas,"POR PROGRAMA");
+	log_info(log_metricas,"-POR PROGRAMA");
 	metrica_por_programa(id_cliente);
 }
 void metrica_por_socket_conectado()
@@ -2174,12 +2203,13 @@ void metrica_por_socket_conectado()
 	//de memoria dinámica pedido
 
 	int total_de_segmentos=0;
+	pthread_mutex_lock(&mutex_tabla_de_programas);
 	for (int i=0;i<tabla_de_programas->elements_count;i++){
 		programa_t* prog = list_get(tabla_de_programas,i);
 		total_de_segmentos+=prog->tabla_de_segmentos->elements_count;
 	}
-	for (int i=0;i<tabla_de_programas->elements_count;i++)
-	{ //agarro cada programa
+	for (int i=0;i<tabla_de_programas->elements_count;i++){
+		//agarro cada programa
 		programa_t* prog = list_get(tabla_de_programas,i);
 		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
 
@@ -2187,35 +2217,35 @@ void metrica_por_socket_conectado()
 		if(!seg->mmapeado){
 			//cantidad de memoria disponible al final de cada programa
 			int espacio_libre= 0;
-			for (int i=0;i<seg->info_heaps->elements_count;i++)
-			{
+			for(int i=0;i<seg->info_heaps->elements_count;i++){
 				heap_lista* heap_lista = list_get(seg->info_heaps,i);
-				if(heap_lista->is_free)
-				{
+				if(heap_lista->is_free){
 					espacio_libre+=heap_lista->espacio;
 				}
-
 			}
 			log_info(log_metricas,"el espacio en el ultimo segmento %i",espacio_libre);
-		}else{
+		}
+		else{
 			log_info(log_metricas,"el ultimo segmento esta mmapeado");
 		}
 
 		if(total_de_segmentos>0){
-		 //agarro cada programa
+			//agarro cada programa
 			//porcentaje de todos los segmentos
 			log_info(log_metricas,"%s tiene el %i porciento de los segmentos pedidos",prog->id_programa,prog->tabla_de_segmentos->elements_count*100/total_de_segmentos);
-
-		}else{
+		}
+		else{
 			log_info(log_metricas,"No hay segmentos");
 		}
 	}
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 }
 
-void metrica_por_programa(char* id_cliente)
-{
-	for (int i=0;i<tabla_de_programas->elements_count;i++)
-	{ //agarro cada programa
+void metrica_por_programa(char* id_cliente){
+	pthread_mutex_lock(&mutex_tabla_de_programas);
+	pthread_mutex_lock(&mutex_tabla_de_memoria);
+	for (int i=0;i<tabla_de_programas->elements_count;i++){
+		//agarro cada programa
 		programa_t* prog = list_get(tabla_de_programas,i);
 		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
 		//memoria liberada por programa
@@ -2224,36 +2254,37 @@ void metrica_por_programa(char* id_cliente)
 		}
 		memoria_liberada* mem_liberada = list_find(tabla_de_memoria_liberada,(void*)esMemoriaDelPrograma);
 		if(mem_liberada!=NULL){
-		int memoria_liberada_por_programa = mem_liberada->memoria_liberada_acumulada;
+			int memoria_liberada_por_programa = mem_liberada->memoria_liberada_acumulada;
 			log_info(log_metricas,"Liberado acumulado: %i",memoria_liberada_por_programa);
-		}else{
+		}
+		else{
 			log_info(log_metricas,"Aun no ha liberado memoria");
 		}
 		memoria_pedida* mem_pedida = list_find(tabla_de_memoria_pedida,(void*)esMemoriaDelPrograma);
 		if(mem_pedida!=NULL){
-		int memoria_pedida_por_programa = mem_pedida->memoria_pedida_acumulada;
+			int memoria_pedida_por_programa = mem_pedida->memoria_pedida_acumulada;
 			log_info(log_metricas,"Pedido acumulado: %i",memoria_pedida_por_programa);
-		}else{
+		}
+		else{
 			log_info(log_metricas,"Aun no ha pedido memoria");
 		}
 
 		int memoria_ocupada=0;
 		int memoria_leaks=0;
-		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++)
-		{ //agarro cada segmento del programa
+		for (int j=0;j<prog->tabla_de_segmentos->elements_count;j++){
+			//agarro cada segmento del programa
 			segmento* seg = list_get(prog->tabla_de_segmentos,j);
 
 			if(!seg->mmapeado){
 				memoria_ocupada+=seg->tamanio; //todas las paginas reservadas del segmento
-				for(int i = 0;i<seg->info_heaps->elements_count;i++)
-				{
+				for(int i = 0;i<seg->info_heaps->elements_count;i++){
 					heap_lista* heap_lista = list_get(seg->info_heaps,i);
-					if(!heap_lista->is_free)
-					{
+					if(!heap_lista->is_free){
 						memoria_leaks+=heap_lista->espacio+sizeof(heap_metadata);
 					}
 				}
-			}else{
+			}
+			else{
 				memoria_ocupada+=seg->tamanio_mapeo;
 			}
 		}
@@ -2264,12 +2295,12 @@ void metrica_por_programa(char* id_cliente)
 			log_info(log_metricas,"Cerrandose con");
 			log_info(log_metricas,"Leaks: %i",memoria_leaks);
 		}
-
 	}
+	pthread_mutex_unlock(&mutex_tabla_de_memoria);
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 }
 
-void metrica_del_sistema()
-{
+void metrica_del_sistema(){
 //Del sistema:
 //Cantidad de memoria disponible (en bytes)
 	pthread_mutex_lock(&mutex_lugar_disponible);
@@ -2277,15 +2308,15 @@ void metrica_del_sistema()
 	pthread_mutex_unlock(&mutex_lugar_disponible);
 }
 
-void acumular_espacio_liberado(char* programa, int cuanto)
-{
+void acumular_espacio_liberado(char* programa, int cuanto){
 	_Bool esMemoriaDelPrograma(memoria_liberada* mem_liberada){
 				return string_equals_ignore_case(mem_liberada->programa_id,programa);
 	}
+	pthread_mutex_lock(&mutex_tabla_de_memoria);
 	memoria_liberada* mem_liberada = list_find(tabla_de_memoria_liberada,(void*)esMemoriaDelPrograma);
 
-	if(mem_liberada==NULL)
-	{ //si no hay, creo uno
+	if(mem_liberada==NULL){
+		//si no hay, creo uno
 		memoria_liberada* mem_liberada = malloc(sizeof(memoria_liberada));
 		mem_liberada->programa_id = string_new();
 		string_append(&mem_liberada->programa_id,programa);
@@ -2295,6 +2326,7 @@ void acumular_espacio_liberado(char* programa, int cuanto)
 	}else {
 		mem_liberada->memoria_liberada_acumulada+=cuanto;
 	}
+	pthread_mutex_unlock(&mutex_tabla_de_memoria);
 }
 
 
@@ -2303,6 +2335,7 @@ void acumular_espacio_pedido(char* programa, int cuanto)
 	_Bool esMemoriaDelPrograma(memoria_pedida* mem_pedida){
 				return string_equals_ignore_case(mem_pedida->programa_id,programa);
 	}
+	pthread_mutex_lock(&mutex_tabla_de_memoria);
 	memoria_pedida* mem_pedida = list_find(tabla_de_memoria_pedida,(void*)esMemoriaDelPrograma);
 
 	if(mem_pedida==NULL)
@@ -2316,5 +2349,6 @@ void acumular_espacio_pedido(char* programa, int cuanto)
 	}else {
 		mem_pedida->memoria_pedida_acumulada+=cuanto;
 	}
+	pthread_mutex_unlock(&mutex_tabla_de_memoria);
 }
 
