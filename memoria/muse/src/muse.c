@@ -9,47 +9,47 @@ int main(int argc, char **argv) {
 	init_estructuras(path_swap);
 	log_info(log_metricas,"NUEVA EJECUCION");
 
-	programa_t* programa2 = malloc(sizeof(programa_t));
-	programa2->tabla_de_segmentos = list_create();
-	programa2->id_programa = string_new();
-	string_append(&programa2->id_programa,"prog2");
-	list_add(tabla_de_programas,programa2);
-
-	muse_alloc_t* mat = crear_muse_alloc(1000,"prog2");
-	int resu = muse_alloc(mat);
-	log_info(logg,"Direccion virtual del mat: %d",resu);
-
-	muse_alloc_t* mat2 = crear_muse_alloc(1000,"prog2");
-	int resu2 = muse_alloc(mat2);
-	log_info(logg,"Direccion virtual del mat: %d",resu2);
-
-	muse_alloc_t* mat3 = crear_muse_alloc(1000,"prog2");
-	int resu3 = muse_alloc(mat3);
-	log_info(logg,"Direccion virtual del mat: %d",resu3);
-
-	muse_map_t* mmt = crear_muse_map(1000,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
-	int puntero_map = muse_map(mmt);
-	log_info(logg,"Direccion virtual del map: %d",puntero_map);
-
-	muse_alloc_t* mat4 = crear_muse_alloc(1000,"prog2");
-	int resu4 = muse_alloc(mat4);
-	log_info(logg,"Direccion virtual del mat: %d",resu4);
-
-	muse_free_t* mft = crear_muse_free("prog2",resu3);
-	muse_free(mft);
-
-	muse_free_t* mft1 = crear_muse_free("prog2",resu);
-	muse_free(mft1);
-
-	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
-	muse_free(mft2);
-
-	muse_alloc_t* mat5 = crear_muse_alloc(311,"prog2");
-	int resu5 = muse_alloc(mat5);
-	log_info(logg,"Direccion virtual del mat: %d",resu5);
-	metricas("prog2");
-
-return 0;
+//	programa_t* programa2 = malloc(sizeof(programa_t));
+//	programa2->tabla_de_segmentos = list_create();
+//	programa2->id_programa = string_new();
+//	string_append(&programa2->id_programa,"prog2");
+//	list_add(tabla_de_programas,programa2);
+//
+//	muse_alloc_t* mat = crear_muse_alloc(1000,"prog2");
+//	int resu = muse_alloc(mat);
+//	log_info(logg,"Direccion virtual del mat: %d",resu);
+//
+//	muse_alloc_t* mat2 = crear_muse_alloc(1000,"prog2");
+//	int resu2 = muse_alloc(mat2);
+//	log_info(logg,"Direccion virtual del mat: %d",resu2);
+//
+//	muse_alloc_t* mat3 = crear_muse_alloc(1000,"prog2");
+//	int resu3 = muse_alloc(mat3);
+//	log_info(logg,"Direccion virtual del mat: %d",resu3);
+//
+//	muse_map_t* mmt = crear_muse_map(1000,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+//	int puntero_map = muse_map(mmt);
+//	log_info(logg,"Direccion virtual del map: %d",puntero_map);
+//
+//	muse_alloc_t* mat4 = crear_muse_alloc(1000,"prog2");
+//	int resu4 = muse_alloc(mat4);
+//	log_info(logg,"Direccion virtual del mat: %d",resu4);
+//
+//	muse_free_t* mft = crear_muse_free("prog2",resu3);
+//	muse_free(mft);
+//
+//	muse_free_t* mft1 = crear_muse_free("prog2",resu);
+//	muse_free(mft1);
+//
+//	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
+//	muse_free(mft2);
+//
+//	muse_alloc_t* mat5 = crear_muse_alloc(311,"prog2");
+//	int resu5 = muse_alloc(mat5);
+//	log_info(logg,"Direccion virtual del mat: %d",resu5);
+//	metricas("prog2");
+//
+//return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -83,10 +83,12 @@ void iniciar_memoria_virtual(char* path_swap){
 		}
 	}
 	char* aux = string_substring_until(path_swap,i);
+	free(path_swap);
 	path_swap = string_new();
 	string_append(&path_swap,aux);
 	string_append(&path_swap,"/SwappingArea");
 	log_info(logg,"path swap: %s",path_swap);
+	free(aux);
 
 
 	int fd = open(path_swap,O_RDWR);
@@ -98,7 +100,6 @@ void iniciar_memoria_virtual(char* path_swap){
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
-	free(aux);
 }
 void init_semaforos(){
 	pthread_mutex_init(&mutex_lugar_disponible,NULL);
@@ -691,7 +692,7 @@ void* obtener_puntero_a_marco(pagina* pag){
 			memcpy(upcm+_bit->posicion*configuracion->tam_pag,pagina_a_sacar,configuracion->tam_pag);
 		}
 		else{
-			log_info(logg,"Aca hay un mapeo que se quiere acceder pero no esta en memoria >:(\n");
+			log_info(logg,"Aca hay un mapeo que se quiere acceder pero no esta en memoria >:(");
 			//si llega aca estamos en las malas
 		}
 	}
@@ -989,7 +990,7 @@ void* muse_get(muse_get_t* datos){
 		int puntero = 0;
 		if(segmento_buscado->mmapeado){
 			//puede haber pags q nunca se levantaron (no estan en memoria)
-			paginas_de_map_en_memoria(datos->direccion,datos->tamanio,segmento_buscado);
+			paginas_de_map_en_memoria(direccion_al_segmento,datos->tamanio,segmento_buscado);
 		}
 		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
@@ -1060,6 +1061,7 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 					//si es la ultima hay que agregar el padding
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag-padding);
 					memcpy(puntero_a_marco+configuracion->tam_pag-padding,void_padding,padding);
+					int a = 0;
 					//padding => se llena de \0 al final
 
 				}
@@ -1068,6 +1070,8 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 				}
 			}
 		}
+		free(buffer);
+		free(void_padding);
 	}
 }
 int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void* es lo que hay que pegar
@@ -1121,6 +1125,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 		pag->bit_marco->bit_uso = true;
 		pag->bit_marco->bit_modificado = true;
 		int cuanto_puedo_pegar = configuracion->tam_pag-(datos->direccion%configuracion->tam_pag);
+		//aca datos->direccion no tendria que ser direccion_al_segmento?!?!
 		if(cuanto_puedo_pegar <= datos->size_paquete){
 			//pego lo que pueda
 			memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,cuanto_puedo_pegar);
@@ -1301,9 +1306,11 @@ void* generar_padding(int padding){
 	char* barra0 = malloc(1);
 	char xd = '\0';
 	memcpy(barra0,&xd,1);
-	for(int i = 0;i<padding;i++){
-		memcpy(void_return,(void*)barra0,1);
+	int puntero = 0;
+	for(int i = 0;i<padding;i++,puntero++){
+		memcpy(void_return+puntero,(void*)barra0,1);
 	}
+	free(barra0);
 	return void_return;
 }
 /**
@@ -1316,15 +1323,16 @@ void* generar_padding(int padding){
 int muse_sync(muse_sync_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	int direccion_al_segmento = datos->direccion - segmento_buscado->base_logica;
 	if(segmento_buscado != NULL){
 		if(segmento_buscado->mmapeado){
-			int numero_pagina_inicial = datos->direccion / configuracion->tam_pag;
-			int numero_pagina_final = (datos->direccion+datos->tamanio)/configuracion->tam_pag;
+			int numero_pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
+			int numero_pagina_final = (direccion_al_segmento+datos->tamanio)/configuracion->tam_pag;
 			int cantidad_de_paginas = numero_pagina_final - numero_pagina_inicial + 1;
 			int tam_a_copiar = cantidad_de_paginas * configuracion->tam_pag;
 			void* super_void_con_datos = malloc(tam_a_copiar);
 			int puntero = 0;
-			paginas_de_map_en_memoria(datos->direccion,datos->tamanio,segmento_buscado);
+			paginas_de_map_en_memoria(direccion_al_segmento,datos->tamanio,segmento_buscado);
 			for(int i = numero_pagina_inicial;i<=numero_pagina_final;i++,puntero+=configuracion->tam_pag,tam_a_copiar-=configuracion->tam_pag){
 				pagina* pag = list_get(segmento_buscado->paginas,i);
 				void* puntero_a_marco = obtener_puntero_a_marco(pag);
@@ -1336,10 +1344,12 @@ int muse_sync(muse_sync_t* datos){
 				if(!fseek(file,posicion_inicial,SEEK_SET)){
 					//revisar esto!!
 					fwrite(super_void_con_datos,cantidad_de_paginas*configuracion->tam_pag,1,file);
+					free(super_void_con_datos);
 					fclose(file);
 					return 0;
 				}
 			}
+			free(super_void_con_datos);
 		}
 	}
 	//si llega aca es xq fallo
@@ -1436,7 +1446,7 @@ uint32_t crear_servidor(uint32_t puerto){
 		perror("Fallo el binde0 del servidor");
 		return 1;
 	}
-	log_info(logg,"Estoy escuchando en el puerto %d\n",puerto);
+	log_info(logg,"Estoy escuchando en el puerto %d",puerto);
 	listen(servidor,SOMAXCONN);
 	return servidor;
 }
@@ -1487,10 +1497,11 @@ void ocupate_de_este(int socket){
 	char* id_cliente;
 	void* respuesta;
 	while(recv(socket,&operacion,4,MSG_WAITALL) >0 && exit_loop==false){
+		printf("\n");
 		log_info(logg,"-Nuevo pedido de %d",socket);
 		switch (operacion) {
 			case MUSE_INIT:;
-				log_info(logg,"-INIT\n");
+				log_info(logg,"-INIT");
 				//recibo int pid, crep el char* id y se lo mando
 				uint32_t pid;
 				recv(socket,&pid,4,0);
@@ -1515,11 +1526,11 @@ void ocupate_de_este(int socket){
 				free(pid_char);
 				break;
 			case MUSE_ALLOC:;
-				log_info(logg,"-ALLOC\n");
 				recv(socket,&tam,4,0);
 				void* vmat = malloc(tam);
 				recv(socket,vmat,tam,0);
 				muse_alloc_t* datos = deserializar_muse_alloc(vmat);
+				log_info(logg,"-ALLOC de %d bytes",datos->tamanio);
 				resultado = muse_alloc(datos);
 				if(resultado>=0){
 					respuesta = malloc(8);
@@ -1527,25 +1538,25 @@ void ocupate_de_este(int socket){
 					memcpy(respuesta,&operacion_respuesta,4);
 					memcpy(respuesta+4,&resultado,4);
 					send(socket,respuesta,8,0);
-					log_info(logg,"mando direccion virtual a %d: %d\n",socket,resultado);
+					log_info(logg,"mando direccion virtual a %d: %d",socket,resultado);
 				}
 				else{
 					respuesta = malloc(4);
 					operacion_respuesta = MUSE_ERROR;
 					memcpy(respuesta,&operacion_respuesta,4);
 					send(socket,respuesta,4,0);
-					log_info(logg,"Error en muse_alloc\n");
+					log_info(logg,"Error en muse_alloc");
 				}
 				free(respuesta);
 				muse_alloc_destroy(datos);
 				free(vmat);
 				break;
 			case MUSE_FREE:;
-				log_info(logg,"-FREE\n");
 				recv(socket,&tam,4,0);
 				void* vmft = malloc(tam);
 				recv(socket,vmft,tam,0);
 				muse_free_t* dmft = deserializar_muse_free(vmft);
+				log_info(logg,"-FREE de direccion %d",dmft->direccion);
 				resultado = muse_free(dmft);
 				if(resultado == -1){
 					operacion_respuesta = MUSE_SEG_FAULT;
@@ -1553,14 +1564,13 @@ void ocupate_de_este(int socket){
 				else{
 					operacion_respuesta = MUSE_EXITOSO;
 				}
-				memcpy(respuesta,&operacion_respuesta,4);
 				send(socket,&operacion_respuesta,4,0);
-				log_info(logg,"haciendo free de %d, resultado: %d\n",socket,resultado);
+				log_info(logg,"haciendo free de %d, resultado: %d",socket,resultado);
 				muse_free_destroy(dmft);
 				free(vmft);
 				break;
 			case MUSE_GET:;
-				log_info(logg,"-GET\n");
+				log_info(logg,"-GET");
 				recv(socket,&tam,4,0);
 				void* vmgt = malloc(tam);
 				recv(socket,vmgt,tam,0);
@@ -1573,12 +1583,8 @@ void ocupate_de_este(int socket){
 					uint32_t tamanio_respuesta;
 					memcpy(&tamanio_respuesta,respuesta+4,4);
 					send(socket,respuesta,tamanio_respuesta,0);
-					// ^^error de valgrind q no pude arreglar?? igual no rompe
-					log_info(logg,"enviando resolucion del get a: %d\n",socket);
-					char* buff = malloc(mgt->tamanio);
-					memcpy(buff,resultado_get,mgt->tamanio);	//pa probar
-					log_info(logg,"buff: %s\n",buff);					//pa probar
-					free(buff);									//pa probar
+					// ^^error de valgrind q no pude arreglar??
+					log_info(logg,"enviando resolucion del get a: %d",socket);
 					free(resultado_get);
 					free(respuesta);
 					muse_void_destroy(mv);
@@ -1592,12 +1598,11 @@ void ocupate_de_este(int socket){
 				free(vmgt);
 				break;
 			case MUSE_CPY:;
-				log_info(logg,"-CPY\n");
+				log_info(logg,"-CPY");
 				recv(socket,&tam,4,0);
 				void* vmct = malloc(tam);
 				recv(socket,vmct,tam,0);
 				muse_cpy_t* mct = deserializar_muse_cpy(vmct);
-				log_info(logg,"datos a copiar: %s\n",(char*)mct->paquete);
 				resultado = muse_cpy(mct);
 				if(resultado == -1){//fallo
 					operacion_respuesta = MUSE_SEG_FAULT;
@@ -1612,10 +1617,10 @@ void ocupate_de_este(int socket){
 					muse_cpy_destroy(mct);
 					free(vmct);
 				}
-				log_info(logg,"enviando resolucion del cpy a: %d, resultado: %d\n",socket,resultado);
+				log_info(logg,"enviando resolucion del cpy a: %d, resultado: %d",socket,resultado);
 				break;
 			case MUSE_MAP:
-				log_info(logg,"-MAP\n");
+				log_info(logg,"-MAP");
 				recv(socket,&tam,4,0);
 				void* vmmt = malloc(tam);
 				recv(socket,vmmt,tam,0);
@@ -1625,15 +1630,15 @@ void ocupate_de_este(int socket){
 				int _op = MUSE_INT;
 				void* void_respuesta = malloc(8);
 				memcpy(void_respuesta,&_op,4);
-				memcpy(void_respuesta,&resultado,4);
+				memcpy(void_respuesta+4,&resultado,4);
 				send(socket,void_respuesta,8,0);
-				log_info(logg,"enviando resolucion del map %d a: %d\n",socket,resultado);
+				log_info(logg,"enviando resolucion del map de%d: %d",socket,resultado);
 				muse_map_destroy(dmmt);
 				free(vmmt);
 				free(void_respuesta);
 				break;
 			case MUSE_SYNC://hay que hacerla bien
-				log_info(logg,"-SYNC\n");
+				log_info(logg,"-SYNC");
 				recv(socket,&tam,4,0);
 				void* vmst = malloc(tam);
 				recv(socket,vmst,tam,0);
@@ -1641,12 +1646,12 @@ void ocupate_de_este(int socket){
 				resultado = muse_sync(dmst);
 				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
-				log_info(logg,"enviando resolucion del sync %d a: %d\n",socket,resultado);
+				log_info(logg,"enviando resolucion del sync %d a: %d",socket,resultado);
 				muse_sync_destroy(dmst);
 				free(vmst);
 				break;
 			case MUSE_UNMAP://hay que hacerla bien
-				log_info(logg,"-UNMAP\n");
+				log_info(logg,"-UNMAP");
 				recv(socket,&tam,4,0);
 				void* vmut = malloc(tam);
 				recv(socket,vmut,tam,0);
@@ -1654,17 +1659,17 @@ void ocupate_de_este(int socket){
 				resultado = muse_unmap(dmut);
 				//devuelve si esta to do ok o no
 				send(socket,&resultado,4,0);
-				log_info(logg,"enviando resolucion del unmap %d a: %d\n",socket,resultado);
+				log_info(logg,"enviando resolucion del unmap %d a: %d",socket,resultado);
 				muse_unmap_destroy(dmut);
 				free(vmut);
 				break;
 			case MUSE_CLOSE:;
-				log_info(logg,"-CLOSE\n");
+				log_info(logg,"-CLOSE");
 //				si no se libera algun muse_alloc-> es un memory leak
 //				liberar tabla de programas
 
 				resultado = muse_close(id_cliente);
-				log_info(logg,"Se fue %d\n",socket);
+				log_info(logg,"Se fue %d",socket);
 				exit_loop = true;
 				break;
 			default:

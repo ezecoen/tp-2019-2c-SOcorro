@@ -121,8 +121,8 @@ int muse_get(void* dst, uint32_t src, size_t n){
 		recv(socket_muse,resultado,size_resultado,0);
 		muse_void* mv = deserializar_muse_void(resultado);
 		memcpy(dst,mv->paquete,mv->size_paquete);
-		printf("get realizado, resultado en %p\n",dst);
-		printf("Buffer en libmuse: %s\n",(char*)mv->paquete);
+//		printf("get realizado, resultado en %p\n",dst);
+//		printf("Buffer en libmuse: %s\n",(char*)mv->paquete);
 		free(resultado);
 		muse_void_destroy(mv);
 		return 0;
@@ -183,9 +183,18 @@ uint32_t muse_map(char *path, size_t length, int flags){
 	memcpy(&tamanio_magic,magic+4,4);
 	send(socket_muse,magic,tamanio_magic,0);
 	uint32_t posicion_memoria_mapeada;
-	if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
+	int op;
+	recv(socket_muse,&op,4,0);
+	if(op == MUSE_INT){
+		if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
+			printf("error en map para : %s\n",path);
+			perror("Error: ");
+			return posicion_memoria_mapeada = 0; // ??
+		}
+	}
+	else{
 		printf("error en map para : %s\n",path);
-		return posicion_memoria_mapeada = 0; // ??
+		perror("Error: ");
 	}
 	printf("map hecho para : %s\n",path);
 	return posicion_memoria_mapeada;

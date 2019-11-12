@@ -9,7 +9,7 @@
 #define PRUEBA_H_
 #include <commons/config.h>
 #include <commons/log.h>
-
+#include <sys/mman.h>
 typedef struct{
 	char* ip_propia;
 	char* ip_muse;
