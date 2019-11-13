@@ -9,47 +9,65 @@ int main(int argc, char **argv) {
 	init_estructuras(path_swap);
 	log_info(log_metricas,"NUEVA EJECUCION");
 
-//	programa_t* programa2 = malloc(sizeof(programa_t));
-//	programa2->tabla_de_segmentos = list_create();
-//	programa2->id_programa = string_new();
-//	string_append(&programa2->id_programa,"prog2");
-//	list_add(tabla_de_programas,programa2);
+	programa_t* programa2 = malloc(sizeof(programa_t));
+	programa2->tabla_de_segmentos = list_create();
+	programa2->id_programa = string_new();
+	string_append(&programa2->id_programa,"prog2");
+	list_add(tabla_de_programas,programa2);
+
+	programa_t* programa = malloc(sizeof(programa_t));
+	programa->tabla_de_segmentos = list_create();
+	programa->id_programa = string_new();
+	string_append(&programa->id_programa,"prog");
+	list_add(tabla_de_programas,programa);
+
+	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
+	int resu = muse_alloc(mat);
+	log_info(logg,"Direccion virtual del mat: %d",resu);
+
+	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog2");
+	int resu2 = muse_alloc(mat2);
+	log_info(logg,"Direccion virtual del mat: %d",resu2);
+
+	muse_alloc_t* mat3 = crear_muse_alloc(100,"prog2");
+	int resu3 = muse_alloc(mat3);
+	log_info(logg,"Direccion virtual del mat: %d",resu3);
+
+	muse_map_t* mmt = crear_muse_map(100,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+	int puntero_map = muse_map(mmt);
+	log_info(logg,"Direccion virtual del map: %d",puntero_map);
+
+	muse_map_t* mmt1 = crear_muse_map(100,"prog",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
+	int puntero_map1 = muse_map(mmt1);
+	log_info(logg,"Direccion virtual del map: %d",puntero_map1);
+
+	muse_unmap_t* mut1 = crear_muse_unmap("prog",puntero_map1);
+	int puntero_unmap1 = muse_unmap(mut1);
+	log_info(logg,"Unmap%d",puntero_map1);
+
+	muse_alloc_t* mat4 = crear_muse_alloc(100,"prog2");
+	int resu4 = muse_alloc(mat4);
+	log_info(logg,"Direccion virtual del mat: %d",resu4);
+
+	muse_free_t* mft = crear_muse_free("prog",resu3);
+	muse_free(mft);
+
+	muse_free_t* mft1 = crear_muse_free("prog",resu);
+	muse_free(mft1);
+
+	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
+	muse_free(mft2);
+
+	muse_alloc_t* mat5 = crear_muse_alloc(311,"prog2");
+	int resu5 = muse_alloc(mat5);
+	log_info(logg,"Direccion virtual del mat: %d",resu5);
+
+	muse_close("prog2");
+	muse_close("prog");
+
+	//	metricas("prog2");
 //
-//	muse_alloc_t* mat = crear_muse_alloc(1000,"prog2");
-//	int resu = muse_alloc(mat);
-//	log_info(logg,"Direccion virtual del mat: %d",resu);
-//
-//	muse_alloc_t* mat2 = crear_muse_alloc(1000,"prog2");
-//	int resu2 = muse_alloc(mat2);
-//	log_info(logg,"Direccion virtual del mat: %d",resu2);
-//
-//	muse_alloc_t* mat3 = crear_muse_alloc(1000,"prog2");
-//	int resu3 = muse_alloc(mat3);
-//	log_info(logg,"Direccion virtual del mat: %d",resu3);
-//
-//	muse_map_t* mmt = crear_muse_map(1000,"prog2",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
-//	int puntero_map = muse_map(mmt);
-//	log_info(logg,"Direccion virtual del map: %d",puntero_map);
-//
-//	muse_alloc_t* mat4 = crear_muse_alloc(1000,"prog2");
-//	int resu4 = muse_alloc(mat4);
-//	log_info(logg,"Direccion virtual del mat: %d",resu4);
-//
-//	muse_free_t* mft = crear_muse_free("prog2",resu3);
-//	muse_free(mft);
-//
-//	muse_free_t* mft1 = crear_muse_free("prog2",resu);
-//	muse_free(mft1);
-//
-//	muse_free_t* mft2 = crear_muse_free("prog2",resu2);
-//	muse_free(mft2);
-//
-//	muse_alloc_t* mat5 = crear_muse_alloc(311,"prog2");
-//	int resu5 = muse_alloc(mat5);
-//	log_info(logg,"Direccion virtual del mat: %d",resu5);
-//	metricas("prog2");
-//
-//return 0;
+return 0;
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -1237,6 +1255,7 @@ int muse_map(muse_map_t* datos){
 		segmento_nuevo->tamanio_mapeo = datos->tamanio;
 		segmento_nuevo->base_logica = base_logica_segmento_nuevo(tabla_de_segmentos);
 		segmento_nuevo->info_heaps = NULL;
+		segmento_nuevo->paginas_liberadas=0;
 		segmento_nuevo->path_mapeo = string_duplicate(datos->path);
 		segmento_nuevo->tamanio = tamanio_paginas;
 		if(datos->flag != MAP_PRIVATE){
@@ -1369,7 +1388,7 @@ int muse_unmap(muse_unmap_t* datos){
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado!=NULL){
 		if(segmento_buscado->mmapeado){
-			bajar_mapeo(segmento_buscado->path_mapeo,segmento_buscado->tamanio_mapeo);
+			bajar_mapeo(segmento_buscado->path_mapeo,segmento_buscado->tamanio_mapeo,datos->id);
 			segmento_buscado->paginas = NULL;
 			segmento_buscado->info_heaps = NULL;
 			free(segmento_buscado->path_mapeo);
@@ -1380,7 +1399,7 @@ int muse_unmap(muse_unmap_t* datos){
 	perror("error en unmap: ");
 	return -1;
 }
-void bajar_mapeo(char* path_mapeo, int tam_mapeo){
+void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
 	_Bool encontrar_mapeo(mapeo_t* _mapeo){
 		return _mapeo->tamanio == tam_mapeo && string_equals_ignore_case(_mapeo->path,path_mapeo);
 	}
@@ -1392,12 +1411,26 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo){
 		else if(pag->bit_swap != NULL){
 			pag->bit_swap->ocupado = false;
 		}
+		free(pag);
 	}
+	_Bool esPrograma(programa_t* prog){
+		return string_equals_ignore_case(prog->id_programa,id_programa);
+	}
+	_Bool esSegmento(segmento* seg){
+		if(seg->mmapeado){
+			return string_equals_ignore_case(seg->path_mapeo,path_mapeo);
+		}
+		return false;
+		}
 	//busco el mapeo
 	pthread_mutex_lock(&mutex_tabla_de_mapeo);
 	mapeo_t* mapeo_encontrado = list_find(tabla_de_mapeo,(void*)encontrar_mapeo);
 	if(mapeo_encontrado != NULL){
 		mapeo_encontrado->contador--;
+		//quiero sacar el segmento de la lista del programa
+		programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
+		list_remove_by_condition(prog->tabla_de_segmentos,(void*)esSegmento);
+
 		if(mapeo_encontrado->contador==0){//si no quedan mas referenciandolo se elimina
 			//libero los bits de memoria
 			list_iterate(mapeo_encontrado->paginas,(void*)liberar_pags);
@@ -1420,16 +1453,20 @@ int muse_close(char* id_cliente){
 	}
 	pthread_mutex_lock(&mutex_tabla_de_programas);
 	programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 	if(prog!=NULL)
 	{
 		//encontro el programa del cliente
 		//me conviene tirar antes las metricas, asi me fijo los leaks y eso
 		metricas(prog->id_programa);
 		//hay que sacarlo de la lista
+		log_info(logg,"muse_close para %s",prog->id_programa);
+		pthread_mutex_lock(&mutex_tabla_de_programas);
 		list_remove_and_destroy_by_condition(tabla_de_programas,
 				(void*)esPrograma,(void*)destroy_programa);
+		pthread_mutex_unlock(&mutex_tabla_de_programas);
 	}
-	pthread_mutex_unlock(&mutex_tabla_de_programas);
+
 	return 0;
 }
 uint32_t crear_servidor(uint32_t puerto){
@@ -2157,19 +2194,20 @@ void destroy_programa(programa_t* prog){
 	_Bool esPrograma(programa_t* programa){
 		return string_equals_ignore_case(programa->id_programa,prog->id_programa);
 	}
-	//falta bien liberar segmentos mappeados o ver que onda eso.. mandarle unmap directo?
+	// !! hay algo en el destroy que rompe el tema de pag -> bit
+	// como que igual antes removed el programa de la lista ??
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
 	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
 }
 void destroy_segmento(segmento* seg)
 {
-	//falta bien liberar segmentos mappeados
 	if(!seg->mmapeado){
+		//estoy destruyendo un mmpapeado sin fijarme si otro hace referencia a esto
 		list_destroy_and_destroy_elements(seg->info_heaps,(void*)free);
+		list_destroy_and_destroy_elements(seg->paginas,(void*)destroy_pagina);
 	}else{
-		free(seg->path_mapeo);
+		destroy_mapeo(seg);
 	}
-	list_destroy_and_destroy_elements(seg->paginas,(void*)destroy_pagina);
 	free(seg);
 }
 
@@ -2214,7 +2252,12 @@ void metrica_por_socket_conectado()
 		//agarro cada programa
 		programa_t* prog = list_get(tabla_de_programas,i);
 		log_info(log_metricas,"PROGRAMA %s",prog->id_programa);
-
+		if(prog->tabla_de_segmentos->elements_count==0)
+		{
+			log_info(log_metricas,"No tiene segmentos");
+			pthread_mutex_unlock(&mutex_tabla_de_programas);
+			return;
+		}
 		segmento* seg = list_last_element(prog->tabla_de_segmentos);
 		if(!seg->mmapeado){
 			//cantidad de memoria disponible al final de cada programa
@@ -2352,5 +2395,24 @@ void acumular_espacio_pedido(char* programa, int cuanto)
 		mem_pedida->memoria_pedida_acumulada+=cuanto;
 	}
 	pthread_mutex_unlock(&mutex_tabla_de_memoria);
+}
+
+void destroy_mapeo(segmento* seg)
+{
+	_Bool esSegmentoEnMapeo (mapeo_t* mpt)
+	{
+		return string_equals_ignore_case(mpt->path,seg->path_mapeo);
+
+	}
+	mapeo_t* mpt = list_find(tabla_de_mapeo,(void*)esSegmentoEnMapeo);
+	mpt->contador--;
+
+	if(mpt->contador==0)
+	{
+		list_destroy_and_destroy_elements(mpt->paginas,(void*)destroy_pagina);
+		list_remove_by_condition(tabla_de_mapeo,(void*)esSegmentoEnMapeo);
+		free(mpt->path);
+		free(mpt);
+	}
 }
 
