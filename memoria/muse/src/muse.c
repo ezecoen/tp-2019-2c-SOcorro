@@ -1428,7 +1428,9 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
 	if(mapeo_encontrado != NULL){
 		mapeo_encontrado->contador--;
 		//quiero sacar el segmento de la lista del programa
+		pthread_mutex_lock(&mutex_tabla_de_programas);
 		programa_t* prog = list_find(tabla_de_programas,(void*)esPrograma);
+		pthread_mutex_unlock(&mutex_tabla_de_programas);
 		list_remove_by_condition(prog->tabla_de_segmentos,(void*)esSegmento);
 
 		if(mapeo_encontrado->contador==0){//si no quedan mas referenciandolo se elimina
@@ -2197,7 +2199,9 @@ void destroy_programa(programa_t* prog){
 	// !! hay algo en el destroy que rompe el tema de pag -> bit
 	// como que igual antes removed el programa de la lista ??
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
+	pthread_mutex_lock(&mutex_tabla_de_programas);
 	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
+	pthread_mutex_unlock(&mutex_tabla_de_programas);
 }
 void destroy_segmento(segmento* seg)
 {
@@ -2404,13 +2408,17 @@ void destroy_mapeo(segmento* seg)
 		return string_equals_ignore_case(mpt->path,seg->path_mapeo);
 
 	}
+	pthread_mutex_lock(&mutex_tabla_de_mapeo);
 	mapeo_t* mpt = list_find(tabla_de_mapeo,(void*)esSegmentoEnMapeo);
+	pthread_mutex_unlock(&mutex_tabla_de_mapeo);
 	mpt->contador--;
 
 	if(mpt->contador==0)
 	{
 		list_destroy_and_destroy_elements(mpt->paginas,(void*)destroy_pagina);
+		pthread_mutex_lock(&mutex_tabla_de_mapeo);
 		list_remove_by_condition(tabla_de_mapeo,(void*)esSegmentoEnMapeo);
+		pthread_mutex_unlock(&mutex_tabla_de_mapeo);
 		free(mpt->path);
 		free(mpt);
 	}
