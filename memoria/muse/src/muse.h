@@ -189,17 +189,12 @@ typedef enum t_comando_muse{
 void* upcm;
 void* swap;
 uint32_t lugar_disponible;
-pthread_mutex_t mutex_lugar_disponible;
 t_list* tabla_de_programas;
-pthread_mutex_t mutex_tabla_de_programas;
 t_list* tabla_de_mapeo;
-pthread_mutex_t mutex_tabla_de_mapeo;
 int CANT_PAGINAS_MEMORIA;
 int CANT_PAGINAS_MEMORIA_VIRTUAL;
-pthread_mutex_t mutex_bitarray;
 bitarray_nuestro* bitarray;
 int posicion_puntero_clock;
-pthread_mutex_t mutex_tabla_de_memoria;
 t_list* tabla_de_memoria_liberada;
 t_list* tabla_de_memoria_pedida;
 struct sockaddr_in direccionServidor;
@@ -210,12 +205,12 @@ t_log* logg;
 t_log* log_metricas;
 
 //SEMAFOROS
-//cosas que va a haber que semaforizar
-/*
- * las 4 tablas, lugar disp
- *
- *
- */
+pthread_mutex_t mutex_bitarray;
+pthread_mutex_t mutex_tabla_de_memoria;
+pthread_mutex_t mutex_lugar_disponible;
+pthread_mutex_t mutex_tabla_de_programas;
+pthread_mutex_t mutex_tabla_de_mapeo;
+
 
 
 //FUNCIONES
@@ -251,7 +246,7 @@ t_list* buscar_mapeo_existente(char* path, int tamanio);
 void* generar_padding(int padding);
 int muse_sync(muse_sync_t* datos);
 int muse_unmap(muse_unmap_t* datos);
-void bajar_mapeo(char* path_mapeo, int tam_mapeo);
+void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa);
 void mapeo_destroy(mapeo_t* _mapeo);
 int muse_close(char* id_cliente);
 uint32_t crear_servidor(uint32_t puerto);
@@ -313,5 +308,7 @@ void metrica_por_socket_conectado();
 void acumular_espacio_liberado(char* programa, int cuanto);
 void acumular_espacio_pedido(char* programa, int cuanto);
 segmento* buscar_segmento_con_paginas_liberadas(int tamanio, t_list* tabla_segmentos);
+void destroy_mapeo(segmento* seg);
+void liberar_pags(pagina* pag);
 
 #endif /* MUSE_H_ */

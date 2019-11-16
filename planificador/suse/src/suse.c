@@ -36,81 +36,8 @@ int main(int argc, char **argv) {
 }
 
 
-
-//FUNCIONES PARA PRUEBAS LOCALES
-void funcionDePrueba(){
-	for(int i = 0; i<4; i++){
-		sem_wait(mut_multiprogramacion);
-			crearHilo(i+1);
-			usleep(5000000);
-	}
-}
-
-void printearNumeroDeHilo(tcb* threadControlBlock){
-
-	int i = 0;
-	srand(time(NULL));
-	int numeroRandom = rand();
-	int cantidadLoops = randomEntre1y10(numeroRandom);
-
-	while(cantidadLoops > i){
-
-		log_info(logg, "Soy el hilo numero %d del proceso %d\n\n", threadControlBlock->t_id, threadControlBlock->p_id);
-		usleep(4000000);
-
-		i++;
-
-	}
-
-	sem_post(mut_multiprogramacion);
-
-	log_info(logg, "Termine de printear, soy el hilo numero %d y me printee %d veces", threadControlBlock->t_id, cantidadLoops);
-
-	_Bool compararNumeroDeTID(tcb* _threadControlBlock){
-		return threadControlBlock->t_id == threadControlBlock->t_id;
-	}
-
-	list_remove_by_condition(estadoNew, (void*)compararNumeroDeTID);
-
-	return;
-
-}
-
-void crearHilo(int numero){
-
-	tcb* threadControlBlock = malloc(sizeof(tcb));
-
-	threadControlBlock->p_id = numeroDePrograma;
-	threadControlBlock->t_id = numero;
-	threadControlBlock->estimacion = 0;
-
-	pthread_t hiloDeNumero;
-	if(pthread_create(&hiloDeNumero, NULL, (void*)printearNumeroDeHilo, (void*)threadControlBlock)!=0){
-		log_error(logg, "Error creando el hilo");
-	}
-
-	pthread_detach(hiloDeNumero);
-
-	sem_wait(sem_mutNew);
-		list_add(estadoNew, threadControlBlock);
-	sem_post(sem_mutNew);
-}
-
-int randomEntre1y10(int numero){
-
-	int aux = numero % 10;
-
-	if(aux > 10){
-		aux = randomEntre1y10(aux);
-	}
-
-	return aux;
-}
-
-
-
 //FUNCIONES PARA INICIALIZAR COSAS
-p_config* leer_config(char* path){//TODO: tengo que ver como levantar los arrays de la config
+p_config* leer_config(char* path){
 
 	g_config = config_create(path);
 	configuracion = malloc(sizeof(p_config));
@@ -127,18 +54,37 @@ p_config* leer_config(char* path){//TODO: tengo que ver como levantar los arrays
 	configuracion->SEM_MAX = list_create();
 
 	int i=0,j=0,k=0;
+	while(aux_sem_ids[k] != NULL){
+		list_add(configuracion->SEM_IDS,string_duplicate(aux_sem_ids[k]));
+		semaforo_t* semaforo = malloc(sizeof(semaforo_t));
+		semaforo->colaDeBloqueo = list_create();
+		semaforo->idNumerico = k;
+		list_add(listaDeSemaforos, semaforo);
+		k++;
+	}
+
 	while(aux_sem_init[i] != NULL){
+		_Bool buscarSemaforoPorId(semaforo_t* _sem){
+			return _sem->idNumerico == i;
+		}
+
+		semaforo_t* sem = list_find(listaDeSemaforos,(void*)buscarSemaforoPorId);
+		sem->valorInicial = atoi(aux_sem_init[i]);
 		list_add(configuracion->SEM_INIT,(void*)atoi(aux_sem_init[i]));
 		i++;
 	}
+
 	while(aux_sem_max[j] != NULL){
+		_Bool buscarSemaforoPorId(semaforo_t* _sem){
+			return _sem->idNumerico == j;
+		}
+
+		semaforo_t* sem = list_find(listaDeSemaforos,(void*)buscarSemaforoPorId);
+		sem->valorMaximo = atoi(aux_sem_init[j]);
 		list_add(configuracion->SEM_MAX,(void*)atoi(aux_sem_max[j]));
 		j++;
 	}
-	while(aux_sem_ids[k] != NULL){
-		list_add(configuracion->SEM_IDS,string_duplicate(aux_sem_ids[k]));
-		k++;
-	}
+
 
 	//Imprimo las variables
 //	log_info(logg, "Puerto de escucha: %d",configuracion->LISTEN_PORT);
@@ -168,6 +114,8 @@ void inicializarSemaforos(){
 	sem_init(sem_mutConfig, 0, 1);
 	sem_init(mut_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
 	sem_init(mut_numeroDePrograma, 0, 1);
+	sem_init(mut_listaDeSemaforos, 0, 1);
+	sem_init(mut_blocked, 0, 1);
 
 }
 
@@ -180,6 +128,7 @@ void inicializarEstadosComunes(){
 void inicializarOtrasListas(){
 
 	listaDeProgramas = list_create();
+	listaDeSemaforos = list_create();
 
 }
 
@@ -248,8 +197,11 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						sacarDeReady(_tcb,colaDeReady);
 					}
 				}
+
 				int resultado = 0;
+
 				send(cliente,&resultado,4,0);
+
 				break;
 			case SCHEDULE_NEXT:;
 				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
@@ -312,10 +264,72 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				//lo que tenga que hacer para suse_close
 				break;
 			case WAIT:
-				//lo que tenga que hacer para suse_wait
+				uint32_t tamanioPaquete;
+				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
+				void* paquete = malloc(tamanioPaquete);
+				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
+				suse_wait_t* wait = deserializar_suse_wait(paquete);
+
+				_Bool buscarSemaforoPorId(semaforo_t* sem){
+					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
+				}
+
+				semaforo_t* sem = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+
+				if(sem->valorInicial == 0){
+					sem_wait(&mut_blocked);
+						list_add(estadoBlocked, excec);
+					sem_post(&mut_blocked);
+					list_add(sem->colaDeBloqueo, excec);
+					excec = NULL;
+				}else{
+					sem->valorInicial--;
+				}
+
+				int resultado = 0;
+				send(cliente,&resultado,4,0);
 				break;
+
 			case SIGNAL:
-				//lo que tenga que hacer para suse_signal
+				uint32_t tamanioPaquete;
+				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
+				void* paquete = malloc(tamanioPaquete);
+				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
+				suse_signal_t* signal = deserializar_suse_signal(paquete);
+
+				_Bool buscarSemaforoPorId(semaforo_t* sem){
+					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
+				}
+
+				semaforo_t* sem = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+
+				if(sem->valorInicial > 0){
+					sem->valorInicial++;
+				}else{
+					sem->valorInicial++;
+
+					if(!list_is_empty(sem->colaDeBloqueo)){
+
+						_Bool buscar_tcb_por_pid(tcb* tcb_lista){
+							return tcb_lista->p_id == pid;
+						}
+
+						tcb* ultParaMover = list_find(sem->colaDeBloqueo, (void*)buscar_tcb_por_pid);
+
+						if(ultParaMover != NULL){
+
+							_Bool buscar_tcb(tcb* _tcb){
+								return _tcb->t_id == ultParaMover->t_id && _tcb->p_id == ultParaMover->p_id;
+							}
+							sem_wait(mut_blocked);
+								list_remove_by_condition(estadoBlocked, buscar_tcb);
+							sem_post(mut_blocked);
+							list_add(colaDeReady, ultParaMover);
+
+						}
+					}
+				}
+
 				break;
 		}
 	}
@@ -374,6 +388,7 @@ pcb* buscarProcesoEnListaDeProcesos(int pid){
 	}
 	return list_find(listaDeProgramas,(void*)buscar_pid);
 }
+
 void sacarDeNew(tcb* _tcb){
 	_Bool buscar_tcb(tcb* tcb_lista){
 		return tcb_lista->t_id == _tcb->t_id && tcb_lista->p_id == _tcb->p_id;
@@ -415,24 +430,6 @@ suse_wait_t* crear_suse_wait(int tid, char* id_semaforo){
 	return swt;
 }
 
-void* serializar_suse_wait(suse_wait_t* swt){
-	int bytes = sizeof(uint32_t)*2+ swt->size_id + sizeof(uint32_t)*2;
-	//2 int de adentro de swt y 2 int de comando y tamanio
-	int comando = WAIT;
-	int puntero = 0;
-	void* magic = malloc(bytes);
-	memcpy(magic+puntero,&comando,sizeof(uint32_t));
-	puntero += sizeof(uint32_t);
-	memcpy(magic+puntero,&bytes,sizeof(uint32_t));
-	puntero += sizeof(uint32_t);
-	memcpy(magic+puntero,&swt->tid,sizeof(uint32_t));
-	puntero += sizeof(uint32_t);
-	memcpy(magic+puntero,&swt->size_id,sizeof(uint32_t));
-	puntero += sizeof(uint32_t);
-	memcpy(magic+puntero,swt->id_semaforo,swt->size_id);
-	puntero += swt->size_id;
-	return magic;
-}
 suse_wait_t* deserializar_suse_wait(void* magic){
 	suse_wait_t* mmt = malloc(sizeof(suse_wait_t));
 	uint32_t puntero = 0;
@@ -445,6 +442,7 @@ suse_wait_t* deserializar_suse_wait(void* magic){
 	puntero+=mmt->size_id;
 	return mmt;
 }
+
 void suse_wait_destroy(suse_wait_t* swt){
 	free(swt->id_semaforo);
 	free(swt);
@@ -457,6 +455,7 @@ suse_signal_t* crear_suse_signal(int tid, char* id_semaforo){
 	sst->id_semaforo = string_duplicate(id_semaforo);
 	return sst;
 }
+
 void* serializar_suse_signal(suse_signal_t* swt){
 	int bytes = sizeof(uint32_t)*2+ swt->size_id + sizeof(uint32_t)*2;
 	//2 int de adentro de swt y 2 int de comando y tamanio
@@ -475,6 +474,7 @@ void* serializar_suse_signal(suse_signal_t* swt){
 	puntero += swt->size_id;
 	return magic;
 }
+
 suse_signal_t* deserializar_suse_signal(void* magic){
 	suse_signal_t* mmt = malloc(sizeof(suse_signal_t));
 	uint32_t puntero = 0;
@@ -487,6 +487,7 @@ suse_signal_t* deserializar_suse_signal(void* magic){
 	puntero+=mmt->size_id;
 	return mmt;
 }
+
 void suse_signal_destroy(suse_signal_t* swt){
 	free(swt->id_semaforo);
 	free(swt);
