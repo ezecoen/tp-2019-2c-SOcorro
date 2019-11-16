@@ -25,6 +25,7 @@ typedef struct{
 	double estimacion; //La inicial siempre es 0
 	double estimacionAnterior;
 	double realAnterior;
+	t_list* tidsEsperando;
 }tcb;
 
 typedef struct{

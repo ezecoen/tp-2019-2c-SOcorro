@@ -226,10 +226,10 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	int operacion;
 	int pid,tid;
 	t_list* colaDeReady;
-	tcb* excec;
+	tcb* exec;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
-			case INIT://recive elpid
+			case INIT://recive el pid
 				//se hace 1 vez por proceso
 				recv(cliente,&pid,4,0);
 				crearPCB(pid);
@@ -243,8 +243,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					list_add(colaDeReady,_tcb);
 					//me fijo si no hay nadie en exec, si esta vacia, me meto
 					sacarDeNew(_tcb);
-					if(excec == NULL){
-						excec = _tcb;
+					if(exec == NULL){
+						exec = _tcb;
 						sacarDeReady(_tcb,colaDeReady);
 					}
 				}
@@ -255,17 +255,58 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
 					return tcb1->estimacion < tcb2->estimacion;
 				}
-				actualizarEstimacion(excec);
+				//si no hay nadie en ready, sigue ejecutando
+				if(list_is_empty(colaDeReady)){
+					send(cliente,&exec->t_id,4,0);
+					actualizarEstimacion(exec,timestamp());
+					break;
+				}
+				//traigo el proximo a ejecutar
 				list_sort(colaDeReady,(void*)ordenamientoSjf);
 				tcb* tcbAEjecutar = list_get(colaDeReady,0);
-				excec = tcbAEjecutar;
+				tcb* tcbAux = exec;
+				uint64_t tiempoAux;
+				//pongo al nuevo en exec y lo saco de ready
+				exec = tcbAEjecutar;
+				tiempoAux = timestamp();
+				exec->tiempoDeInicio = tiempoAux;
 				sacarDeReady(tcbAEjecutar,colaDeReady);
 				send(cliente,&tcbAEjecutar->t_id,4,0);
+				//el q estaba en exec lo devuelvo a ready
+				list_add(colaDeReady,tcbAux);
+				//se actualiza el estimador del que salio de exec
+				actualizarEstimacion(tcbAux,tiempoAux);
+
 				break;
-			case JOIN:;
+			case JOIN:
 				int tid_para_join;
+				_Bool buscarTid(tcb* _tcb){
+					return _tcb->t_id == tid_para_join;
+				}
 				recv(cliente,&tid_para_join,4,0);
 				//tid actual se bloquea esperando a que termine tid exec->tid
+				//hay que buscar a tid_para_join y ponerle en su lista el tid actual
+				tcb* tcb_para_join = list_find(estadoNew,(void*)buscarTid);
+				if(tcb_para_join == NULL){
+					tcb_para_join = list_find(colaDeReady,(void*)buscarTid);
+					if(tcb_para_join == NULL){
+						tcb_para_join = list_find(estadoBlocked,(void*)buscarTid);
+						if(tcb_para_join == NULL){
+							//no hay que bloquear al tid actual
+							int resultado = 0;
+							send(cliente,&resultado,4,0);
+							break;
+						}
+					}
+				}
+				//tengo que agregarle a tcb_para_join->lista de tid esperandolo, el tid actual
+				list_add(tcb_para_join->tidsEsperando,exec->t_id);
+				//bloqueo al tid actual
+				list_add(estadoBlocked,exec);
+				//actualizo la estimacion
+				actualizarEstimacion(exec,timestamp());
+				exec = NULL;
+
 				break;
 			case CLOSE:
 				//lo que tenga que hacer para suse_close
@@ -314,6 +355,8 @@ tcb* crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero
 	tcb->estimacion = 0; //De entrada siempre es 0
 	tcb->p_id = pid;
 	tcb->t_id = tid;
+	tcb->estimacionAnterior = 0;
+	tcb->realAnterior = 0;
 
 	pcb* procesoPadre = buscarProcesoEnListaDeProcesos(pid);
 
@@ -347,8 +390,12 @@ void sacarDeReady(tcb* _tcb,t_list* colaReady){
 	list_remove_by_condition(colaReady,(void*)buscar_tcb);
 }
 
-void actualizarEstimacion(tcb* _tcb){
-
+void actualizarEstimacion(tcb* _tcb,uint64_t tiempoSalida){
+	//alfa*raf ant + (1-alfa)*est ant
+	_tcb->realAnterior = tiempoSalida -_tcb->tiempoDeInicio;//en milisegundos
+	_tcb->estimacionAnterior = _tcb->estimacion;
+	_tcb->estimacion = configuracion->ALPHA_SJF * _tcb->realAnterior +
+			(1-configuracion->ALPHA_SJF) * _tcb->estimacionAnterior;
 }
 
 uint64_t timestamp(){
