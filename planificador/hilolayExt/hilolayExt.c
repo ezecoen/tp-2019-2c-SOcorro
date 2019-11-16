@@ -34,13 +34,24 @@ int suse_join(int tid){
 int suse_close(int asd){
 	return 0;
 }
-int suse_wait(int asd1, char *asd2){
-	return 0;
-}
-int suse_signal(int asd1, char *asd2){
-	return 0;
+
+int suse_wait(int tid, char *nombreSemaforo){
+
+	suse_wait_t* wait = crear_suse_wait(tid, nombreSemaforo);
+	void* paquete = serializar_suse_wait(wait);
+	int tamanioPaquete = sizeof(suse_wait_t);
+	send(socket_suse,paquete,tamanioPaquete,0);
+	int resultado;
+	recv(socket_suse,&resultado,4,0);
+
+	return resultado;
 }
 
+int suse_signal(int asd1, char *asd2){
+	int op = SIGNAL;
+
+	return 0;
+}
 
 
 void hilolay_init(){
@@ -70,6 +81,7 @@ void hilolay_init(){
 	};
 	init_internal(&ops);
 }
+
 uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	struct sockaddr_in direccionServidor;
 	direccionServidor.sin_family = AF_INET;
@@ -83,6 +95,7 @@ uint32_t conectar_socket_a(char* ip, uint32_t puerto){
 	}
 	return cliente;
 }
+
 s_config* leer_config(char* path){
 	if(config_levantada){
 		return configuracion;
@@ -124,18 +137,8 @@ void* serializar_suse_wait(suse_wait_t* swt){
 	puntero += swt->size_id;
 	return magic;
 }
-suse_wait_t* deserializar_suse_wait(void* magic){
-	suse_wait_t* mmt = malloc(sizeof(suse_wait_t));
-	uint32_t puntero = 0;
-	memcpy(&mmt->tid,magic+puntero,sizeof(uint32_t));
-	puntero+=sizeof(uint32_t);
-	memcpy(&mmt->size_id,magic+puntero,sizeof(uint32_t));
-	puntero+=sizeof(uint32_t);
-	mmt->id_semaforo = malloc(mmt->size_id);
-	memcpy(mmt->id_semaforo,magic+puntero,mmt->size_id);
-	puntero+=mmt->size_id;
-	return mmt;
-}
+
+
 void suse_wait_destroy(suse_wait_t* swt){
 	free(swt->id_semaforo);
 	free(swt);
@@ -148,6 +151,7 @@ suse_signal_t* crear_suse_signal(int tid, char* id_semaforo){
 	sst->id_semaforo = string_duplicate(id_semaforo);
 	return sst;
 }
+
 void* serializar_suse_signal(suse_signal_t* swt){
 	int bytes = sizeof(uint32_t)*2+ swt->size_id + sizeof(uint32_t)*2;
 	//2 int de adentro de swt y 2 int de comando y tamanio
@@ -166,6 +170,7 @@ void* serializar_suse_signal(suse_signal_t* swt){
 	puntero += swt->size_id;
 	return magic;
 }
+
 suse_signal_t* deserializar_suse_signal(void* magic){
 	suse_signal_t* mmt = malloc(sizeof(suse_signal_t));
 	uint32_t puntero = 0;
@@ -178,6 +183,7 @@ suse_signal_t* deserializar_suse_signal(void* magic){
 	puntero+=mmt->size_id;
 	return mmt;
 }
+
 void suse_signal_destroy(suse_signal_t* swt){
 	free(swt->id_semaforo);
 	free(swt);
