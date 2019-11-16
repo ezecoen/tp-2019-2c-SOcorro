@@ -37,20 +37,43 @@ int suse_close(int asd){
 
 int suse_wait(int tid, char *nombreSemaforo){
 
+	int op = WAIT;
+	void* paquetito = malloc(4+sizeof(suse_wait_t));
+	memcpy(paquetito,&op,4);
+
 	suse_wait_t* wait = crear_suse_wait(tid, nombreSemaforo);
-	void* paquete = serializar_suse_wait(wait);
+	void* paqueteWait = serializar_suse_wait(wait);
 	int tamanioPaquete = sizeof(suse_wait_t);
-	send(socket_suse,paquete,tamanioPaquete,0);
+
+	memcpy(paquetito,paqueteWait,tamanioPaquete);
+
+	send(socket_suse,paquetito,4+tamanioPaquete,0);
+
 	int resultado;
 	recv(socket_suse,&resultado,4,0);
 
 	return resultado;
 }
 
-int suse_signal(int asd1, char *asd2){
-	int op = SIGNAL;
+int suse_signal(int tid, char *nombreSemaforo){
 
-	return 0;
+	int op = SIGNAL;
+	void* paquetito = malloc(4+sizeof(suse_signal_t));
+	memcpy(paquetito,&op,4);
+
+	suse_signal_t* signal = crear_suse_signal(tid, nombreSemaforo);
+	void* paqueteSignal = serializar_suse_signal(signal);
+	int tamanioPaquete = sizeof(suse_signal_t);
+
+	memcpy(paquetito, paqueteSignal, 4+tamanioPaquete);
+
+	send(socket_suse, paquetito,4+tamanioPaquete,0);
+
+	int resultado;
+	recv(socket_suse,&resultado,4,0);
+
+	return resultado;
+
 }
 
 
