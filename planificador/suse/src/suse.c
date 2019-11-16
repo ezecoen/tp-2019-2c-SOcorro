@@ -176,6 +176,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	int pid,tid;
 	t_list* colaDeReady;
 	tcb* exec;
+	int resultado;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
 			case INIT://recive el pid
@@ -198,7 +199,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					}
 				}
 
-				int resultado = 0;
+				resultado = 0;
 
 				send(cliente,&resultado,4,0);
 
@@ -230,7 +231,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				actualizarEstimacion(tcbAux,tiempoAux);
 
 				break;
-			case JOIN:
+			case JOIN:;
 				int tid_para_join;
 				_Bool buscarTid(tcb* _tcb){
 					return _tcb->t_id == tid_para_join;
@@ -252,7 +253,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					}
 				}
 				//tengo que agregarle a tcb_para_join->lista de tid esperandolo, el tid actual
-				list_add(tcb_para_join->tidsEsperando,exec->t_id);
+				list_add(tcb_para_join->tidsEsperando,(void*)exec->t_id);
 				//bloqueo al tid actual
 				list_add(estadoBlocked,exec);
 				//actualizo la estimacion
@@ -263,7 +264,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 			case CLOSE:
 				//lo que tenga que hacer para suse_close
 				break;
-			case WAIT:
+			case WAIT:;
 				uint32_t tamanioPaquete;
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				void* paquete = malloc(tamanioPaquete);
@@ -278,10 +279,10 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				if(sem->valorInicial == 0){
 					sem_wait(&mut_blocked);
-						list_add(estadoBlocked, excec);
+						list_add(estadoBlocked, exec);
 					sem_post(&mut_blocked);
-					list_add(sem->colaDeBloqueo, excec);
-					excec = NULL;
+					list_add(sem->colaDeBloqueo, exec);
+					exec = NULL;
 				}else{
 					sem->valorInicial--;
 				}
@@ -322,7 +323,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 								return _tcb->t_id == ultParaMover->t_id && _tcb->p_id == ultParaMover->p_id;
 							}
 							sem_wait(mut_blocked);
-								list_remove_by_condition(estadoBlocked, buscar_tcb);
+								list_remove_by_condition(estadoBlocked, (void*)buscar_tcb);
 							sem_post(mut_blocked);
 							list_add(colaDeReady, ultParaMover);
 

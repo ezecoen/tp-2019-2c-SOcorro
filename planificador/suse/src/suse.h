@@ -111,7 +111,9 @@ pcb* buscarProcesoEnListaDeProcesos(int pid);
 void sacarDeNew(tcb* _tcb);
 void sacarDeReady(tcb* _tcb,t_list* colaReady);
 uint64_t timestamp();
-void actualizarEstimacion(tcb* _tcb);
+void actualizarEstimacion(tcb* _tcb,uint64_t tiempoFin);
+suse_signal_t* deserializar_suse_signal(void* magic);
+suse_wait_t* deserializar_suse_wait(void* magic);
 
 //OTRAS FUNCIONES
 
