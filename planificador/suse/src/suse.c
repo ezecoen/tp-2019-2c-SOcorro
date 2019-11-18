@@ -5,35 +5,24 @@ int main(int argc, char **argv) {
 
 	iniciar_log(path_de_config);
 
-	leer_config(path_de_config);
+	inicializarOtrasListas();//Inicializo la lista de  programas ejecutando/a ejecutar
 
-	//Inicializo variables globales
-	numeroDePrograma = 0;
+	leer_config(path_de_config);
 
 	inicializarSemaforos();
 
 	inicializarEstadosComunes();//Inicializo las listas de New - Block - Exit
-
-	inicializarOtrasListas();//Inicializo la lista de  programas ejecutando/a ejecutar
 
 	int servidor = crearServidor();
 
 	while(1){
 		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
 	}
-//
-//	pthread_t hiloDePrueba;
-//	if(pthread_create(&hiloDePrueba, NULL, (void*)funcionDePrueba, NULL) != 0){
-//		log_error(logg, "Erroe creando el hilo de prueba");
-//	}
-
-//	pthread_detach(hiloDePrueba);
-
-//	while(1){};
 
 	return 0;
 
 }
+
 
 
 //FUNCIONES PARA INICIALIZAR COSAS
@@ -59,6 +48,7 @@ p_config* leer_config(char* path){
 		semaforo_t* semaforo = malloc(sizeof(semaforo_t));
 		semaforo->colaDeBloqueo = list_create();
 		semaforo->idNumerico = k;
+		semaforo->id_semaforo = string_duplicate(aux_sem_ids[k]);
 		list_add(listaDeSemaforos, semaforo);
 		k++;
 	}
@@ -80,7 +70,7 @@ p_config* leer_config(char* path){
 		}
 
 		semaforo_t* sem = list_find(listaDeSemaforos,(void*)buscarSemaforoPorId);
-		sem->valorMaximo = atoi(aux_sem_init[j]);
+		sem->valorMaximo = atoi(aux_sem_max[j]);
 		list_add(configuracion->SEM_MAX,(void*)atoi(aux_sem_max[j]));
 		j++;
 	}
@@ -110,12 +100,12 @@ void iniciar_log(char* path){
 
 void inicializarSemaforos(){
 
-	sem_init(sem_mutNew, 0, 1);
-	sem_init(sem_mutConfig, 0, 1);
-	sem_init(mut_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
-	sem_init(mut_numeroDePrograma, 0, 1);
-	sem_init(mut_listaDeSemaforos, 0, 1);
-	sem_init(mut_blocked, 0, 1);
+	sem_init(&mut_new,0,1);
+	sem_init(&sem_mutConfig,0,1);
+	sem_init(&mut_multiprogramacion,0,configuracion->MAX_MULTIPROG);
+	sem_init(&mut_listaDeSemaforos,0,1);
+	sem_init(&mut_blocked,0,1);
+	sem_init(&mut_exit,0,1);
 
 }
 
@@ -177,9 +167,10 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	t_list* colaDeReady;
 	tcb* exec;
 	int resultado;
+	uint32_t tamanioPaquete;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
-			case INIT://recive el pid
+			case INIT:;//recive el pid
 				//se hace 1 vez por proceso
 				recv(cliente,&pid,4,0);
 				crearPCB(pid);
@@ -261,11 +252,43 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				exec = NULL;
 
 				break;
-			case CLOSE:
-				//lo que tenga que hacer para suse_close
+			case CLOSE:;
+				int tid_para_close;
+				recv(cliente,&tid_para_close,4,0);
+
+				_Bool buscarTCB(tcb* _tcb){
+					return _tcb->p_id == pid && _tcb->t_id == tid_para_close;
+				}
+
+				if(exec->t_id == tid_para_close){
+					sem_wait(&mut_exit);
+						list_add(estadoExit, exec);
+					sem_post(&mut_exit);
+
+					if(!list_is_empty(exec->tidsEsperando)){
+						void moverTcbAReady(int tid){
+
+							_Bool buscarTCBporTID(tcb* __tcb){
+								return __tcb->p_id == pid && __tcb->t_id == tid;
+							}
+							sem_wait(&mut_blocked);
+								tcb* tcbAReady = list_remove_by_condition(estadoBlocked, (void*)buscarTCBporTID);
+							sem_post(&mut_blocked);
+							list_add(colaDeReady, tcbAReady);
+						}
+						list_iterate(exec->tidsEsperando, (void*)moverTcbAReady);
+						list_clean(exec->tidsEsperando);
+					}
+					exec = NULL;
+					multiprogramacion++;
+				}
+
+				resultado = 0;
+
+				send(cliente,&resultado,4,0);
+
 				break;
 			case WAIT:;
-				uint32_t tamanioPaquete;
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				void* paquete = malloc(tamanioPaquete);
 				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
@@ -275,56 +298,59 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
 				}
 
-				semaforo_t* sem = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+				semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
 
-				if(sem->valorInicial == 0){
+				if(semWait->valorInicial == 0){
 					sem_wait(&mut_blocked);
 						list_add(estadoBlocked, exec);
 					sem_post(&mut_blocked);
-					list_add(sem->colaDeBloqueo, exec);
+					list_add(semWait->colaDeBloqueo, exec);
+					//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
 					exec = NULL;
 				}else{
-					sem->valorInicial--;
+					semWait->valorInicial--;
 				}
 
-				int resultado = 0;
+				resultado = 0;
 				send(cliente,&resultado,4,0);
 				break;
 
 			case SIGNAL:
-				uint32_t tamanioPaquete;
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
-				void* paquete = malloc(tamanioPaquete);
-				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
-				suse_signal_t* signal = deserializar_suse_signal(paquete);
+				void* paqueteSignal = malloc(tamanioPaquete);
+				recv(cliente, &paqueteSignal, tamanioPaquete,MSG_WAITALL);
+				suse_signal_t* signal = deserializar_suse_signal(paqueteSignal);
 
-				_Bool buscarSemaforoPorId(semaforo_t* sem){
-					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
+				_Bool buscarSemaforoPorIdSignal(semaforo_t* sem){
+					return strcmp(sem->id_semaforo, signal->id_semaforo) == 0;
 				}
 
-				semaforo_t* sem = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+				semaforo_t* semSignal = list_find(listaDeSemaforos, (void*)buscarSemaforoPorIdSignal);
 
-				if(sem->valorInicial > 0){
-					sem->valorInicial++;
+				if(semSignal->valorInicial > 0){
+					if(semSignal->valorInicial < semSignal->valorMaximo){
+						semSignal->valorInicial++;
+					}
 				}else{
-					sem->valorInicial++;
-
-					if(!list_is_empty(sem->colaDeBloqueo)){
+					if(semSignal->valorInicial < semSignal->valorMaximo){
+						semSignal->valorInicial++;
+					}
+					if(!list_is_empty(semSignal->colaDeBloqueo)){
 
 						_Bool buscar_tcb_por_pid(tcb* tcb_lista){
 							return tcb_lista->p_id == pid;
-						}
+						};
 
-						tcb* ultParaMover = list_find(sem->colaDeBloqueo, (void*)buscar_tcb_por_pid);
+						tcb* ultParaMover = list_find(semSignal->colaDeBloqueo, (void*)buscar_tcb_por_pid);
 
 						if(ultParaMover != NULL){
 
 							_Bool buscar_tcb(tcb* _tcb){
 								return _tcb->t_id == ultParaMover->t_id && _tcb->p_id == ultParaMover->p_id;
 							}
-							sem_wait(mut_blocked);
-								list_remove_by_condition(estadoBlocked, (void*)buscar_tcb);
-							sem_post(mut_blocked);
+							sem_wait(&mut_blocked);
+								list_remove_by_condition(estadoBlocked,(void*)buscar_tcb);
+							sem_post(&mut_blocked);
 							list_add(colaDeReady, ultParaMover);
 
 						}
@@ -394,9 +420,9 @@ void sacarDeNew(tcb* _tcb){
 	_Bool buscar_tcb(tcb* tcb_lista){
 		return tcb_lista->t_id == _tcb->t_id && tcb_lista->p_id == _tcb->p_id;
 	}
-	sem_wait(sem_mutNew);
-	list_remove_by_condition(estadoNew,(void*)buscar_tcb);
-	sem_post(sem_mutNew);
+	sem_wait(&mut_new);
+		list_remove_by_condition(estadoNew,(void*)buscar_tcb);
+	sem_post(&mut_new);
 }
 
 void sacarDeReady(tcb* _tcb,t_list* colaReady){
@@ -421,6 +447,8 @@ uint64_t timestamp(){
 	uint64_t a = result;
 	return a;
 }
+
+
 
 //OTRAS FUNCIONES
 suse_wait_t* crear_suse_wait(int tid, char* id_semaforo){

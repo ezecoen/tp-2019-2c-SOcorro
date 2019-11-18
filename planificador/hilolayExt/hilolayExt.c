@@ -31,23 +31,30 @@ int suse_join(int tid){
 	return resultado;
 }
 
-int suse_close(int asd){
-	return 0;
+int suse_close(int tid){
+	int op = CLOSE;
+
+	void* paquete = malloc(8);
+	memcpy(paquete, &op, 4);
+	memcpy(paquete+4, &tid, 4);
+	send(socket_suse, paquete, 8, 0);
+
+	int resultado;
+
+	recv(socket_suse, &resultado, 4, 0);
+
+	return resultado;
 }
 
 int suse_wait(int tid, char *nombreSemaforo){
 
-	int op = WAIT;
-	void* paquetito = malloc(4+sizeof(suse_wait_t));
-	memcpy(paquetito,&op,4);
-
 	suse_wait_t* wait = crear_suse_wait(tid, nombreSemaforo);
 	void* paqueteWait = serializar_suse_wait(wait);
-	int tamanioPaquete = sizeof(suse_wait_t);
+	int tamanio;
 
-	memcpy(paquetito,paqueteWait,tamanioPaquete);
+	memcpy(tamanio,paqueteWait+4,4);
 
-	send(socket_suse,paquetito,4+tamanioPaquete,0);
+	send(socket_suse,paqueteWait,tamanio,0);
 
 	int resultado;
 	recv(socket_suse,&resultado,4,0);
@@ -57,17 +64,13 @@ int suse_wait(int tid, char *nombreSemaforo){
 
 int suse_signal(int tid, char *nombreSemaforo){
 
-	int op = SIGNAL;
-	void* paquetito = malloc(4+sizeof(suse_signal_t));
-	memcpy(paquetito,&op,4);
-
 	suse_signal_t* signal = crear_suse_signal(tid, nombreSemaforo);
 	void* paqueteSignal = serializar_suse_signal(signal);
-	int tamanioPaquete = sizeof(suse_signal_t);
+	int tamanioPaquete;
 
-	memcpy(paquetito, paqueteSignal, 4+tamanioPaquete);
+	memcpy(tamanioPaquete, paqueteSignal+4, 4);
 
-	send(socket_suse, paquetito,4+tamanioPaquete,0);
+	send(socket_suse, paqueteSignal,tamanioPaquete,0);
 
 	int resultado;
 	recv(socket_suse,&resultado,4,0);
@@ -75,7 +78,6 @@ int suse_signal(int tid, char *nombreSemaforo){
 	return resultado;
 
 }
-
 
 void hilolay_init(){
 	leer_config("/home/utnso/tp-2019-2c-SOcorro/planificador/hilolay/Debug/hilolay.config");
@@ -160,7 +162,6 @@ void* serializar_suse_wait(suse_wait_t* swt){
 	puntero += swt->size_id;
 	return magic;
 }
-
 
 void suse_wait_destroy(suse_wait_t* swt){
 	free(swt->id_semaforo);

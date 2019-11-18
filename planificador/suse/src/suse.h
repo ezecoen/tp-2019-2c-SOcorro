@@ -126,18 +126,18 @@ t_list* listaDeSemaforos;
 t_log* logg;
 t_config* g_config;
 p_config* configuracion;
-uint32_t numeroDePrograma; //vendria a ser como el "pid" de cada programa/proceso
 uint32_t multiprogramacion;
 
 
 
 /* SEMAFOROS ------------------------------------------------------------------------------------------------------*/
-sem_t* sem_mutConfig;
-sem_t* sem_mutNew;
-sem_t* mut_multiprogramacion;
-sem_t* mut_numeroDePrograma;
-sem_t* mut_listaDeSemaforos;
-sem_t* mut_blocked;
+sem_t sem_mutConfig;
+sem_t mut_new;
+sem_t mut_multiprogramacion;
+sem_t mut_numeroDePrograma;
+sem_t mut_listaDeSemaforos;
+sem_t mut_blocked;
+sem_t mut_exit;
 
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/
