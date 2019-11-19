@@ -1,6 +1,5 @@
 #include "muse.h"
 
-#include <stdbool.h>
 int main(int argc, char **argv) {
 //	INICIANDO
 	char* path_de_config = string_duplicate(argv[1]);
@@ -659,24 +658,34 @@ segmento* buscar_segmento_con_paginas_liberadas(int tamanio, t_list* tabla_segme
 		}
 		//cambio
 		if(list_is_empty(seg->info_heaps))
-		{// si esta vacio, como que tengo que armarlo de vuelta ...
-			heap_lista* heap_lista_inicial =  malloc(sizeof(heap_lista));
-			heap_lista_inicial->direccion_heap_metadata=0;
-			heap_lista_inicial->is_free=true;
-			heap_lista_inicial->espacio=configuracion->tam_pag-sizeof(heap_metadata);
-			heap_lista_inicial->indice=0;
-			//y deberia agregar al menos una pagina
-			pagina* pag_inicial = malloc(sizeof(pagina));
-			pag_inicial->num_pagina=0;
-			pag_inicial->presencia = true;
-			pag_inicial->bit_marco = asignar_marco_nuevo();
-			pag_inicial->bit_swap = NULL;
-			list_add(seg->paginas,pag_inicial);
-			list_add(seg->info_heaps,heap_lista_inicial);
-			heap_metadata* heap_inicial = malloc(sizeof(heap_metadata));
-			heap_inicial->is_free=true;
-			heap_inicial->size=configuracion->tam_pag-sizeof(heap_metadata);
-			reemplazar_heap_en_memoria(heap_lista_inicial,seg,heap_inicial);
+		{
+			// si esta vacio, como que tengo que armarlo de vuelta ...
+			pthread_mutex_lock(&mutex_lugar_disponible);
+			if(lugar_disponible>=configuracion->tam_pag){
+				lugar_disponible -= configuracion->tam_pag;
+				pthread_mutex_unlock(&mutex_lugar_disponible);
+				heap_lista* heap_lista_inicial =  malloc(sizeof(heap_lista));
+				heap_lista_inicial->direccion_heap_metadata=0;
+				heap_lista_inicial->is_free=true;
+				heap_lista_inicial->espacio=configuracion->tam_pag-sizeof(heap_metadata);
+				heap_lista_inicial->indice=0;
+				//y deberia agregar al menos una pagina
+				pagina* pag_inicial = malloc(sizeof(pagina));
+				pag_inicial->num_pagina=0;
+				pag_inicial->presencia = true;
+				pag_inicial->bit_marco = asignar_marco_nuevo();
+				pag_inicial->bit_swap = NULL;
+				list_add(seg->paginas,pag_inicial);
+				list_add(seg->info_heaps,heap_lista_inicial);
+				heap_metadata* heap_inicial = malloc(sizeof(heap_metadata));
+				heap_inicial->is_free=true;
+				heap_inicial->size=configuracion->tam_pag-sizeof(heap_metadata);
+				reemplazar_heap_en_memoria(heap_lista_inicial,seg,heap_inicial);
+			}
+			else{
+				pthread_mutex_unlock(&mutex_lugar_disponible);
+				return false;
+			}
 		}
 		heap_lista* heap_lista_ultimo = list_last_element(seg->info_heaps);
 		uint32_t paginas_necesarias = paginas_necesarias_para_tamanio(tamanio+sizeof(heap_metadata)-heap_lista_ultimo->espacio);
@@ -1038,14 +1047,16 @@ void* muse_get(muse_get_t* datos){
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
 	//si copia demas tira segm fault en libmuse
-	if(segmento_buscado != NULL && segmento_buscado->tamanio >= datos->tamanio){
+	int pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
+	int offset_inicial = direccion_al_segmento % configuracion->tam_pag;
+	if(segmento_buscado != NULL && segmento_buscado->tamanio-direccion_al_segmento >= datos->tamanio
+			&& pagina_inicial*configuracion->tam_pag+offset_inicial+datos->tamanio
+			<= segmento_buscado->tamanio){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
 		int direccion_final = direccion_al_segmento+datos->tamanio;
 		int offset_final = direccion_final % configuracion->tam_pag;
-		int offset_inicial = direccion_al_segmento % configuracion->tam_pag;
 		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
 		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
-		int pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
 		resultado_get = malloc(datos->tamanio);
 		void* super_void = malloc(tamanio_de_todas_las_paginas);
 		int puntero = 0;
@@ -1054,7 +1065,7 @@ void* muse_get(muse_get_t* datos){
 			//puede haber pags q nunca se levantaron (no estan en memoria)
 			paginas_de_map_en_memoria(direccion_al_segmento,datos->tamanio,segmento_buscado);
 		}
-		for(int i = 0;i<cantidad_de_paginas && i<segmento_buscado->paginas->elements_count;i++,puntero+=configuracion->tam_pag){
+		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
 			pag->bit_marco->bit_uso = true;
 			void* puntero_a_marco = obtener_puntero_a_marco(pag);
@@ -1084,6 +1095,7 @@ pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag) {
 }
 void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_buscado){
 	int pagina_inicial = direccion / configuracion->tam_pag;
+	int offset_inicial = direccion % configuracion->tam_pag;
 	int pagina_final = (direccion+tamanio) / configuracion->tam_pag;
 
 	_Bool ver_si_hay_pags_no_cargadas(pagina* _pag){
@@ -1094,10 +1106,12 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 		}
 		return false;
 	}
-
+	if(pagina_inicial*configuracion->tam_pag+offset_inicial+tamanio > segmento_buscado->tamanio){
+		//me esta pidiendo mas que lo que tiene el segmento
+		return;
+	}
 	if(list_any_satisfy(segmento_buscado->paginas,(void*)ver_si_hay_pags_no_cargadas)){
 		//si se cumple, hay pags q no estan cargadas en memoria
-		int offset_inicial = direccion % configuracion->tam_pag;
 		int cantidad_de_paginas = pagina_final - pagina_inicial + 1;//xq empieza en 0
 		int bytes_a_leer = cantidad_de_paginas * configuracion->tam_pag;
 		int padding = bytes_a_leer-offset_inicial-tamanio;
@@ -1110,7 +1124,7 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 		fclose(archivo);
 		int puntero = pagina_inicial*configuracion->tam_pag;
 		//voy copiando las pags necesarias a los marcos en memoria
-		for(int i = pagina_inicial;i<=pagina_final && i<segmento_buscado->paginas->elements_count;i++,puntero += configuracion->tam_pag, bytes_a_leer-= configuracion->tam_pag){
+		for(int i = pagina_inicial;i<=pagina_final;i++,puntero += configuracion->tam_pag, bytes_a_leer-= configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,i);
 			if(pag->bit_marco==NULL && pag->bit_swap == NULL){
 				//hay q traerla a memoria
@@ -1176,7 +1190,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 		int offset_al_muse_alloc = direccion_al_segmento-heap_dst->direccion_heap_metadata-sizeof(heap_metadata);
 		if(offset_al_muse_alloc + datos->size_paquete > heap_dst->espacio) {
 			//va a pisar el heap_lista_siguiente
-			log_info(logg,"Generar un cpy en la direccion %i genera un conflico en el segmento %s",datos->direccion,datos->id);
+			log_info(logg,"Hacer un cpy en la direccion %i genera un conflicto en el segmento %s",datos->direccion,datos->id);
 			return -1;
 		}
 
@@ -1186,16 +1200,16 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 		void* marco = obtener_puntero_a_marco(pag);
 		pag->bit_marco->bit_uso = true;
 		pag->bit_marco->bit_modificado = true;
-		int cuanto_puedo_pegar = configuracion->tam_pag-(datos->direccion%configuracion->tam_pag);
+		int cuanto_puedo_pegar = configuracion->tam_pag-(direccion_al_segmento%configuracion->tam_pag);
 		//aca datos->direccion no tendria que ser direccion_al_segmento?!?!
 		if(cuanto_puedo_pegar <= datos->size_paquete){
 			//pego lo que pueda
-			memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,cuanto_puedo_pegar);
+			memcpy(marco+(direccion_al_segmento%configuracion->tam_pag),datos->paquete,cuanto_puedo_pegar);
 
 		}
 		else{
 			//pego el paquete completo
-			memcpy(marco+(datos->direccion%configuracion->tam_pag),datos->paquete,datos->size_paquete);
+			memcpy(marco+(direccion_al_segmento%configuracion->tam_pag),datos->paquete,datos->size_paquete);
 			log_info(logg,"Datos en segmento %d direccion %d fueron copiados con exito"
 					,segmento_buscado->num_segmento,datos->direccion);
 			return 0;
@@ -1235,11 +1249,11 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 	else{
 		//es mmapeado
 		//puede haber pags q nunca se levantaron (no estan en memoria)
-		paginas_de_map_en_memoria(datos->direccion,datos->size_paquete,segmento_buscado);
+		paginas_de_map_en_memoria(direccion_al_segmento,datos->size_paquete,segmento_buscado);
 
-		int numero_pagina_inicial = datos->direccion / configuracion->tam_pag;
-		int offset_pagina_inicial = datos->direccion % configuracion->tam_pag;
-		int numero_pagina_final = (datos->direccion+datos->size_paquete) / configuracion->tam_pag;
+		int numero_pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
+		int offset_pagina_inicial = direccion_al_segmento % configuracion->tam_pag;
+		int numero_pagina_final = (direccion_al_segmento+datos->size_paquete) / configuracion->tam_pag;
 		if(numero_pagina_inicial*configuracion->tam_pag+offset_pagina_inicial+datos->size_paquete
 				> segmento_buscado->tamanio){
 			return -1;
@@ -1289,7 +1303,7 @@ int muse_map(muse_map_t* datos){
 	int tamanio_paginas = redondear_double_arriba((double)datos->tamanio/configuracion->tam_pag)*configuracion->tam_pag;
 
 	pthread_mutex_lock(&mutex_lugar_disponible);
-	if(lugar_disponible >= datos->tamanio){
+	if(lugar_disponible >= tamanio_paginas){
 		lugar_disponible-= tamanio_paginas;
 		pthread_mutex_unlock(&mutex_lugar_disponible);
 		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
@@ -1495,9 +1509,10 @@ int muse_close(char* id_cliente){
 		metricas(prog->id_programa);
 		//hay que sacarlo de la lista
 		log_info(logg,"muse_close para %s",prog->id_programa);
-
+		pthread_mutex_lock(&mutex_tabla_de_programas);
 		list_remove_and_destroy_by_condition(tabla_de_programas,
 				(void*)esPrograma,(void*)destroy_programa);
+		pthread_mutex_unlock(&mutex_tabla_de_programas);
 	}
 	return 0;
 }
@@ -2229,9 +2244,7 @@ void destroy_programa(programa_t* prog){
 	// !! hay algo en el destroy que rompe el tema de pag -> bit
 	// como que igual antes removed el programa de la lista ??
 	list_destroy_and_destroy_elements(prog->tabla_de_segmentos,(void*)destroy_segmento);
-	pthread_mutex_lock(&mutex_tabla_de_programas);
 	list_remove_by_condition(tabla_de_programas,(void*)esPrograma);
-	pthread_mutex_unlock(&mutex_tabla_de_programas);
 }
 void destroy_segmento(segmento* seg)
 {
