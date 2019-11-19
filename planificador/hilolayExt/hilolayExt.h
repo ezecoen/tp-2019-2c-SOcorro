@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <hilolay/hilolay.h>
 #include <hilolay/alumnos.h>
 
 typedef struct s_config{
@@ -56,5 +57,10 @@ int suse_signal(int, char *);
 
 uint32_t conectar_socket_a(char* ip, uint32_t puerto);
 s_config* leer_config(char* path);
+
+suse_signal_t* crear_suse_signal(int tid, char* id_semaforo);
+void* serializar_suse_signal(suse_signal_t* swt);
+void* serializar_suse_wait(suse_wait_t* swt);
+suse_wait_t* crear_suse_wait(int tid, char* id_semaforo);
 
 #endif /* HILOLAYEXTENDED_H_ */

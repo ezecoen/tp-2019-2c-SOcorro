@@ -25,6 +25,7 @@ typedef struct{
 	double estimacion; //La inicial siempre es 0
 	double estimacionAnterior;
 	double realAnterior;
+	t_list* tidsEsperando;
 }tcb;
 
 typedef struct{
@@ -110,7 +111,9 @@ pcb* buscarProcesoEnListaDeProcesos(int pid);
 void sacarDeNew(tcb* _tcb);
 void sacarDeReady(tcb* _tcb,t_list* colaReady);
 uint64_t timestamp();
-void actualizarEstimacion(tcb* _tcb);
+void actualizarEstimacion(tcb* _tcb,uint64_t tiempoFin);
+suse_signal_t* deserializar_suse_signal(void* magic);
+suse_wait_t* deserializar_suse_wait(void* magic);
 
 //OTRAS FUNCIONES
 
@@ -123,18 +126,18 @@ t_list* listaDeSemaforos;
 t_log* logg;
 t_config* g_config;
 p_config* configuracion;
-uint32_t numeroDePrograma; //vendria a ser como el "pid" de cada programa/proceso
 uint32_t multiprogramacion;
 
 
 
 /* SEMAFOROS ------------------------------------------------------------------------------------------------------*/
-sem_t* sem_mutConfig;
-sem_t* sem_mutNew;
-sem_t* mut_multiprogramacion;
-sem_t* mut_numeroDePrograma;
-sem_t* mut_listaDeSemaforos;
-sem_t* mut_blocked;
+sem_t sem_mutConfig;
+sem_t mut_new;
+sem_t mut_multiprogramacion;
+sem_t mut_numeroDePrograma;
+sem_t mut_listaDeSemaforos;
+sem_t mut_blocked;
+sem_t mut_exit;
 
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/
