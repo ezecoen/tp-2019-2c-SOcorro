@@ -1418,10 +1418,10 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
 	}
 	_Bool esSegmento(segmento* seg){
 		if(seg->mmapeado){
-			return string_equals_ignore_case(seg->path_mapeo,path_mapeo);
+			return string_equals_ignore_case(seg->path_mapeo,path_mapeo) && seg->tamanio_mapeo == tam_mapeo;
 		}
 		return false;
-		}
+	}
 	//busco el mapeo
 	pthread_mutex_lock(&mutex_tabla_de_mapeo);
 	mapeo_t* mapeo_encontrado = list_find(tabla_de_mapeo,(void*)encontrar_mapeo);
