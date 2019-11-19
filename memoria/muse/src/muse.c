@@ -1433,10 +1433,6 @@ int muse_unmap(muse_unmap_t* datos){
 	if(segmento_buscado!=NULL){
 		if(segmento_buscado->mmapeado){
 			bajar_mapeo(segmento_buscado->path_mapeo,segmento_buscado->tamanio_mapeo,datos->id);
-			segmento_buscado->paginas = NULL;
-			segmento_buscado->info_heaps = NULL;
-			free(segmento_buscado->path_mapeo);
-			//elimino el segm pa siempre??
 			return 0;
 		}
 	}
@@ -1444,25 +1440,18 @@ int muse_unmap(muse_unmap_t* datos){
 	return -1;
 }
 void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
+
 	_Bool encontrar_mapeo(mapeo_t* _mapeo){
 		return _mapeo->tamanio == tam_mapeo && string_equals_ignore_case(_mapeo->path,path_mapeo);
 	}
-	void liberar_pags(pagina* pag){
-		if(pag->bit_marco != NULL){
-			pag->bit_marco->ocupado = false;
-			pag->bit_marco = NULL;
-		}
-		else if(pag->bit_swap != NULL){
-			pag->bit_swap->ocupado = false;
-		}
-		free(pag);
-	}
+
 	_Bool esPrograma(programa_t* prog){
 		return string_equals_ignore_case(prog->id_programa,id_programa);
 	}
 	_Bool esSegmento(segmento* seg){
 		if(seg->mmapeado){
-			return string_equals_ignore_case(seg->path_mapeo,path_mapeo);
+			mapeo_t* mapeo = list_find(tabla_de_mapeo,(void*)encontrar_mapeo);
+			return seg->tamanio_mapeo == mapeo->tamanio && string_equals_ignore_case(seg->path_mapeo,path_mapeo);
 		}
 		return false;
 		}
@@ -1479,7 +1468,7 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
 
 		if(mapeo_encontrado->contador==0){//si no quedan mas referenciandolo se elimina
 			//libero los bits de memoria
-			list_iterate(mapeo_encontrado->paginas,(void*)liberar_pags);
+			//list_iterate(mapeo_encontrado->paginas,(void*)liberar_pags);
 			//elimino el mapeo de la lista
 			list_remove_and_destroy_by_condition(tabla_de_mapeo,(void*)encontrar_mapeo,(void*)mapeo_destroy);
 		}
@@ -1488,7 +1477,7 @@ void bajar_mapeo(char* path_mapeo, int tam_mapeo, char* id_programa){
 }
 void mapeo_destroy(mapeo_t* _mapeo){
 	free(_mapeo->path);
-	list_destroy_and_destroy_elements(_mapeo->paginas,(void*)free);
+	list_destroy_and_destroy_elements(_mapeo->paginas,(void*)destroy_pagina);
 	free(_mapeo);
 }
 int muse_close(char* id_cliente){
@@ -2259,13 +2248,12 @@ void destroy_segmento(segmento* seg)
 void destroy_pagina(pagina* pag)
 {
 	//libero antes los marcos
-	if(pag->bit_marco!=NULL)
-	{
-		pag->bit_marco->ocupado=false;
+	if(pag->bit_marco != NULL){
+		pag->bit_marco->ocupado = false;
+		pag->bit_marco = NULL;
 	}
-	if(pag->bit_swap!=NULL)
-	{
-		pag->bit_swap->ocupado=false;
+	if(pag->bit_swap != NULL){
+		pag->bit_swap->ocupado = false;
 	}
 	free(pag);
 }
@@ -2447,7 +2435,7 @@ void destroy_mapeo(segmento* seg)
 {
 	_Bool esSegmentoEnMapeo (mapeo_t* mpt)
 	{
-		return string_equals_ignore_case(mpt->path,seg->path_mapeo);
+		return seg->tamanio_mapeo == mpt->tamanio && string_equals_ignore_case(mpt->path,seg->path_mapeo);
 
 	}
 	pthread_mutex_lock(&mutex_tabla_de_mapeo);
