@@ -131,7 +131,7 @@ int crearServidor(){
 
 	direccionServidor.sin_family = AF_INET;
 	direccionServidor.sin_addr.s_addr = INADDR_ANY;
-	direccionServidor.sin_port = htons(8080);
+	direccionServidor.sin_port = htons(configuracion->LISTEN_PORT);
 
 	int servidor = socket(AF_INET, SOCK_STREAM, 0);
 	//Esto es para que cuando haga ctrl+c y vuelvo a levantar el sv, no tenga problemas con el bind
@@ -144,7 +144,7 @@ int crearServidor(){
 		return 1;
 	}
 
-	log_info(logg, "Estoy escuchando en el puerto 8080");
+	log_info(logg, "Estoy escuchando en el puerto %d",configuracion->LISTEN_PORT);
 	listen(servidor,SOMAXCONN);
 	return servidor;
 }

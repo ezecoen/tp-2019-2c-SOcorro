@@ -11,6 +11,7 @@
 #include <sys/types.h>
 #include <commons/config.h>
 #include <commons/string.h>
+#include <hilolay/hilolay.h>
 #include <hilolay/alumnos.h>
 
 typedef struct s_config{

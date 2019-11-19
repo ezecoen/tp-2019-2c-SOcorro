@@ -52,7 +52,7 @@ int suse_wait(int tid, char *nombreSemaforo){
 	void* paqueteWait = serializar_suse_wait(wait);
 	int tamanio;
 
-	memcpy(tamanio,paqueteWait+4,4);
+	memcpy(&tamanio,paqueteWait+4,4);
 
 	send(socket_suse,paqueteWait,tamanio,0);
 
@@ -68,7 +68,7 @@ int suse_signal(int tid, char *nombreSemaforo){
 	void* paqueteSignal = serializar_suse_signal(signal);
 	int tamanioPaquete;
 
-	memcpy(tamanioPaquete, paqueteSignal+4, 4);
+	memcpy(&tamanioPaquete, paqueteSignal+4, 4);
 
 	send(socket_suse, paqueteSignal,tamanioPaquete,0);
 
@@ -80,7 +80,7 @@ int suse_signal(int tid, char *nombreSemaforo){
 }
 
 void hilolay_init(){
-	leer_config("/home/utnso/tp-2019-2c-SOcorro/planificador/hilolay/Debug/hilolay.config");
+	leer_config("/home/utnso/tp-2019-2c-SOcorro/planificador/hilolayExt/Debug/hilolayExt.config");
 	int sock = conectar_socket_a(configuracion->ip_suse,configuracion->puerto_suse);
 	if(sock > 0){
 		socket_suse = sock;
@@ -130,7 +130,7 @@ s_config* leer_config(char* path){
 
 	configuracion->puerto_suse = config_get_int_value(g_config,"PUERTO_SUSE");
 	configuracion->ip_suse = string_duplicate(config_get_string_value(g_config,"IP_SUSE"));
-	puts("config de hilolay levantada");
+	printf("IP = %s, PUERTO = %d\n",configuracion->ip_suse,configuracion->puerto_suse);
 
 	config_destroy(g_config);
 	return configuracion;
