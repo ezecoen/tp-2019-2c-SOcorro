@@ -424,8 +424,8 @@ int sac_rename(const char* old,const char* new){
 	void* _respuesta;
 	int error;
 	if(op == ERROR){
-//		recv(_socket,&error,4,0);
-		return -1;
+		recv(_socket,&error,4,0);
+		return -error;
 	}
 	else{
 		return 0;
