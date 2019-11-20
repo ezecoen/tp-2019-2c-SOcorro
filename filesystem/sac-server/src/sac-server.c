@@ -3,6 +3,11 @@
 
 int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
+	char* a = string_new();
+	char* b = string_new();
+	string_append(&a,"/a/file_1/");
+	string_append(&b,"/a/file_10");
+	bool c = string_starts_with(a,b);
 	es_virgen = 0;
 	init_semaforos();
 	if(argc != 2){
@@ -695,20 +700,24 @@ void atender_cliente(int cliente){
 				int new_father = dictionary_get(diccionario_de_path,new_pather);
 				dictionary_remove(diccionario_de_path,_rename->old);
 				dictionary_put(diccionario_de_path,_rename->new,key);
+				sem_post(&s_diccionario);
 				void cambiar_nombre(char* key,void* value){
-					bool a = string_equals_ignore_case(key,_rename->old);
+					bool a = string_starts_with(key,_rename->old);
 					if(a){
 						int _a = strlen(_rename->old);
 						char* lo_de_atras = string_substring_from(key,_a);
 						char* new_key = string_new();
 						string_append(&new_key,_rename->new);
 						string_append(&new_key,lo_de_atras);
+						sem_wait(&s_diccionario);
 						dictionary_put(diccionario_de_path,new_key,value);
 						dictionary_remove(diccionario_de_path,key);
+						sem_post(&s_diccionario);
 					}
 				}
-				dictionary_iterator(diccionario_de_path,cambiar_nombre);
-				sem_post(&s_diccionario);
+				if(__nodo->estado == 2){//es un directorio
+					dictionary_iterator(diccionario_de_path,cambiar_nombre);
+				}
 				if(new_father!=0){
 					__nodo->bloque_padre = new_father+1+tam_de_bitmap;
 				}else{
