@@ -3,11 +3,6 @@
 
 int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
-	char* a = string_new();
-	char* b = string_new();
-	string_append(&a,"/a/file_1/");
-	string_append(&b,"/a/file_10");
-	bool c = string_starts_with(a,b);
 	es_virgen = 0;
 	init_semaforos();
 	if(argc != 2){
@@ -690,9 +685,16 @@ void atender_cliente(int cliente){
 			char* new = dame_el_nombre(split,1);
 			char* new_pather = dame_path_padre(_rename->new);
 			nodo* __nodo = dame_el_nodo_de(_rename->old);
-			if(__nodo == -1){
-				int err = ERROR;
-				send(cliente,&err,4,0);
+			bool key_exist = dictionary_has_key(diccionario_de_path,_rename->new);
+			if(__nodo == -1 || key_exist){
+				if(key_exist){
+					void* error = armar_error(EEXIST);
+					send(cliente,error,8,0);
+					free(error);
+				}else{
+					int err = ERROR;
+					send(cliente,&err,4,0);
+				}
 			}else{
 				memcpy(__nodo->nombre_de_archivo,new,strlen(new)+1);
 				sem_wait(&s_diccionario);
