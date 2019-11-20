@@ -696,7 +696,7 @@ void atender_cliente(int cliente){
 				dictionary_remove(diccionario_de_path,_rename->old);
 				dictionary_put(diccionario_de_path,_rename->new,key);
 				void cambiar_nombre(char* key,void* value){
-					bool a = string_starts_with(key,_rename->old);
+					bool a = string_equals_ignore_case(key,_rename->old);
 					if(a){
 						int _a = strlen(_rename->old);
 						char* lo_de_atras = string_substring_from(key,_a);
