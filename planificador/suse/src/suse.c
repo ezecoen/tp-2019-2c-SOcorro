@@ -113,6 +113,7 @@ void inicializarEstadosComunes(){
 	estadoNew = list_create();
 	estadoBlocked = list_create();
 	estadoExit = list_create();
+	multiprogramacion = configuracion->MAX_MULTIPROG;
 }
 
 void inicializarOtrasListas(){
@@ -165,7 +166,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	int operacion;
 	int pid,tid;
 	t_list* colaDeReady;
-	tcb* exec;
+	tcb* exec = NULL;
 	int resultado;
 	uint32_t tamanioPaquete;
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
@@ -180,6 +181,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				recv(cliente,&tid,4,0);
 				tcb* _tcb = crearTCB(pid,tid);
 				if(multiprogramacion>0){
+					multiprogramacion--;
 					//pongo en ready y saco de new
 					list_add(colaDeReady,_tcb);
 					//me fijo si no hay nadie en exec, si esta vacia, me meto
@@ -201,9 +203,15 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				}
 				//si no hay nadie en ready, sigue ejecutando
 				if(list_is_empty(colaDeReady)){
-					send(cliente,&exec->t_id,4,0);
-					actualizarEstimacion(exec,timestamp());
-					break;
+					if(exec != NULL){
+						send(cliente,&exec->t_id,4,0);
+						actualizarEstimacion(exec,timestamp());
+						break;
+					}else{
+						int mensaje = -1;
+						send(cliente,&mensaje,4,0);
+						break;
+					}
 				}
 				//traigo el proximo a ejecutar
 				list_sort(colaDeReady,(void*)ordenamientoSjf);
@@ -383,32 +391,32 @@ int aceptarConexion(int servidor){
 //FUNCIONES PARA HACER LO QUE ME PIDA HILOLAY, O SEA, LA IMPLEMENTACION DE SUSE
 pcb* crearPCB(int pid){//Esto es mas para gestion interna, no tiene mucho que ver con el planificador
 
-	pcb* pcb = malloc(sizeof(pcb));
-	pcb->ejecutando = false; //Me dice si tiene algun hilo ejecutando
-	pcb->p_id = pid;
-	pcb->ults = list_create();//Lista de ults de este proceso
+	pcb* _pcb = malloc(sizeof(pcb));
+	_pcb->ejecutando = false; //Me dice si tiene algun hilo ejecutando
+	_pcb->p_id = pid;
+	_pcb->ults = list_create();//Lista de ults de este proceso
 
-	list_add(listaDeProgramas, pcb);
-	return pcb;
+	list_add(listaDeProgramas, _pcb);
+	return _pcb;
 }
 
 tcb* crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero como todavia nose que int lo dejo como un void
 
-	tcb* tcb = malloc(sizeof(tcb));
-	tcb->estimacion = 0; //De entrada siempre es 0
-	tcb->p_id = pid;
-	tcb->t_id = tid;
-	tcb->estimacionAnterior = 0;
-	tcb->realAnterior = 0;
+	tcb* _tcb = malloc(sizeof(tcb));
+	_tcb->estimacion = 0; //De entrada siempre es 0
+	_tcb->p_id = pid;
+	_tcb->t_id = tid;
+	_tcb->estimacionAnterior = 0;
+	_tcb->realAnterior = 0;
 
 	pcb* procesoPadre = buscarProcesoEnListaDeProcesos(pid);
 
-	list_add(procesoPadre->ults, tcb);
+	list_add(procesoPadre->ults, _tcb);
 
 	//pasa a cola de new
-	list_add(estadoNew,tcb);
+	list_add(estadoNew,_tcb);
 
-	return tcb;
+	return _tcb;
 }
 
 pcb* buscarProcesoEnListaDeProcesos(int pid){

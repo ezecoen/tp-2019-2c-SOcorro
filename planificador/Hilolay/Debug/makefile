@@ -8,7 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/subdir.mk
+-include hilolay/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -23,25 +23,21 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: pruebita
-
-dependents:
-	-cd /home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay/Debug && $(MAKE) all
+all: libHilolay.so
 
 # Tool invocations
-pruebita: $(OBJS) $(USER_OBJS) /home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay/Debug/libHilolay.so
+libHilolay.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay/Debug" -o "pruebita" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -shared -o "libHilolay.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) pruebita
+	-$(RM) $(LIBRARIES)$(OBJS)$(C_DEPS) libHilolay.so
 	-@echo ' '
 
 .PHONY: all clean dependents
-/home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay/Debug/libHilolay.so:
 
 -include ../makefile.targets

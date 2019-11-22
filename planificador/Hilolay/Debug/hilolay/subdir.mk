@@ -4,20 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/pruebita.c 
+../hilolay/hilolay_internal.c \
+../hilolay/implementaciones.c 
 
 OBJS += \
-./src/pruebita.o 
+./hilolay/hilolay_internal.o \
+./hilolay/implementaciones.o 
 
 C_DEPS += \
-./src/pruebita.d 
+./hilolay/hilolay_internal.d \
+./hilolay/implementaciones.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.c
+hilolay/%.o: ../hilolay/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -I"/home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay" -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	gcc -Icommons -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
