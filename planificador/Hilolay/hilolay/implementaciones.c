@@ -7,7 +7,7 @@ int suse_create(int tid){
 	memcpy(mensaje+4,&tid,4);
 	send(socket_suse,mensaje,8,0);
 	int resultado;
-	recv(socket_suse,&resultado,4,0);
+	recv(socket_suse,&resultado,4,MSG_WAITALL);
 	return resultado;
 }
 
@@ -16,7 +16,7 @@ int suse_schedule_next(void){
 	int op = SCHEDULE_NEXT;
 	send(socket_suse,&op,4,0);
 	int tid_return;
-	recv(socket_suse,&tid_return,4,0);
+	recv(socket_suse,&tid_return,4,MSG_WAITALL);
 	return tid_return;
 }
 
@@ -27,7 +27,7 @@ int suse_join(int tid){
 	memcpy(paquete+4,&tid,4);
 	send(socket_suse,paquete,8,0);
 	int resultado;
-	recv(socket_suse,&resultado,4,0);
+	recv(socket_suse,&resultado,4,MSG_WAITALL);
 	return resultado;
 }
 
@@ -41,7 +41,7 @@ int suse_close(int tid){
 
 	int resultado;
 
-	recv(socket_suse, &resultado, 4, 0);
+	recv(socket_suse, &resultado, 4,MSG_WAITALL);
 
 	return resultado;
 }
@@ -57,7 +57,7 @@ int suse_wait(int tid, char *nombreSemaforo){
 	send(socket_suse,paqueteWait,tamanio,0);
 
 	int resultado;
-	recv(socket_suse,&resultado,4,0);
+	recv(socket_suse,&resultado,4,MSG_WAITALL);
 
 	return resultado;
 }
@@ -73,7 +73,7 @@ int suse_signal(int tid, char *nombreSemaforo){
 	send(socket_suse, paqueteSignal,tamanioPaquete,0);
 
 	int resultado;
-	recv(socket_suse,&resultado,4,0);
+	recv(socket_suse,&resultado,4,MSG_WAITALL);
 
 	return resultado;
 

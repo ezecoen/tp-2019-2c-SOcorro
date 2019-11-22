@@ -179,6 +179,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 			case CREATE:;
 				recv(cliente,&tid,4,0);
+				log_info(logg, "Recibi un create del cliente %d", cliente);
 				tcb* _tcb = crearTCB(pid,tid);
 				if(multiprogramacion>0){
 					multiprogramacion--;
@@ -201,6 +202,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
 					return tcb1->estimacion < tcb2->estimacion;
 				}
+				log_info(logg, "Recibi un schedule_next del cliente %d", cliente);
 				//si no hay nadie en ready, sigue ejecutando
 				if(list_is_empty(colaDeReady)){
 					if(exec != NULL){
@@ -235,6 +237,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				_Bool buscarTid(tcb* _tcb){
 					return _tcb->t_id == tid_para_join;
 				}
+
+				log_info(logg, "Recibi un join del cliente %d", cliente);
+
 				recv(cliente,&tid_para_join,4,0);
 				//tid actual se bloquea esperando a que termine tid exec->tid
 				//hay que buscar a tid_para_join y ponerle en su lista el tid actual
@@ -262,6 +267,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 			case CLOSE:;
 				int tid_para_close;
+				log_info(logg, "Recibi un close del cliente %d", cliente);
 				recv(cliente,&tid_para_close,4,0);
 
 				_Bool buscarTCB(tcb* _tcb){
@@ -297,6 +303,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				break;
 			case WAIT:;
+
+				log_info(logg, "Recibi un wait del cliente %d", cliente);
+
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				void* paquete = malloc(tamanioPaquete);
 				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
@@ -325,6 +334,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 
 			case SIGNAL:
+
+				log_info(logg, "Recibi un signal del cliente %d", cliente);
+
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				void* paqueteSignal = malloc(tamanioPaquete);
 				recv(cliente, &paqueteSignal, tamanioPaquete,MSG_WAITALL);
@@ -408,6 +420,7 @@ tcb* crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero
 	_tcb->t_id = tid;
 	_tcb->estimacionAnterior = 0;
 	_tcb->realAnterior = 0;
+	_tcb->tidsEsperando = list_create();
 
 	pcb* procesoPadre = buscarProcesoEnListaDeProcesos(pid);
 
