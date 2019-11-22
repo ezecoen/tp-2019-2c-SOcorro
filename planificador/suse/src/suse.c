@@ -225,11 +225,14 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				tiempoAux = timestamp();
 				exec->tiempoDeInicio = tiempoAux;
 				sacarDeReady(tcbAEjecutar,colaDeReady);
-				send(cliente,&tcbAEjecutar->t_id,4,0);
+				int i = tcbAEjecutar->t_id;
+				send(cliente,&i,4,0);
 				//el q estaba en exec lo devuelvo a ready
-				list_add(colaDeReady,tcbAux);
+				if(tcbAux != NULL){
+					list_add(colaDeReady,tcbAux);
+					actualizarEstimacion(tcbAux,tiempoAux);
+				}
 				//se actualiza el estimador del que salio de exec
-				actualizarEstimacion(tcbAux,tiempoAux);
 
 				break;
 			case JOIN:;
@@ -263,6 +266,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				//actualizo la estimacion
 				actualizarEstimacion(exec,timestamp());
 				exec = NULL;
+				int resultado = 0;
+				send(cliente,&resultado,4,0);
 
 				break;
 			case CLOSE:;
