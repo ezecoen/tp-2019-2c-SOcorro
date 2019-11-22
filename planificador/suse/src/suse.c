@@ -312,10 +312,11 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				log_info(logg, "Recibi un wait del cliente %d", cliente);
 
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
+				tamanioPaquete -= 8;
 				void* paquete = malloc(tamanioPaquete);
-				recv(cliente, &paquete, tamanioPaquete,MSG_WAITALL);
+				recv(cliente, paquete, tamanioPaquete,MSG_WAITALL);
 				suse_wait_t* wait = deserializar_suse_wait(paquete);
-
+				log_info(logg,"Semaforo %s",wait->id_semaforo);
 				_Bool buscarSemaforoPorId(semaforo_t* sem){
 					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
 				}
@@ -343,8 +344,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				log_info(logg, "Recibi un signal del cliente %d", cliente);
 
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
+				tamanioPaquete -= 8;
 				void* paqueteSignal = malloc(tamanioPaquete);
-				recv(cliente, &paqueteSignal, tamanioPaquete,MSG_WAITALL);
+				recv(cliente, paqueteSignal, tamanioPaquete,MSG_WAITALL);
 				suse_signal_t* signal = deserializar_suse_signal(paqueteSignal);
 
 				_Bool buscarSemaforoPorIdSignal(semaforo_t* sem){
@@ -382,7 +384,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						}
 					}
 				}
-
+				int res = 0;
+				send(cliente,&res,4,0);
 				break;
 		}
 	}
@@ -397,7 +400,7 @@ int aceptarConexion(int servidor){
 	//perror("Error: ");
 	log_info(logg, "Recibi una conexion de %d!!\n", cliente);
 
-	send(cliente, "Hola!", 6, 0);
+	//send(cliente, "Hola!", 6, 0);
 
 	return cliente;
 
