@@ -1,4 +1,4 @@
-#include "hilolayExt.h"
+#include "implementaciones.h"
 
 int suse_create(int tid){
 	int op = CREATE;
