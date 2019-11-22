@@ -300,11 +300,12 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
 
-				if(semWait->valorInicial == 0){
+				if(semWait->valorInicial <= 0){
 					sem_wait(&mut_blocked);
 						list_add(estadoBlocked, exec);
 					sem_post(&mut_blocked);
 					list_add(semWait->colaDeBloqueo, exec);
+					semWait->valorInicial--;
 					//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
 					exec = NULL;
 				}else{
@@ -360,6 +361,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 		}
 	}
+	close(cliente);
 }
 
 int aceptarConexion(int servidor){
