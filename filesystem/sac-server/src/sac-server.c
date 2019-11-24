@@ -60,6 +60,7 @@ int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	char* path_padre = dame_path_padre(nombre);
 	sem_wait(&s_diccionario);
 	int padre = dictionary_get(diccionario_de_path,path_padre);
+	free(path_padre);
 	sem_post(&s_diccionario);
 	char* nom_mio = dame_el_nombre(list,1);
 	strcpy(nodo->nombre_de_archivo,nom_mio);
@@ -68,6 +69,12 @@ int _mknod(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	}else{
 		nodo->bloque_padre = padre;
 	}
+//	free(path_padre);
+//	free(nom_mio);
+	for(int i = 0;list[i]!=NULL;i++){
+		free(list[i]);
+	}
+	free(list);
 	return 1;
 }
 int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits de la tabla de nodo ya estan en 1
@@ -92,6 +99,12 @@ int _mkdir(char* nombre){//no hace falta actualizar el bitarray porque los bits 
 	}else{
 		nodo->bloque_padre = padre;
 	}
+//	free(path_padre);
+//	free(nom_mio);
+	for(int i = 0;list[i]!=NULL;i++){
+		free(list[i]);
+	}
+	free(list);
 	return 1;
 }
 char* dame_path_padre(char* nombre){
@@ -106,6 +119,11 @@ char* dame_path_padre(char* nombre){
 	string_append(&hijo_a_sacar,split[i-1]);
 	int len = strlen(nombre)+1-(strlen(hijo_a_sacar)+1);
 	path_padre = string_substring_until(nombre,len);
+	free(hijo_a_sacar);
+	for(int a = 0;a<i;a++){
+		free(split[a]);
+	}
+	free(split);
 	return path_padre;
 }
 char* dame_el_nombre(char** nombres,int quien){
@@ -145,8 +163,10 @@ int _rmdir(char* path){
 			nodox->estado = 0;
 			dictionary_remove(diccionario_de_path,path);
 			sem_post(&s_diccionario);
+			list_destroy(entradas);
 			return 0;
 		}else{
+			list_destroy(entradas);
 			return ENOTEMPTY;
 		}
 	}
@@ -165,7 +185,7 @@ bool el_fs_esta_formateado(char* fs){
 	int tam = fileSize(fs);
 	bloque* bloq = mmap(NULL,tam,PROT_READ | PROT_WRITE,MAP_FILE | MAP_SHARED,disco_fd,0);
 	header* __header = levantar_header(bloq);
-	bool rta = ((__header->bloque_inicio_bitmap==2)&&(strcmp(__header->id,"SAC")==0)&&(__header->version==1));
+	bool rta = ((__header->bloque_inicio_bitmap==2)&&(string_equals_ignore_case(__header->id,"SAC"))&&(__header->version==1));
 	close(disco_fd);
 	return rta;
 }
@@ -239,6 +259,11 @@ void acomodamelo_papi(char* path_al_reves){
 			string_append(&path_generator,"/");
 		}
 	}
+	for(int b = 0; b<i;b++){
+		free(a[b]);
+	}
+	free(a);
+
 }
 char* acomodamelo_papi_local(char* path_al_reves){
 	char** a = string_split(path_al_reves,"/");
@@ -470,6 +495,7 @@ void atender_cliente(int cliente){
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_truncate* __truncate = deserializar_truncate(magic);
 			res = _truncate(__truncate);
+			free(magic);
 			if(res == 0){
 				int a = TRUNCATE;
 				send(cliente,&a,4,0);
@@ -477,6 +503,8 @@ void atender_cliente(int cliente){
 				int err = ERROR;
 				send(cliente,&err,4,0);
 			}
+			free(__truncate->path);
+			free(__truncate);
 			break;
 		case RMDIR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
@@ -495,6 +523,7 @@ void atender_cliente(int cliente){
 				send(cliente,error,8,0);
 				free(error);
 			}
+			free(path_pedido);
 			break;
 		case GETATTR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
@@ -514,6 +543,8 @@ void atender_cliente(int cliente){
 				int tam;
 				memcpy(&tam,magic+4,sizeof(int));
 				send(cliente,magic,tam,0);
+				free(magic);
+				free(attr);
 			}
 			break;
 		case READDIR:
@@ -538,6 +569,8 @@ void atender_cliente(int cliente){
 				send(cliente,magic,tam,0);
 				free(magic);
 			}
+			list_destroy(entradas);
+			free(path_pedido);
 			break;
 		case OPEN:
 			recv(cliente, &_tam,4,MSG_WAITALL);
@@ -563,8 +596,10 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_write* wwrite = deserializar_write(magic);
+			free(magic);
 			log_info(logger,"Llego la instruccion READ %s",wwrite->path);
 			t_write* res_write = _read(wwrite);
+			write_destroy(wwrite);
 			if(res_write == -1){
 				int err = ERROR;
 				send(cliente,&err,4,0);
@@ -575,6 +610,7 @@ void atender_cliente(int cliente){
 				send(cliente,magic,_tam,0);
 				free(magic);
 			}
+			write_destroy(res_write);
 			break;
 		case MKNOD:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
@@ -621,6 +657,7 @@ void atender_cliente(int cliente){
 				int a = UNLINK;
 				send(cliente,&a,4,0);
 			}
+			free(path_pedido);
 			break;
 		case MKDIR:
 			recv(cliente,&_tam,sizeof(int),MSG_WAITALL);
@@ -652,8 +689,10 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_write* _wwrite = deserializar_write(magic);
+			free(magic);
 			log_info(logger,"Llego la instruccion WRITE de %s",_wwrite->path);
 			res = _write(_wwrite);
+			write_destroy(_wwrite);
 			if(res == -1){
 				int err = ERROR;
 				send(cliente,&err,4,0);
@@ -670,6 +709,7 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_utime* modif = deserializar_utime(magic);
+			free(magic);
 			log_info(logger,"Llego la instruccion WRITE %s", modif->path);
 			nodo* _nodo = dame_el_nodo_de(modif->path);
 			_nodo->fecha_de_modificacion = (uint64_t) modif->utime;
@@ -681,6 +721,7 @@ void atender_cliente(int cliente){
 			magic = malloc(_tam);
 			recv(cliente,magic,_tam-8,MSG_WAITALL);
 			t_rename* _rename = deserializar_rename(magic);
+			free(magic);
 			char** split = string_split(_rename->new,"/");
 			char* new = dame_el_nombre(split,1);
 			char* new_pather = dame_path_padre(_rename->new);
@@ -715,6 +756,8 @@ void atender_cliente(int cliente){
 						dictionary_put(diccionario_de_path,new_key,value);
 						dictionary_remove(diccionario_de_path,key);
 						sem_post(&s_diccionario);
+						free(lo_de_atras);
+						free(new_key);
 					}
 				}
 				if(__nodo->estado == 2){//es un directorio
@@ -728,6 +771,12 @@ void atender_cliente(int cliente){
 				int a = RENAME;
 				send(cliente,&a,4,0);
 			}
+			for(int a = 0;split[a]!=NULL;a++){
+				free(split[a]);
+			}
+			free(split);
+			free(new_pather);
+			rename_destroy(_rename);
 			break;
 		default:
 			log_error(logger, "Llego una instruccion no habilitada");
@@ -881,6 +930,7 @@ t_write* _read(t_write* wwrite){
 		char* buff = malloc(1);
 		memcpy(buff,"\0",1);
 		res = crear_write(wwrite->path,buff,1,wwrite->offset);
+		free(buff);
 		return res;
 	}
 	t_punteros_a_bloques_de_datos* BPD;
@@ -891,6 +941,7 @@ t_write* _read(t_write* wwrite){
 		char* buff = malloc(1);
 		memcpy(buff,"\0",1);
 		res = crear_write(wwrite->path,buff,1,wwrite->offset);
+		free(buff);
 		return res;
 	}
 	bloque* _bloq = (bloque*) primer_bloque_de_disco+BPD->punteros_a_bloques_de_datos[_bloque];
@@ -900,11 +951,14 @@ t_write* _read(t_write* wwrite){
 		char* buff = malloc(wwrite->size_buff);
 		memcpy(buff,_bloq+byte,wwrite->size_buff);
 		res = crear_write(wwrite->path,buff,wwrite->size_buff,wwrite->offset);
+		free(buff);
 	}else{
 		char* buff = malloc(espacio);
 		memcpy(buff,_bloq+byte,espacio);
 		res = crear_write(wwrite->path,buff,espacio,wwrite->offset);
+		free(buff);
 	}
+
 	return res;
 }
 int _write(t_write* wwrite){
