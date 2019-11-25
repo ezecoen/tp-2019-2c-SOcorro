@@ -8,7 +8,16 @@
 //	recv(socket,&pack_size,4,0);
 //	void* buffer = malloc(pack_size);
 //	recv(socket,buffer,pack_size,0);
-
+void rename_destroy(t_rename* _rename){
+	free(_rename->new);
+	free(_rename->old);
+	free(_rename);
+}
+void write_destroy(t_write* wwrite){
+	free(wwrite->buff);
+	free(wwrite->path);
+	free(wwrite);
+}
 t_write* crear_write(char* path,char*buff,uint32_t tam,uint32_t offset){
 	t_write* _write = malloc(sizeof(t_write));
 	_write->size_path=strlen(path)+1;
@@ -380,7 +389,10 @@ t_list* deserializar_lista_ent_dir(void* magic, int tam_lista){
 	}
 	return lista;
 }
-
+void truncate_destroy(t_truncate* _truncate){
+	free(_truncate->path);
+	free(_truncate);
+}
 int tamanio_de_todos_las_ent_dir(t_list* lista){
 	int tam = 0;
 	char* elem;
