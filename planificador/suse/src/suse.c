@@ -191,6 +191,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						exec = _tcb;
 						sacarDeReady(_tcb,colaDeReady);
 					}
+				}else{
+					log_info(logg, "El thread %d no se pudo mandar a ready porque la multiprogramacion no lo permite, quedo en New", tid);
 				}
 
 				resultado = 0;
@@ -210,6 +212,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						actualizarEstimacion(exec,timestamp());
 						break;
 					}else{
+						log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
 						int mensaje = -1;
 						send(cliente,&mensaje,4,0);
 						break;
@@ -272,8 +275,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 			case CLOSE:;
 				int tid_para_close;
-				log_info(logg, "Recibi un close del cliente %d", cliente);
 				recv(cliente,&tid_para_close,4,0);
+				log_info(logg, "Recibi un close del cliente %d para el tid %d", cliente, tid_para_close);
 
 				_Bool buscarTCB(tcb* _tcb){
 					return _tcb->p_id == pid && _tcb->t_id == tid_para_close;
@@ -284,6 +287,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						list_add(estadoExit, exec);
 					sem_post(&mut_exit);
 
+					//Si la lista de tids esperando tiene algun tid, busca esos tid en blocked y los mueve a ready
 					if(!list_is_empty(exec->tidsEsperando)){
 						void moverTcbAReady(int tid){
 
@@ -299,7 +303,23 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						list_clean(exec->tidsEsperando);
 					}
 					exec = NULL;
-					multiprogramacion++;
+					sem_wait(&mut_multiprogramacion);
+						if(multiprogramacion < 3){
+							multiprogramacion++;
+						}
+					sem_post(&mut_multiprogramacion);
+					//Si en la lista de
+					if(!list_is_empty(estadoNew)){
+						_Bool hayAlgunTCBdelProceso(tcb* _tcb){
+							return _tcb->p_id == pid;
+						}
+
+						tcb* tcbAReady = list_remove_by_condition(estadoNew, (void*)hayAlgunTCBdelProceso);
+						if(tcbAReady != NULL){
+							list_add(colaDeReady, tcbAReady);
+						}
+
+					}
 				}
 
 				resultado = 0;
@@ -323,16 +343,20 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
 
-				if(semWait->valorInicial <= 0){
-					sem_wait(&mut_blocked);
-						list_add(estadoBlocked, exec);
-					sem_post(&mut_blocked);
-					list_add(semWait->colaDeBloqueo, exec);
-					semWait->valorInicial--;
-					//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
-					exec = NULL;
+				if(semWait != NULL){
+					if(semWait->valorInicial <= 0){
+						sem_wait(&mut_blocked);
+							list_add(estadoBlocked, exec);
+						sem_post(&mut_blocked);
+						list_add(semWait->colaDeBloqueo, exec);
+						semWait->valorInicial--;
+						//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
+						exec = NULL;
+					}else{
+						semWait->valorInicial--;
+					}
 				}else{
-					semWait->valorInicial--;
+					log_info(logg, "No existe el semaforo con id %c", wait->id_semaforo);
 				}
 
 				resultado = 0;
@@ -355,34 +379,38 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				semaforo_t* semSignal = list_find(listaDeSemaforos, (void*)buscarSemaforoPorIdSignal);
 
-				if(semSignal->valorInicial > 0){
-					if(semSignal->valorInicial < semSignal->valorMaximo){
-						semSignal->valorInicial++;
-					}
-				}else{
-					if(semSignal->valorInicial < semSignal->valorMaximo){
-						semSignal->valorInicial++;
-					}
-					if(!list_is_empty(semSignal->colaDeBloqueo)){
+				if(semSignal != NULL){
+					if(semSignal->valorInicial > 0){
+						if(semSignal->valorInicial < semSignal->valorMaximo){
+							semSignal->valorInicial++;
+						}
+					}else{
+						if(semSignal->valorInicial < semSignal->valorMaximo){
+							semSignal->valorInicial++;
+						}
+						if(!list_is_empty(semSignal->colaDeBloqueo)){
 
-						_Bool buscar_tcb_por_pid(tcb* tcb_lista){
-							return tcb_lista->p_id == pid;
-						};
+							_Bool buscar_tcb_por_pid(tcb* tcb_lista){
+								return tcb_lista->p_id == pid;
+							};
 
-						tcb* ultParaMover = list_find(semSignal->colaDeBloqueo, (void*)buscar_tcb_por_pid);
+							tcb* ultParaMover = list_find(semSignal->colaDeBloqueo, (void*)buscar_tcb_por_pid);
 
-						if(ultParaMover != NULL){
+							if(ultParaMover != NULL){
 
-							_Bool buscar_tcb(tcb* _tcb){
-								return _tcb->t_id == ultParaMover->t_id && _tcb->p_id == ultParaMover->p_id;
+								_Bool buscar_tcb(tcb* _tcb){
+									return _tcb->t_id == ultParaMover->t_id && _tcb->p_id == ultParaMover->p_id;
+								}
+								sem_wait(&mut_blocked);
+									list_remove_by_condition(estadoBlocked,(void*)buscar_tcb);
+								sem_post(&mut_blocked);
+								list_add(colaDeReady, ultParaMover);
+
 							}
-							sem_wait(&mut_blocked);
-								list_remove_by_condition(estadoBlocked,(void*)buscar_tcb);
-							sem_post(&mut_blocked);
-							list_add(colaDeReady, ultParaMover);
-
 						}
 					}
+				} else {
+					log_info(logg, "No existe el semaforo con id %c", signal->id_semaforo);
 				}
 				int res = 0;
 				send(cliente,&res,4,0);
