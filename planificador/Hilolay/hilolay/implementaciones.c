@@ -1,7 +1,7 @@
 #include "implementaciones.h"
 
 int suse_create(int tid){
-	printf("Create en hilolayExt\n");
+	printf("Pido un create para el tid %d \n", tid);
 	int op = CREATE;
 	void* mensaje = malloc(8);
 	memcpy(mensaje,&op,4);
@@ -14,17 +14,17 @@ int suse_create(int tid){
 
 int suse_schedule_next(void){
 	//Aca es donde basicamente le digo a suse que corra el algoritmo SJF
-	printf("Sch next en hilolayExt\n");
+	printf("Pido un schNext \n");
 	int op = SCHEDULE_NEXT;
 	send(socket_suse,&op,4,0);
 	int tid_return;
 	recv(socket_suse,&tid_return,4,MSG_WAITALL);
-	printf("Sch next numero: %d\n",tid_return);
+//	printf("Sch next numero: %d\n",tid_return);
 	return tid_return;
 }
 
 int suse_join(int tid){
-	printf("Join en hilolayExt\n");
+	printf("Pido un join \n");
 	int op = JOIN;
 	void* paquete = malloc(8);
 	memcpy(paquete,&op,4);
@@ -32,11 +32,13 @@ int suse_join(int tid){
 	send(socket_suse,paquete,8,0);
 	int resultado;
 	recv(socket_suse,&resultado,4,MSG_WAITALL);
-	printf("Join numero: %d\n",resultado);
+//	printf("Join numero: %d\n",resultado);
 	return resultado;
 }
 
 int suse_close(int tid){
+	printf("Pido un close \n");
+
 	int op = CLOSE;
 
 	void* paquete = malloc(8);
@@ -52,7 +54,7 @@ int suse_close(int tid){
 }
 
 int suse_wait(int tid, char *nombreSemaforo){
-	printf("Wait en hilolayExt\n");
+	printf("Pido un wait para el tid %d \n", tid);
 	suse_wait_t* wait = crear_suse_wait(tid, nombreSemaforo);
 	void* paqueteWait = serializar_suse_wait(wait);
 	int tamanio;
@@ -68,7 +70,7 @@ int suse_wait(int tid, char *nombreSemaforo){
 }
 
 int suse_signal(int tid, char *nombreSemaforo){
-	printf("Signal en hilolayExt\n");
+	printf("Pido un signal para el tid %d \n", tid);
 	suse_signal_t* signal = crear_suse_signal(tid, nombreSemaforo);
 	void* paqueteSignal = serializar_suse_signal(signal);
 	int tamanioPaquete;
@@ -85,7 +87,7 @@ int suse_signal(int tid, char *nombreSemaforo){
 }
 
 void hilolay_init(){
-	printf("Init en hilolayExt\n");
+	printf("Iniciando conexion con SUSE... \n");
 	leer_config("/home/utnso/tp-2019-2c-SOcorro/planificador/Hilolay.config");
 	int sock = conectar_socket_a(configuracion->ip_suse,configuracion->puerto_suse);
 	if(sock > 0){
