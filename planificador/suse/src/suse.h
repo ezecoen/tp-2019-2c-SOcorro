@@ -64,7 +64,7 @@ typedef struct suse_signal_t{
 typedef struct{
 	uint32_t idNumerico;//Lo lleno con el indice que se utiliza en la config
 	char* id_semaforo;//Es el id que viene por la configuracion
-	uint32_t valorInicial;//Este es el valor que voy a restar/sumar cuando haga un
+	int valorInicial;//Este es el valor que voy a restar/sumar cuando haga un
 	uint32_t valorMaximo;
 	t_list* colaDeBloqueo;//Es una lista que sirve para ver que procesos se bloquearon por querer waiter este semaforo
 }semaforo_t;

@@ -213,7 +213,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						break;
 					}else{
 						log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
-						int mensaje = -1;
+						int mensaje = 0;
 						send(cliente,&mensaje,4,0);
 						break;
 					}
@@ -282,7 +282,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					return _tcb->p_id == pid && _tcb->t_id == tid_para_close;
 				}
 
-				if(exec->t_id == tid_para_close){
+				if(exec!= NULL && exec->t_id == tid_para_close){
 					sem_wait(&mut_exit);
 						list_add(estadoExit, exec);
 					sem_post(&mut_exit);
@@ -308,7 +308,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 							multiprogramacion++;
 						}
 					sem_post(&mut_multiprogramacion);
-					//Si en la lista de
+					//Si en la lista de New hay algun hilo del proceso
 					if(!list_is_empty(estadoNew)){
 						_Bool hayAlgunTCBdelProceso(tcb* _tcb){
 							return _tcb->p_id == pid;
@@ -317,9 +317,14 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						tcb* tcbAReady = list_remove_by_condition(estadoNew, (void*)hayAlgunTCBdelProceso);
 						if(tcbAReady != NULL){
 							list_add(colaDeReady, tcbAReady);
+							sem_wait(&mut_multiprogramacion);
+								multiprogramacion--;
+							sem_post(&mut_multiprogramacion);
 						}
 
 					}
+				}else{
+					log_info(logg, "Hubo un error con el close, se quiso hacer un Close sobre el hilo %d que no estaba ejecutando", tid);
 				}
 
 				resultado = 0;
@@ -336,7 +341,6 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				void* paquete = malloc(tamanioPaquete);
 				recv(cliente, paquete, tamanioPaquete,MSG_WAITALL);
 				suse_wait_t* wait = deserializar_suse_wait(paquete);
-				log_info(logg,"Semaforo %s",wait->id_semaforo);
 				_Bool buscarSemaforoPorId(semaforo_t* sem){
 					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
 				}
@@ -349,14 +353,20 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 							list_add(estadoBlocked, exec);
 						sem_post(&mut_blocked);
 						list_add(semWait->colaDeBloqueo, exec);
+						log_info(logg, "Le resto 1 al semaforo %s y bloqueo el thread %d del proceso %d", semWait->id_semaforo, tid, pid);
 						semWait->valorInicial--;
 						//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
 						exec = NULL;
+						//Si en la cola de Ready del proceso no hay ningun hilo significa que este hilo se quedo solo y esta en deadlock
+						while(semWait->valorInicial < 0){
+							//Aca se queda esperando a que el valor del semaforo sea
+						}
 					}else{
+						log_info(logg, "Le resto 1 al semaforo %s", semWait->id_semaforo);
 						semWait->valorInicial--;
 					}
 				}else{
-					log_info(logg, "No existe el semaforo con id %c", wait->id_semaforo);
+					log_info(logg, "No existe el semaforo con id %s", wait->id_semaforo);
 				}
 
 				resultado = 0;
@@ -382,12 +392,14 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				if(semSignal != NULL){
 					if(semSignal->valorInicial > 0){
 						if(semSignal->valorInicial < semSignal->valorMaximo){
+							log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
 							semSignal->valorInicial++;
 						}
 					}else{
-						if(semSignal->valorInicial < semSignal->valorMaximo){
-							semSignal->valorInicial++;
-						}
+						log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
+						semSignal->valorInicial++;
+
+						//Aca me fijo si algunos tcbs estaban bloqueados por este semaforo
 						if(!list_is_empty(semSignal->colaDeBloqueo)){
 
 							_Bool buscar_tcb_por_pid(tcb* tcb_lista){

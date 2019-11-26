@@ -98,13 +98,52 @@ int correrPrueba2(){
 	hilolay_join(&th1);
 	hilolay_join(&th3);
 
-	printf("Termino la ejecucion de todos los hilos\n\n");
+	printf("Termino la ejecucion de todos los hilos\n");
 
 	return hilolay_return(0);
 
 }
 
+/*
+ * Nombre: correrPrueba3
+ * Descripcion: Con este test pruebo el funcionamiento de los semaforos y la posibilidad de que se produzca un Deadlock entre distintos procesos
+ * Instruccion para que la prueba termine: correr pruebita en una sola ventana de la terminal (debuggeando o no suse)
+ * Instruccion para que haya Deadlock:
+ * 1 - Correr suse en modo debug
+ * 2 - Abrir 2 ventanas en la terminal, en una poner a correr pruebita y en la otra todavia no
+ * 3 - Apenas se printee esto :
+	 * Recibi un wait del cliente [NRO_DE_CLIENTE]
+	 * Le resto 1 al semaforo B
+ * poner a correr pruebita en la 2da ventana de la terminal
+ * 4 - Seguir debuggeando como siempre
+ * 5 - En un momento va a aparecer el mensaje
+	 *Le resto 1 al semaforo B y bloqueo el thread 0 del proceso [NRO_DE_PROCESO]
+ * La ventana 1 va a seguir ejecutando mientras que la 2da ventana queda bloqueada en el wait con el mensaje
+	 * Pido un wait para el tid 0
+ * 6 - Seguir debuggeando, la primera ventana va a terminar, la 2da va a seguir con su ejecucion hasta que se haga el ultimo wait, va a aparece el mensaje:
+ * Le resto 1 al semaforo A y bloqueo el thread 0 del proceso [NRO_DE_PROCESO]
+ * 7 - La ventana 2 queda en Deadlock porque la ventana 1 hizo el wait de A antes, y como A es un mutex, cuando la 1ra ventana termino dejo su valor en 0
+ */
+int correrPrueba3(){
 
+	hilolay_init();
+
+	hilolay_sem_t* sem1 = hilolay_sem_open("A");
+	hilolay_sem_t* sem2 = hilolay_sem_open("B");
+	hilolay_sem_t* semNE = hilolay_sem_open("C");
+
+	hilolay_signal(sem1);
+	hilolay_wait(sem2);
+	hilolay_wait(semNE);
+
+	printf("Puedo printear esto\n");
+
+	hilolay_signal(sem2);
+	hilolay_wait(sem1);
+
+	return hilolay_return(0);
+
+}
 
 
 
@@ -114,9 +153,11 @@ int correrPrueba2(){
  */
 int main() {
 
-	correrPrueba1();
+//	correrPrueba1();
 
 //	correrPrueba2();
+
+	correrPrueba3();
 
 	return 0;
 
