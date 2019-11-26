@@ -15,6 +15,14 @@ int main(int argc, char **argv) {
 
 	int servidor = crearServidor();
 
+	pthread_t metricasDelSistema = 0;
+
+	if(pthread_create(&metricasDelSistema, NULL, (void*)mostrarMetricasDelSistema, NULL) != 0){
+		perror("Hubo un error creando el hilo de las metricas");
+	}
+
+	pthread_detach(metricasDelSistema);
+
 	while(1){
 		escucharServidor(servidor);//Con esto suse se queda esperando conexiones
 	}
@@ -23,7 +31,20 @@ int main(int argc, char **argv) {
 
 }
 
+//Funcion para las metricas
+void mostrarMetricasDelSistema(){
+	while(1){
 
+		log_info(metricas, "*********************MOSTRANDO METRICAS DEL SISTEMA*********************\n");
+		void mostrarValorDelSemaforo(semaforo_t* sem){
+			log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
+		}
+		list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
+		log_info(metricas, "Grado de multiprogramacion: %d\n", configuracion->MAX_MULTIPROG);
+
+		usleep(configuracion->METRICS_TIMER*2*100000);
+	}
+}
 
 //FUNCIONES PARA INICIALIZAR COSAS
 p_config* leer_config(char* path){
@@ -75,17 +96,6 @@ p_config* leer_config(char* path){
 		j++;
 	}
 
-
-	//Imprimo las variables
-//	log_info(logg, "Puerto de escucha: %d",configuracion->LISTEN_PORT);
-//	log_info(logg, "Timer para metricas: %d",configuracion->METRICS_TIMER);
-//	log_info(logg, "Grado de Multiprogramacion: %d",configuracion->MAX_MULTIPROG);
-//	log_info(logg, "Alpha para el algoritmo: %d",configuracion->ALPHA_SJF);
-
-//	for(int i=0 ; i < (sizeof(configuracion->SEM_IDS / sizeof(uint32_t))); i++){
-//		log_info(logg, "Sem id %d: %c", i, configuracion->SEM_IDS[i]);
-//	}
-
 	return configuracion;
 
 }
@@ -95,6 +105,7 @@ void iniciar_log(char* path){
 	string_append(&nombre,path);
 	string_append(&nombre,".log");
 	logg = log_create(nombre,"suse",1,LOG_LEVEL_TRACE);
+	metricas = log_create("metricas.log", "suse", 1, LOG_LEVEL_TRACE);
 	log_info(logg, "Log creado!");
 }
 
@@ -113,7 +124,6 @@ void inicializarEstadosComunes(){
 	estadoNew = list_create();
 	estadoBlocked = list_create();
 	estadoExit = list_create();
-	multiprogramacion = configuracion->MAX_MULTIPROG;
 }
 
 void inicializarOtrasListas(){
@@ -181,8 +191,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				recv(cliente,&tid,4,0);
 				log_info(logg, "Recibi un create del cliente %d", cliente);
 				tcb* _tcb = crearTCB(pid,tid);
-				if(multiprogramacion>0){
-					multiprogramacion--;
+				if(configuracion->MAX_MULTIPROG > 0){
+					configuracion->MAX_MULTIPROG--;
 					//pongo en ready y saco de new
 					list_add(colaDeReady,_tcb);
 					//me fijo si no hay nadie en exec, si esta vacia, me meto
@@ -304,8 +314,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					}
 					exec = NULL;
 					sem_wait(&mut_multiprogramacion);
-						if(multiprogramacion < 3){
-							multiprogramacion++;
+						if(configuracion->MAX_MULTIPROG < 3){
+							configuracion->MAX_MULTIPROG++;
 						}
 					sem_post(&mut_multiprogramacion);
 					//Si en la lista de New hay algun hilo del proceso
@@ -318,7 +328,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						if(tcbAReady != NULL){
 							list_add(colaDeReady, tcbAReady);
 							sem_wait(&mut_multiprogramacion);
-								multiprogramacion--;
+								configuracion->MAX_MULTIPROG--;
 							sem_post(&mut_multiprogramacion);
 						}
 

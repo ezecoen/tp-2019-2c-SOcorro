@@ -42,7 +42,7 @@ typedef struct{
 typedef struct{
 	uint32_t LISTEN_PORT;
 	uint32_t METRICS_TIMER;
-	uint32_t MAX_MULTIPROG;
+	int MAX_MULTIPROG;
 	t_list* SEM_IDS;
 	t_list* SEM_INIT;
 	double ALPHA_SJF;
@@ -116,7 +116,7 @@ suse_signal_t* deserializar_suse_signal(void* magic);
 suse_wait_t* deserializar_suse_wait(void* magic);
 
 //OTRAS FUNCIONES
-
+void mostrarMetricasDelSistema();
 
 
 /* VARIABLES GLOBALES ---------------------------------------------------------------------------------------------*/
@@ -124,9 +124,9 @@ t_list* ultsAPlanificar;
 t_list* listaDeProgramas; //Lista de programas ejecutando/a ejecutar
 t_list* listaDeSemaforos;
 t_log* logg;
+t_log* metricas;
 t_config* g_config;
 p_config* configuracion;
-uint32_t multiprogramacion;
 
 
 
