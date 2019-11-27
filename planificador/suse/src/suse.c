@@ -179,6 +179,36 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	tcb* exec = NULL;
 	int resultado;
 	uint32_t tamanioPaquete;
+
+	void mostrarMetricasDelProceso(){
+
+
+		while(1){
+			int ultsEnReady = list_size(colaDeReady);
+			int ultsEnNew = cantidadDeHilosEnElEstado(estadoNew, pid);
+			int ultsEnBlocked = cantidadDeHilosEnElEstado(estadoBlocked, pid);
+
+			log_info(metricas, "*********************MOSTRANDO METRICAS DEL PROCESO %d *********************\n",pid);
+			log_info(metricas, "Hilos del pid %d en New: %d", pid, ultsEnNew);
+			log_info(metricas, "Hilos del pid %d en Ready: %d", pid, ultsEnReady);
+			if(exec != NULL){
+				log_info(metricas, "Hilos del pid %d en Exec: 1", pid);
+			}else{
+				log_info(metricas, "Hilos del pid %d en Exec: 0", pid);
+			}
+			log_info(metricas, "Hilos del pid %d en Blocked: %d", pid, ultsEnBlocked);
+//			usleep(configuracion->METRICS_TIMER*100000);
+		}//TODO:Arreglar el tema de que cuando se cierra el socket sigue imprimiendo las metricas del proceso que termino
+
+	}
+
+	pthread_t metricasDelProceso = 0;
+	if(pthread_create(&metricasDelProceso, NULL, (void*)mostrarMetricasDelProceso, NULL) != 0){
+		printf("Error creando el hilo para mostrar metricas del proceso %d", pid);
+	}
+	pthread_detach(metricasDelProceso);
+
+
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
 		switch(operacion){
 			case INIT:;//recive el pid
@@ -456,13 +486,18 @@ int aceptarConexion(int servidor){
 
 }
 
+int cantidadDeHilosEnElEstado(t_list* estado, int pid){
+	_Bool esUnHiloDelProceso(tcb* _tcb){
+		return _tcb->p_id == pid;
+	}
+	return list_count_satisfying(estado, (void*)esUnHiloDelProceso);
+}
 
 
 //FUNCIONES PARA HACER LO QUE ME PIDA HILOLAY, O SEA, LA IMPLEMENTACION DE SUSE
 pcb* crearPCB(int pid){//Esto es mas para gestion interna, no tiene mucho que ver con el planificador
 
 	pcb* _pcb = malloc(sizeof(pcb));
-	_pcb->ejecutando = false; //Me dice si tiene algun hilo ejecutando
 	_pcb->p_id = pid;
 	_pcb->ults = list_create();//Lista de ults de este proceso
 

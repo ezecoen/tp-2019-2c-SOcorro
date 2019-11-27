@@ -87,6 +87,7 @@ void funcionDePrueba();
 void printearNumeroDeHilo(tcb*);
 void crearHilo(int numero);
 int randomEntre1y10(int numero);
+int cantidadDeHilosEnElEstado(t_list*, int);
 
 
 //FUNCIONES PARA INICIALIZAR COSAS
