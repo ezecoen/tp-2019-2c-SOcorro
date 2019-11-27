@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
 	log_info(log_metricas,"<<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>");
-
+/*
 	programa_t* programa2 = malloc(sizeof(programa_t));
 	programa2->tabla_de_segmentos = list_create();
 	programa2->id_programa = string_new();
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
 	programa->id_programa = string_new();
 	string_append(&programa->id_programa,"prog");
 	list_add(tabla_de_programas,programa);
-
+*/
 	muse_cpy_t* mcp = crear_muse_cpy(15,"prog2",10,"uertyehdejroi2u");
 	muse_cpy(mcp);
 
@@ -34,18 +34,18 @@ int main(int argc, char **argv) {
 
 	muse_get_t* mgt = crear_muse_get(string_length(blah),"prog2",25);
 	void* algo = muse_get(mgt);
-	log_info(logg,"%s",(char*)algo);
+	//log_info(logg,"%s",(char*)algo);
 
 	muse_cpy_t* mcp2 = crear_muse_cpy(15,"prog2",25,"heystrregdtahsye");
 	muse_cpy(mcp2);
 
 	muse_get_t* mgt2 = crear_muse_get(string_length(blah),"prog2",10);
 	algo = muse_get(mgt2);
-	log_info(logg,"%s",(char*)algo);
+	//log_info(logg,"%s",(char*)algo);
 
 	muse_alloc_t* mat2 = crear_muse_alloc(100,"prog2");
 	int resu2 = muse_alloc(mat2);
-	log_info(logg,"Direccion virtual del mat: %d",resu2);
+	//log_info(logg,"Direccion virtual del mat: %d",resu2);
 
 	muse_alloc_t* mat3 = crear_muse_alloc(100,"prog2");
 	int resu3 = muse_alloc(mat3);
@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
 
 	muse_get_t* mgt3 = crear_muse_get(305,"prog2",340);
 	algo = muse_get(mgt3);
-	log_info(logg,"%s",(char*)algo);
+	//log_info(logg,"%s",(char*)algo);
 
 	muse_map_t* mmt1 = crear_muse_map(100,"prog",MAP_SHARED,"/home/utnso/tp-2019-2c-SOcorro/memoria/ejemplo_map");
 	int puntero_map1 = muse_map(mmt1);
@@ -84,10 +84,11 @@ int main(int argc, char **argv) {
 	int resu5 = muse_alloc(mat5);
 	log_info(logg,"Direccion virtual del mat: %d",resu5);
 
+
 	muse_close("prog2");
 	muse_close("prog");
 
-	//	metricas("prog2");
+	metricas();
 //
 return 0;
 //	SERVIDOR
@@ -207,6 +208,10 @@ t_list* traer_tabla_de_segmentos(char* id_programa){
 	pthread_mutex_lock(&mutex_tabla_de_programas);
 	programa_t* programa_buscado = list_find(tabla_de_programas,(void*)id_programa_igual);
 	pthread_mutex_unlock(&mutex_tabla_de_programas);
+	if(programa_buscado==NULL)
+	{
+		return NULL;
+	}
 	return programa_buscado->tabla_de_segmentos;
 }
 int muse_alloc(muse_alloc_t* datos){
@@ -217,6 +222,12 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	pthread_mutex_unlock(&mutex_lugar_disponible);
 	//busco si ya tengo algun segmento
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos==NULL)
+	{
+		log_info(logg,"%s no tiene tabla de segmentos",datos->id);
+		return -1;
+	}
+
 	if(list_is_empty(tabla_de_segmentos)){
 		//hay que crear el 1er segmento
 		uint32_t cantidad_de_paginas = paginas_necesarias_para_tamanio(datos->tamanio+sizeof(heap_metadata)*2);
@@ -919,6 +930,11 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 // inicializar tam _ mapeos !!
 int muse_free(muse_free_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos==NULL)
+	{
+		log_info(logg,"no se encontro la tabla de segmentos de %s",datos->id);
+		return -1;
+	}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
@@ -1043,7 +1059,17 @@ int muse_free(muse_free_t* datos){
 
 void* muse_get(muse_get_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos==NULL){
+			//no existe el segmento buscado o se paso del segmento
+			log_info(logg,"no se encontro tabla de segmentos de %s",datos->id);
+			return -1;
+		}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
+	if(segmento_buscado==NULL){
+		//no existe el segmento buscado o se paso del segmento
+		log_info(logg,"no se encontro segmento de %s",datos->id);
+		return -1;
+	}
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
 	//si copia demas tira segm fault en libmuse
@@ -1075,6 +1101,8 @@ void* muse_get(muse_get_t* datos){
 		memcpy(resultado_get,super_void+offset_inicial,datos->tamanio);
 		free(super_void);
 	}
+
+	log_info(logg,"%s",(char*)resultado_get);
 	return resultado_get;
 }
 segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direccion){
@@ -1084,6 +1112,7 @@ segmento* traer_segmento_de_direccion(t_list* tabla_de_segmentos,uint32_t direcc
 		}
 		return false;
 	}
+
 	return list_find(tabla_de_segmentos,(void*)buscar_segmento_por_direccion);
 }
 pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag) {
@@ -1152,6 +1181,11 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 }
 int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void* es lo que hay que pegar
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos==NULL){
+		//no existe el segmento buscado o se paso del segmento
+		log_info(logg,"no se encontro la tabla de segmentos de %s",datos->id);
+		return -1;
+		}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
@@ -1307,6 +1341,11 @@ int muse_map(muse_map_t* datos){
 		lugar_disponible-= tamanio_paginas;
 		pthread_mutex_unlock(&mutex_lugar_disponible);
 		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+		if(tabla_de_segmentos==NULL)
+		{
+			log_info("no se encontro tabla de segmentos para %s",datos->id);
+			return -1;
+		}
 		segmento* segmento_nuevo = malloc(sizeof(segmento));
 		segmento_nuevo->num_segmento = tabla_de_segmentos->elements_count;
 		segmento_nuevo->mmapeado = true;
@@ -1399,6 +1438,17 @@ void* generar_padding(int padding){
 */
 int muse_sync(muse_sync_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos == NULL)
+	{
+		log_info(logg,"No hay tabla de segmentos para el id: &s ", datos->id);
+		return -1;
+	}
+	if(list_is_empty(tabla_de_segmentos))
+	{
+		log_info(logg,"La tabla de segmentos para el id &s esta vacia", datos->id);
+		return -1;
+	}
+
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	int direccion_al_segmento = datos->direccion - segmento_buscado->base_logica;
 	if(segmento_buscado != NULL){
@@ -1443,6 +1493,11 @@ int muse_sync(muse_sync_t* datos){
 */
 int muse_unmap(muse_unmap_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
+	if(tabla_de_segmentos==NULL)
+	{
+		log_info("no se encontro tabla de segmentos de %s", datos->id);
+		return -1;
+	}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado!=NULL){
 		if(segmento_buscado->mmapeado){
