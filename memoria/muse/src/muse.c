@@ -1089,8 +1089,8 @@ void* muse_get(muse_get_t* datos){
 		}
 		for(int i = 0;i<cantidad_de_paginas;i++,puntero+=configuracion->tam_pag){
 			pagina* pag = list_get(segmento_buscado->paginas,pagina_inicial+i);
-			pag->bit_marco->bit_uso = true;
 			void* puntero_a_marco = obtener_puntero_a_marco(pag);
+			pag->bit_marco->bit_uso = true;
 			pag->presencia = true;
 			memcpy(super_void+puntero,puntero_a_marco,configuracion->tam_pag);
 		}
@@ -1267,6 +1267,9 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 				pag->bit_marco->bit_uso = true;
 				pag->bit_marco->bit_modificado = true;
 				memcpy(marco,datos->paquete+cuanto_puedo_pegar,cuanto_me_falta);
+				break;
+			}
+			else{
 				break;
 			}
 		}while (1);
