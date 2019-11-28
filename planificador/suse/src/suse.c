@@ -35,14 +35,16 @@ int main(int argc, char **argv) {
 void mostrarMetricasDelSistema(){
 	while(1){
 
-		log_info(metricas, "*********************MOSTRANDO METRICAS DEL SISTEMA*********************\n");
-		void mostrarValorDelSemaforo(semaforo_t* sem){
-			log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
-		}
-		list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
-		log_info(metricas, "Grado de multiprogramacion: %d\n", configuracion->MAX_MULTIPROG);
+		sem_wait(&mut_mostrarMetricas);
+			log_info(metricas, "*********************MOSTRANDO METRICAS DEL SISTEMA*********************\n");
+			void mostrarValorDelSemaforo(semaforo_t* sem){
+				log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
+			}
+			list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
+			log_info(metricas, "Grado de multiprogramacion: %d\n", configuracion->MAX_MULTIPROG);
 
-		usleep(configuracion->METRICS_TIMER*2*100000);
+			usleep(configuracion->METRICS_TIMER*2*100000);
+		sem_post(&mut_mostrarMetricas);
 	}
 }
 
@@ -105,7 +107,7 @@ void iniciar_log(char* path){
 	string_append(&nombre,path);
 	string_append(&nombre,".log");
 	logg = log_create(nombre,"suse",1,LOG_LEVEL_TRACE);
-	metricas = log_create("metricas.log", "suse", 1, LOG_LEVEL_TRACE);
+	metricas = log_create("metricas.log", "suse", 0, LOG_LEVEL_TRACE);
 	log_info(logg, "Log creado!");
 }
 
@@ -113,10 +115,12 @@ void inicializarSemaforos(){
 
 	sem_init(&mut_new,0,1);
 	sem_init(&sem_mutConfig,0,1);
-	sem_init(&mut_multiprogramacion,0,configuracion->MAX_MULTIPROG);
+	sem_init(&mut_multiprogramacion,0,1);
 	sem_init(&mut_listaDeSemaforos,0,1);
 	sem_init(&mut_blocked,0,1);
 	sem_init(&mut_exit,0,1);
+	sem_init(&mut_mostrarMetricas, 0, 1);
+	sem_init(&cont_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
 
 }
 
@@ -184,29 +188,31 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 
 		while(1){
-			int ultsEnReady = list_size(colaDeReady);
-			int ultsEnNew = cantidadDeHilosEnElEstado(estadoNew, pid);
-			int ultsEnBlocked = cantidadDeHilosEnElEstado(estadoBlocked, pid);
+			sem_wait(&mut_mostrarMetricas);
+				int ultsEnReady = list_size(colaDeReady);
+				int ultsEnNew = cantidadDeHilosEnElEstado(estadoNew, pid);
+				int ultsEnBlocked = cantidadDeHilosEnElEstado(estadoBlocked, pid);
 
-			log_info(metricas, "*********************MOSTRANDO METRICAS DEL PROCESO %d *********************\n",pid);
-			log_info(metricas, "Hilos del pid %d en New: %d", pid, ultsEnNew);
-			log_info(metricas, "Hilos del pid %d en Ready: %d", pid, ultsEnReady);
-			if(exec != NULL){
-				log_info(metricas, "Hilos del pid %d en Exec: 1", pid);
-			}else{
-				log_info(metricas, "Hilos del pid %d en Exec: 0", pid);
-			}
-			log_info(metricas, "Hilos del pid %d en Blocked: %d", pid, ultsEnBlocked);
-//			usleep(configuracion->METRICS_TIMER*100000);
+				log_info(metricas, "*********************MOSTRANDO METRICAS DEL PROCESO %d *********************\n",pid);
+				log_info(metricas, "Hilos del pid %d en New: %d", pid, ultsEnNew);
+				log_info(metricas, "Hilos del pid %d en Ready: %d", pid, ultsEnReady);
+				if(exec != NULL){
+					log_info(metricas, "Hilos del pid %d en Exec: 1", pid);
+				}else{
+					log_info(metricas, "Hilos del pid %d en Exec: 0", pid);
+				}
+				log_info(metricas, "Hilos del pid %d en Blocked: %d", pid, ultsEnBlocked);
+				usleep(configuracion->METRICS_TIMER*100000);
+			sem_post(&mut_mostrarMetricas);
 		}//TODO:Arreglar el tema de que cuando se cierra el socket sigue imprimiendo las metricas del proceso que termino
 
 	}
 
-	pthread_t metricasDelProceso = 0;
-	if(pthread_create(&metricasDelProceso, NULL, (void*)mostrarMetricasDelProceso, NULL) != 0){
-		printf("Error creando el hilo para mostrar metricas del proceso %d", pid);
-	}
-	pthread_detach(metricasDelProceso);
+//	pthread_t metricasDelProceso = 0;
+//	if(pthread_create(&metricasDelProceso, NULL, (void*)mostrarMetricasDelProceso, NULL) != 0){
+//		printf("Error creando el hilo para mostrar metricas del proceso %d", pid);
+//	}
+//	pthread_detach(metricasDelProceso);
 
 
 	while(recv(cliente,&operacion,4,MSG_WAITALL)>0){
@@ -219,10 +225,12 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 			case CREATE:;
 				recv(cliente,&tid,4,0);
-				log_info(logg, "Recibi un create del cliente %d", cliente);
+				log_info(logg, "Recibi un create del cliente %d (PID %d)", cliente, pid);
 				tcb* _tcb = crearTCB(pid,tid);
 				if(configuracion->MAX_MULTIPROG > 0){
-					configuracion->MAX_MULTIPROG--;
+					sem_wait(&mut_multiprogramacion);
+						configuracion->MAX_MULTIPROG--;
+					sem_post(&mut_multiprogramacion);
 					//pongo en ready y saco de new
 					list_add(colaDeReady,_tcb);
 					//me fijo si no hay nadie en exec, si esta vacia, me meto
@@ -244,7 +252,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				_Bool ordenamientoSjf(tcb* tcb1,tcb* tcb2){
 					return tcb1->estimacion < tcb2->estimacion;
 				}
-				log_info(logg, "Recibi un schedule_next del cliente %d", cliente);
+				log_info(logg, "Recibi un schedule_next del cliente %d (PID %d)", cliente, pid);
 				//si no hay nadie en ready, sigue ejecutando
 				if(list_is_empty(colaDeReady)){
 					if(exec != NULL){
@@ -284,11 +292,12 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					return _tcb->t_id == tid_para_join;
 				}
 
-				log_info(logg, "Recibi un join del cliente %d", cliente);
+				log_info(logg, "Recibi un join del cliente %d (PID %d)", cliente, pid);
 
 				recv(cliente,&tid_para_join,4,0);
 				//tid actual se bloquea esperando a que termine tid exec->tid
 				//hay que buscar a tid_para_join y ponerle en su lista el tid actual
+
 				tcb* tcb_para_join = list_find(estadoNew,(void*)buscarTid);
 				if(tcb_para_join == NULL){
 					tcb_para_join = list_find(colaDeReady,(void*)buscarTid);
@@ -302,6 +311,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						}
 					}
 				}
+
 				//tengo que agregarle a tcb_para_join->lista de tid esperandolo, el tid actual
 				list_add(tcb_para_join->tidsEsperando,(void*)exec->t_id);
 				//bloqueo al tid actual
@@ -316,7 +326,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 			case CLOSE:;
 				int tid_para_close;
 				recv(cliente,&tid_para_close,4,0);
-				log_info(logg, "Recibi un close del cliente %d para el tid %d", cliente, tid_para_close);
+				log_info(logg, "Recibi un close del cliente %d para el tid %d (PID %d)", cliente, tid_para_close, pid);
 
 				_Bool buscarTCB(tcb* _tcb){
 					return _tcb->p_id == pid && _tcb->t_id == tid_para_close;
@@ -348,6 +358,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 							configuracion->MAX_MULTIPROG++;
 						}
 					sem_post(&mut_multiprogramacion);
+
 					//Si en la lista de New hay algun hilo del proceso
 					if(!list_is_empty(estadoNew)){
 						_Bool hayAlgunTCBdelProceso(tcb* _tcb){
@@ -374,7 +385,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				break;
 			case WAIT:;
 
-				log_info(logg, "Recibi un wait del cliente %d", cliente);
+				log_info(logg, "Recibi un wait del cliente %d (PID %d)", cliente, pid);
 
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				tamanioPaquete -= 8;
@@ -400,6 +411,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						//Si en la cola de Ready del proceso no hay ningun hilo significa que este hilo se quedo solo y esta en deadlock
 						while(semWait->valorInicial < 0){
 							//Aca se queda esperando a que el valor del semaforo sea
+							usleep(50*100000);
 						}
 					}else{
 						log_info(logg, "Le resto 1 al semaforo %s", semWait->id_semaforo);
@@ -415,7 +427,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 			case SIGNAL:
 
-				log_info(logg, "Recibi un signal del cliente %d", cliente);
+				log_info(logg, "Recibi un signal del cliente %d (PID %d)", cliente, pid);
 
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				tamanioPaquete -= 8;
