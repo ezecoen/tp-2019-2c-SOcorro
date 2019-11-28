@@ -1,0 +1,2321 @@
+[INFO] 22:08:31:84 muse/(3504:3504): NUEVA EJECUCION
+[INFO] 22:08:37:735 muse/(3504:3504): ----> METRICAS <----
+[INFO] 22:08:37:735 muse/(3504:3504): DEL SISTEMA
+[INFO] 22:08:37:735 muse/(3504:3504): el espacio disponible en la memoria es 4992
+[INFO] 22:08:37:735 muse/(3504:3504): POR SOCKET CONECTADO
+[INFO] 22:08:37:735 muse/(3504:3504): PROGRAMA prog2
+[INFO] 22:08:37:735 muse/(3504:3504): el espacio en el ultimo segmento 18
+[INFO] 22:08:37:735 muse/(3504:3504): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:08:37:735 muse/(3504:3504): POR PROGRAMA
+[INFO] 22:08:37:735 muse/(3504:3504): PROGRAMA prog2
+[INFO] 22:08:37:735 muse/(3504:3504): Aun no ha liberado memoria
+[INFO] 22:08:37:735 muse/(3504:3504): Pedido acumulado: 100
+[INFO] 22:08:37:735 muse/(3504:3504): Espacio reservado: 128
+[INFO] 22:08:38:612 muse/(3504:3504): ----> METRICAS <----
+[INFO] 22:08:38:612 muse/(3504:3504): DEL SISTEMA
+[INFO] 22:08:38:612 muse/(3504:3504): el espacio disponible en la memoria es 4896
+[INFO] 22:08:38:612 muse/(3504:3504): POR SOCKET CONECTADO
+[INFO] 22:08:38:612 muse/(3504:3504): PROGRAMA prog2
+[INFO] 22:08:38:612 muse/(3504:3504): el espacio en el ultimo segmento 9
+[INFO] 22:08:38:612 muse/(3504:3504): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:08:38:612 muse/(3504:3504): POR PROGRAMA
+[INFO] 22:08:38:612 muse/(3504:3504): PROGRAMA prog2
+[INFO] 22:08:38:612 muse/(3504:3504): Aun no ha liberado memoria
+[INFO] 22:08:38:612 muse/(3504:3504): Pedido acumulado: 200
+[INFO] 22:08:38:612 muse/(3504:3504): Espacio reservado: 224
+[INFO] 22:09:23:128 muse/(3552:3552): NUEVA EJECUCION
+[INFO] 22:09:23:128 muse/(3552:3552): ----> METRICAS <----
+[INFO] 22:09:23:128 muse/(3552:3552): DEL SISTEMA
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio disponible en la memoria es 4992
+[INFO] 22:09:23:128 muse/(3552:3552): POR SOCKET CONECTADO
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio en el ultimo segmento 18
+[INFO] 22:09:23:128 muse/(3552:3552): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:09:23:128 muse/(3552:3552): POR PROGRAMA
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): Aun no ha liberado memoria
+[INFO] 22:09:23:128 muse/(3552:3552): Pedido acumulado: 100
+[INFO] 22:09:23:128 muse/(3552:3552): Espacio reservado: 128
+[INFO] 22:09:23:128 muse/(3552:3552): ----> METRICAS <----
+[INFO] 22:09:23:128 muse/(3552:3552): DEL SISTEMA
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio disponible en la memoria es 4896
+[INFO] 22:09:23:128 muse/(3552:3552): POR SOCKET CONECTADO
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio en el ultimo segmento 9
+[INFO] 22:09:23:128 muse/(3552:3552): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:09:23:128 muse/(3552:3552): POR PROGRAMA
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): Aun no ha liberado memoria
+[INFO] 22:09:23:128 muse/(3552:3552): Pedido acumulado: 200
+[INFO] 22:09:23:128 muse/(3552:3552): Espacio reservado: 224
+[INFO] 22:09:23:128 muse/(3552:3552): ----> METRICAS <----
+[INFO] 22:09:23:128 muse/(3552:3552): DEL SISTEMA
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio disponible en la memoria es 4640
+[INFO] 22:09:23:128 muse/(3552:3552): POR SOCKET CONECTADO
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): el espacio en el ultimo segmento 18
+[INFO] 22:09:23:128 muse/(3552:3552): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:09:23:128 muse/(3552:3552): POR PROGRAMA
+[INFO] 22:09:23:128 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:128 muse/(3552:3552): Aun no ha liberado memoria
+[INFO] 22:09:23:128 muse/(3552:3552): Pedido acumulado: 400
+[INFO] 22:09:23:128 muse/(3552:3552): Espacio reservado: 452
+[INFO] 22:09:23:129 muse/(3552:3552): ----> METRICAS <----
+[INFO] 22:09:23:129 muse/(3552:3552): DEL SISTEMA
+[INFO] 22:09:23:129 muse/(3552:3552): el espacio disponible en la memoria es 4640
+[INFO] 22:09:23:129 muse/(3552:3552): POR SOCKET CONECTADO
+[INFO] 22:09:23:129 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:129 muse/(3552:3552): el espacio en el ultimo segmento 123
+[INFO] 22:09:23:129 muse/(3552:3552): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 22:09:23:129 muse/(3552:3552): POR PROGRAMA
+[INFO] 22:09:23:129 muse/(3552:3552): PROGRAMA prog2
+[INFO] 22:09:23:129 muse/(3552:3552): Liberado acumulado: 200
+[INFO] 22:09:23:129 muse/(3552:3552): Pedido acumulado: 400
+[INFO] 22:09:23:129 muse/(3552:3552): Espacio reservado: 452
+[INFO] 22:09:23:129 muse/(3552:3552): Cerrandose con
+[INFO] 22:09:23:129 muse/(3552:3552): Leaks: 105
+[INFO] 01:16:05:587 muse/(7291:7291): NUEVA EJECUCION
+[INFO] 01:16:05:587 muse/(7291:7291): ----> METRICAS <----
+[INFO] 01:16:05:587 muse/(7291:7291): DEL SISTEMA
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio disponible en la memoria es 4992
+[INFO] 01:16:05:587 muse/(7291:7291): POR SOCKET CONECTADO
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio en el ultimo segmento 18
+[INFO] 01:16:05:587 muse/(7291:7291): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:16:05:587 muse/(7291:7291): POR PROGRAMA
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): Aun no ha liberado memoria
+[INFO] 01:16:05:587 muse/(7291:7291): Pedido acumulado: 100
+[INFO] 01:16:05:587 muse/(7291:7291): Espacio reservado: 128
+[INFO] 01:16:05:587 muse/(7291:7291): ----> METRICAS <----
+[INFO] 01:16:05:587 muse/(7291:7291): DEL SISTEMA
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio disponible en la memoria es 4896
+[INFO] 01:16:05:587 muse/(7291:7291): POR SOCKET CONECTADO
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio en el ultimo segmento 9
+[INFO] 01:16:05:587 muse/(7291:7291): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:16:05:587 muse/(7291:7291): POR PROGRAMA
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): Aun no ha liberado memoria
+[INFO] 01:16:05:587 muse/(7291:7291): Pedido acumulado: 200
+[INFO] 01:16:05:587 muse/(7291:7291): Espacio reservado: 224
+[INFO] 01:16:05:587 muse/(7291:7291): ----> METRICAS <----
+[INFO] 01:16:05:587 muse/(7291:7291): DEL SISTEMA
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio disponible en la memoria es 4800
+[INFO] 01:16:05:587 muse/(7291:7291): POR SOCKET CONECTADO
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio en el ultimo segmento 0
+[INFO] 01:16:05:587 muse/(7291:7291): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:16:05:587 muse/(7291:7291): POR PROGRAMA
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): Aun no ha liberado memoria
+[INFO] 01:16:05:587 muse/(7291:7291): Pedido acumulado: 300
+[INFO] 01:16:05:587 muse/(7291:7291): Espacio reservado: 320
+[INFO] 01:16:05:587 muse/(7291:7291): ----> METRICAS <----
+[INFO] 01:16:05:587 muse/(7291:7291): DEL SISTEMA
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio disponible en la memoria es 4544
+[INFO] 01:16:05:587 muse/(7291:7291): POR SOCKET CONECTADO
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio en el ultimo segmento 18
+[INFO] 01:16:05:587 muse/(7291:7291): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:16:05:587 muse/(7291:7291): POR PROGRAMA
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): Aun no ha liberado memoria
+[INFO] 01:16:05:587 muse/(7291:7291): Pedido acumulado: 500
+[INFO] 01:16:05:587 muse/(7291:7291): Espacio reservado: 548
+[INFO] 01:16:05:587 muse/(7291:7291): ----> METRICAS <----
+[INFO] 01:16:05:587 muse/(7291:7291): DEL SISTEMA
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio disponible en la memoria es 4512
+[INFO] 01:16:05:587 muse/(7291:7291): POR SOCKET CONECTADO
+[INFO] 01:16:05:587 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:587 muse/(7291:7291): el espacio en el ultimo segmento 22
+[INFO] 01:16:05:588 muse/(7291:7291): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:16:05:588 muse/(7291:7291): POR PROGRAMA
+[INFO] 01:16:05:588 muse/(7291:7291): PROGRAMA prog2
+[INFO] 01:16:05:588 muse/(7291:7291): Liberado acumulado: 300
+[INFO] 01:16:05:588 muse/(7291:7291): Pedido acumulado: 811
+[INFO] 01:16:05:588 muse/(7291:7291): Espacio reservado: 580
+[INFO] 01:22:28:389 muse/(7517:7517): NUEVA EJECUCION
+[INFO] 01:22:28:389 muse/(7517:7517): ----> METRICAS <----
+[INFO] 01:22:28:389 muse/(7517:7517): DEL SISTEMA
+[INFO] 01:22:28:389 muse/(7517:7517): el espacio disponible en la memoria es 4992
+[INFO] 01:22:28:389 muse/(7517:7517): POR SOCKET CONECTADO
+[INFO] 01:22:28:389 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:389 muse/(7517:7517): el espacio en el ultimo segmento 18
+[INFO] 01:22:28:389 muse/(7517:7517): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:22:28:389 muse/(7517:7517): POR PROGRAMA
+[INFO] 01:22:28:389 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:389 muse/(7517:7517): Aun no ha liberado memoria
+[INFO] 01:22:28:389 muse/(7517:7517): Pedido acumulado: 100
+[INFO] 01:22:28:389 muse/(7517:7517): Espacio reservado: 128
+[INFO] 01:22:28:390 muse/(7517:7517): ----> METRICAS <----
+[INFO] 01:22:28:390 muse/(7517:7517): DEL SISTEMA
+[INFO] 01:22:28:390 muse/(7517:7517): el espacio disponible en la memoria es 4896
+[INFO] 01:22:28:390 muse/(7517:7517): POR SOCKET CONECTADO
+[INFO] 01:22:28:390 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:390 muse/(7517:7517): el espacio en el ultimo segmento 9
+[INFO] 01:22:28:390 muse/(7517:7517): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:22:28:390 muse/(7517:7517): POR PROGRAMA
+[INFO] 01:22:28:390 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:390 muse/(7517:7517): Aun no ha liberado memoria
+[INFO] 01:22:28:390 muse/(7517:7517): Pedido acumulado: 200
+[INFO] 01:22:28:390 muse/(7517:7517): Espacio reservado: 224
+[INFO] 01:22:28:390 muse/(7517:7517): ----> METRICAS <----
+[INFO] 01:22:28:390 muse/(7517:7517): DEL SISTEMA
+[INFO] 01:22:28:390 muse/(7517:7517): el espacio disponible en la memoria es 4800
+[INFO] 01:22:28:390 muse/(7517:7517): POR SOCKET CONECTADO
+[INFO] 01:22:28:390 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:390 muse/(7517:7517): el espacio en el ultimo segmento 0
+[INFO] 01:22:28:390 muse/(7517:7517): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:22:28:390 muse/(7517:7517): POR PROGRAMA
+[INFO] 01:22:28:390 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:390 muse/(7517:7517): Aun no ha liberado memoria
+[INFO] 01:22:28:390 muse/(7517:7517): Pedido acumulado: 300
+[INFO] 01:22:28:390 muse/(7517:7517): Espacio reservado: 320
+[INFO] 01:22:28:391 muse/(7517:7517): ----> METRICAS <----
+[INFO] 01:22:28:391 muse/(7517:7517): DEL SISTEMA
+[INFO] 01:22:28:391 muse/(7517:7517): el espacio disponible en la memoria es 4544
+[INFO] 01:22:28:391 muse/(7517:7517): POR SOCKET CONECTADO
+[INFO] 01:22:28:391 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:391 muse/(7517:7517): el espacio en el ultimo segmento 18
+[INFO] 01:22:28:391 muse/(7517:7517): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:22:28:391 muse/(7517:7517): POR PROGRAMA
+[INFO] 01:22:28:391 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:391 muse/(7517:7517): Aun no ha liberado memoria
+[INFO] 01:22:28:391 muse/(7517:7517): Pedido acumulado: 500
+[INFO] 01:22:28:391 muse/(7517:7517): Espacio reservado: 548
+[INFO] 01:22:28:392 muse/(7517:7517): ----> METRICAS <----
+[INFO] 01:22:28:392 muse/(7517:7517): DEL SISTEMA
+[INFO] 01:22:28:392 muse/(7517:7517): el espacio disponible en la memoria es 4512
+[INFO] 01:22:28:392 muse/(7517:7517): POR SOCKET CONECTADO
+[INFO] 01:22:28:392 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:392 muse/(7517:7517): el espacio en el ultimo segmento 22
+[INFO] 01:22:28:392 muse/(7517:7517): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:22:28:392 muse/(7517:7517): POR PROGRAMA
+[INFO] 01:22:28:392 muse/(7517:7517): PROGRAMA prog2
+[INFO] 01:22:28:392 muse/(7517:7517): Liberado acumulado: 300
+[INFO] 01:22:28:392 muse/(7517:7517): Pedido acumulado: 811
+[INFO] 01:22:28:392 muse/(7517:7517): Espacio reservado: 580
+[INFO] 01:30:04:871 muse/(7733:7733): NUEVA EJECUCION
+[INFO] 01:30:04:871 muse/(7733:7733): ----> METRICAS <----
+[INFO] 01:30:04:871 muse/(7733:7733): DEL SISTEMA
+[INFO] 01:30:04:871 muse/(7733:7733): el espacio disponible en la memoria es 4992
+[INFO] 01:30:04:871 muse/(7733:7733): POR SOCKET CONECTADO
+[INFO] 01:30:04:871 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:871 muse/(7733:7733): el espacio en el ultimo segmento 18
+[INFO] 01:30:04:871 muse/(7733:7733): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:30:04:871 muse/(7733:7733): POR PROGRAMA
+[INFO] 01:30:04:871 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:871 muse/(7733:7733): Aun no ha liberado memoria
+[INFO] 01:30:04:874 muse/(7733:7733): Pedido acumulado: 100
+[INFO] 01:30:04:874 muse/(7733:7733): Espacio reservado: 128
+[INFO] 01:30:04:874 muse/(7733:7733): ----> METRICAS <----
+[INFO] 01:30:04:874 muse/(7733:7733): DEL SISTEMA
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio disponible en la memoria es 4896
+[INFO] 01:30:04:874 muse/(7733:7733): POR SOCKET CONECTADO
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio en el ultimo segmento 9
+[INFO] 01:30:04:874 muse/(7733:7733): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:30:04:874 muse/(7733:7733): POR PROGRAMA
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): Aun no ha liberado memoria
+[INFO] 01:30:04:874 muse/(7733:7733): Pedido acumulado: 200
+[INFO] 01:30:04:874 muse/(7733:7733): Espacio reservado: 224
+[INFO] 01:30:04:874 muse/(7733:7733): ----> METRICAS <----
+[INFO] 01:30:04:874 muse/(7733:7733): DEL SISTEMA
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio disponible en la memoria es 4800
+[INFO] 01:30:04:874 muse/(7733:7733): POR SOCKET CONECTADO
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio en el ultimo segmento 0
+[INFO] 01:30:04:874 muse/(7733:7733): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:30:04:874 muse/(7733:7733): POR PROGRAMA
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): Aun no ha liberado memoria
+[INFO] 01:30:04:874 muse/(7733:7733): Pedido acumulado: 300
+[INFO] 01:30:04:874 muse/(7733:7733): Espacio reservado: 320
+[INFO] 01:30:04:874 muse/(7733:7733): ----> METRICAS <----
+[INFO] 01:30:04:874 muse/(7733:7733): DEL SISTEMA
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio disponible en la memoria es 4544
+[INFO] 01:30:04:874 muse/(7733:7733): POR SOCKET CONECTADO
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): el espacio en el ultimo segmento 18
+[INFO] 01:30:04:874 muse/(7733:7733): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:30:04:874 muse/(7733:7733): POR PROGRAMA
+[INFO] 01:30:04:874 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:874 muse/(7733:7733): Aun no ha liberado memoria
+[INFO] 01:30:04:874 muse/(7733:7733): Pedido acumulado: 500
+[INFO] 01:30:04:874 muse/(7733:7733): Espacio reservado: 548
+[INFO] 01:30:04:875 muse/(7733:7733): ----> METRICAS <----
+[INFO] 01:30:04:875 muse/(7733:7733): DEL SISTEMA
+[INFO] 01:30:04:875 muse/(7733:7733): el espacio disponible en la memoria es 4512
+[INFO] 01:30:04:875 muse/(7733:7733): POR SOCKET CONECTADO
+[INFO] 01:30:04:875 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:875 muse/(7733:7733): el espacio en el ultimo segmento 22
+[INFO] 01:30:04:875 muse/(7733:7733): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:30:04:875 muse/(7733:7733): POR PROGRAMA
+[INFO] 01:30:04:875 muse/(7733:7733): PROGRAMA prog2
+[INFO] 01:30:04:875 muse/(7733:7733): Liberado acumulado: 300
+[INFO] 01:30:04:875 muse/(7733:7733): Pedido acumulado: 811
+[INFO] 01:30:04:875 muse/(7733:7733): Espacio reservado: 580
+[INFO] 01:44:24:669 muse/(8019:8019): NUEVA EJECUCION
+[INFO] 01:44:24:669 muse/(8019:8019): ----> METRICAS <----
+[INFO] 01:44:24:669 muse/(8019:8019): DEL SISTEMA
+[INFO] 01:44:24:669 muse/(8019:8019): el espacio disponible en la memoria es 4096
+[INFO] 01:44:24:669 muse/(8019:8019): POR SOCKET CONECTADO
+[INFO] 01:44:24:669 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:669 muse/(8019:8019): el espacio en el ultimo segmento 14
+[INFO] 01:44:24:669 muse/(8019:8019): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:44:24:669 muse/(8019:8019): POR PROGRAMA
+[INFO] 01:44:24:669 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:669 muse/(8019:8019): Aun no ha liberado memoria
+[INFO] 01:44:24:669 muse/(8019:8019): Pedido acumulado: 1000
+[INFO] 01:44:24:669 muse/(8019:8019): Espacio reservado: 1024
+[INFO] 01:44:24:670 muse/(8019:8019): ----> METRICAS <----
+[INFO] 01:44:24:670 muse/(8019:8019): DEL SISTEMA
+[INFO] 01:44:24:670 muse/(8019:8019): el espacio disponible en la memoria es 3104
+[INFO] 01:44:24:671 muse/(8019:8019): POR SOCKET CONECTADO
+[INFO] 01:44:24:671 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:671 muse/(8019:8019): el espacio en el ultimo segmento 1
+[INFO] 01:44:24:671 muse/(8019:8019): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:44:24:671 muse/(8019:8019): POR PROGRAMA
+[INFO] 01:44:24:671 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:671 muse/(8019:8019): Aun no ha liberado memoria
+[INFO] 01:44:24:671 muse/(8019:8019): Pedido acumulado: 2000
+[INFO] 01:44:24:671 muse/(8019:8019): Espacio reservado: 2016
+[INFO] 01:44:24:671 muse/(8019:8019): ----> METRICAS <----
+[INFO] 01:44:24:671 muse/(8019:8019): DEL SISTEMA
+[INFO] 01:44:24:671 muse/(8019:8019): el espacio disponible en la memoria es 2080
+[INFO] 01:44:24:671 muse/(8019:8019): POR SOCKET CONECTADO
+[INFO] 01:44:24:671 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:671 muse/(8019:8019): el espacio en el ultimo segmento 20
+[INFO] 01:44:24:671 muse/(8019:8019): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:44:24:671 muse/(8019:8019): POR PROGRAMA
+[INFO] 01:44:24:671 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:671 muse/(8019:8019): Aun no ha liberado memoria
+[INFO] 01:44:24:671 muse/(8019:8019): Pedido acumulado: 3000
+[INFO] 01:44:24:671 muse/(8019:8019): Espacio reservado: 3040
+[INFO] 01:44:24:673 muse/(8019:8019): ----> METRICAS <----
+[INFO] 01:44:24:673 muse/(8019:8019): DEL SISTEMA
+[INFO] 01:44:24:673 muse/(8019:8019): el espacio disponible en la memoria es 32
+[INFO] 01:44:24:673 muse/(8019:8019): POR SOCKET CONECTADO
+[INFO] 01:44:24:673 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:673 muse/(8019:8019): el espacio en el ultimo segmento 14
+[INFO] 01:44:24:673 muse/(8019:8019): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:44:24:673 muse/(8019:8019): POR PROGRAMA
+[INFO] 01:44:24:673 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:673 muse/(8019:8019): Aun no ha liberado memoria
+[INFO] 01:44:24:673 muse/(8019:8019): Pedido acumulado: 5000
+[INFO] 01:44:24:673 muse/(8019:8019): Espacio reservado: 5064
+[INFO] 01:44:24:675 muse/(8019:8019): ----> METRICAS <----
+[INFO] 01:44:24:675 muse/(8019:8019): DEL SISTEMA
+[INFO] 01:44:24:675 muse/(8019:8019): el espacio disponible en la memoria es 2720
+[INFO] 01:44:24:675 muse/(8019:8019): POR SOCKET CONECTADO
+[INFO] 01:44:24:675 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:675 muse/(8019:8019): el espacio en el ultimo segmento 14
+[INFO] 01:44:24:675 muse/(8019:8019): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:44:24:675 muse/(8019:8019): POR PROGRAMA
+[INFO] 01:44:24:675 muse/(8019:8019): PROGRAMA prog2
+[INFO] 01:44:24:675 muse/(8019:8019): Liberado acumulado: 3000
+[INFO] 01:44:24:675 muse/(8019:8019): Pedido acumulado: 5311
+[INFO] 01:44:24:675 muse/(8019:8019): Espacio reservado: 2376
+[INFO] 01:57:32:179 muse/(8267:8267): NUEVA EJECUCION
+[INFO] 01:57:32:179 muse/(8267:8267): ----> METRICAS <----
+[INFO] 01:57:32:179 muse/(8267:8267): DEL SISTEMA
+[INFO] 01:57:32:179 muse/(8267:8267): el espacio disponible en la memoria es 4096
+[INFO] 01:57:32:179 muse/(8267:8267): POR SOCKET CONECTADO
+[INFO] 01:57:32:179 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:180 muse/(8267:8267): el espacio en el ultimo segmento 14
+[INFO] 01:57:32:180 muse/(8267:8267): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:32:180 muse/(8267:8267): POR PROGRAMA
+[INFO] 01:57:32:180 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:180 muse/(8267:8267): Aun no ha liberado memoria
+[INFO] 01:57:32:180 muse/(8267:8267): Pedido acumulado: 1000
+[INFO] 01:57:32:180 muse/(8267:8267): Espacio reservado: 1024
+[INFO] 01:57:32:180 muse/(8267:8267): ----> METRICAS <----
+[INFO] 01:57:32:180 muse/(8267:8267): DEL SISTEMA
+[INFO] 01:57:32:180 muse/(8267:8267): el espacio disponible en la memoria es 3104
+[INFO] 01:57:32:180 muse/(8267:8267): POR SOCKET CONECTADO
+[INFO] 01:57:32:180 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:180 muse/(8267:8267): el espacio en el ultimo segmento 1
+[INFO] 01:57:32:180 muse/(8267:8267): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:32:180 muse/(8267:8267): POR PROGRAMA
+[INFO] 01:57:32:180 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:180 muse/(8267:8267): Aun no ha liberado memoria
+[INFO] 01:57:32:180 muse/(8267:8267): Pedido acumulado: 2000
+[INFO] 01:57:32:180 muse/(8267:8267): Espacio reservado: 2016
+[INFO] 01:57:32:181 muse/(8267:8267): ----> METRICAS <----
+[INFO] 01:57:32:181 muse/(8267:8267): DEL SISTEMA
+[INFO] 01:57:32:181 muse/(8267:8267): el espacio disponible en la memoria es 2080
+[INFO] 01:57:32:181 muse/(8267:8267): POR SOCKET CONECTADO
+[INFO] 01:57:32:181 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:181 muse/(8267:8267): el espacio en el ultimo segmento 20
+[INFO] 01:57:32:181 muse/(8267:8267): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:32:181 muse/(8267:8267): POR PROGRAMA
+[INFO] 01:57:32:181 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:181 muse/(8267:8267): Aun no ha liberado memoria
+[INFO] 01:57:32:181 muse/(8267:8267): Pedido acumulado: 3000
+[INFO] 01:57:32:181 muse/(8267:8267): Espacio reservado: 3040
+[INFO] 01:57:32:181 muse/(8267:8267): ----> METRICAS <----
+[INFO] 01:57:32:181 muse/(8267:8267): DEL SISTEMA
+[INFO] 01:57:32:181 muse/(8267:8267): el espacio disponible en la memoria es 32
+[INFO] 01:57:32:181 muse/(8267:8267): POR SOCKET CONECTADO
+[INFO] 01:57:32:181 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:181 muse/(8267:8267): el espacio en el ultimo segmento 14
+[INFO] 01:57:32:181 muse/(8267:8267): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:32:181 muse/(8267:8267): POR PROGRAMA
+[INFO] 01:57:32:181 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:181 muse/(8267:8267): Aun no ha liberado memoria
+[INFO] 01:57:32:181 muse/(8267:8267): Pedido acumulado: 5000
+[INFO] 01:57:32:182 muse/(8267:8267): Espacio reservado: 5064
+[INFO] 01:57:32:183 muse/(8267:8267): ----> METRICAS <----
+[INFO] 01:57:32:183 muse/(8267:8267): DEL SISTEMA
+[INFO] 01:57:32:183 muse/(8267:8267): el espacio disponible en la memoria es 2720
+[INFO] 01:57:32:183 muse/(8267:8267): POR SOCKET CONECTADO
+[INFO] 01:57:32:183 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:183 muse/(8267:8267): el espacio en el ultimo segmento 14
+[INFO] 01:57:32:183 muse/(8267:8267): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:32:183 muse/(8267:8267): POR PROGRAMA
+[INFO] 01:57:32:183 muse/(8267:8267): PROGRAMA prog2
+[INFO] 01:57:32:183 muse/(8267:8267): Liberado acumulado: 3000
+[INFO] 01:57:32:183 muse/(8267:8267): Pedido acumulado: 5311
+[INFO] 01:57:32:183 muse/(8267:8267): Espacio reservado: 2376
+[INFO] 01:57:46:634 muse/(8309:8309): NUEVA EJECUCION
+[INFO] 01:57:46:634 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:634 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:634 muse/(8309:8309): el espacio disponible en la memoria es 4096
+[INFO] 01:57:46:634 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:634 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:634 muse/(8309:8309): el espacio en el ultimo segmento 14
+[INFO] 01:57:46:634 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:634 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:634 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:634 muse/(8309:8309): Aun no ha liberado memoria
+[INFO] 01:57:46:634 muse/(8309:8309): Pedido acumulado: 1000
+[INFO] 01:57:46:634 muse/(8309:8309): Espacio reservado: 1024
+[INFO] 01:57:46:634 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:634 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:634 muse/(8309:8309): el espacio disponible en la memoria es 3104
+[INFO] 01:57:46:634 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:634 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:634 muse/(8309:8309): el espacio en el ultimo segmento 1
+[INFO] 01:57:46:634 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:634 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:634 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:634 muse/(8309:8309): Aun no ha liberado memoria
+[INFO] 01:57:46:634 muse/(8309:8309): Pedido acumulado: 2000
+[INFO] 01:57:46:634 muse/(8309:8309): Espacio reservado: 2016
+[INFO] 01:57:46:635 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:635 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:635 muse/(8309:8309): el espacio disponible en la memoria es 2080
+[INFO] 01:57:46:635 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:635 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:635 muse/(8309:8309): el espacio en el ultimo segmento 20
+[INFO] 01:57:46:635 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:635 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:635 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:635 muse/(8309:8309): Aun no ha liberado memoria
+[INFO] 01:57:46:635 muse/(8309:8309): Pedido acumulado: 3000
+[INFO] 01:57:46:635 muse/(8309:8309): Espacio reservado: 3040
+[INFO] 01:57:46:636 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:636 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:636 muse/(8309:8309): el espacio disponible en la memoria es 32
+[INFO] 01:57:46:636 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:636 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:636 muse/(8309:8309): el espacio en el ultimo segmento 14
+[INFO] 01:57:46:636 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:636 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:636 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:636 muse/(8309:8309): Aun no ha liberado memoria
+[INFO] 01:57:46:636 muse/(8309:8309): Pedido acumulado: 5000
+[INFO] 01:57:46:636 muse/(8309:8309): Espacio reservado: 5064
+[INFO] 01:57:46:636 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:637 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:637 muse/(8309:8309): el espacio disponible en la memoria es 2720
+[INFO] 01:57:46:637 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:637 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:637 muse/(8309:8309): el espacio en el ultimo segmento 14
+[INFO] 01:57:46:637 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:637 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:637 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:637 muse/(8309:8309): Liberado acumulado: 3000
+[INFO] 01:57:46:637 muse/(8309:8309): Pedido acumulado: 5311
+[INFO] 01:57:46:637 muse/(8309:8309): Espacio reservado: 2376
+[INFO] 01:57:46:637 muse/(8309:8309): ----> METRICAS <----
+[INFO] 01:57:46:637 muse/(8309:8309): DEL SISTEMA
+[INFO] 01:57:46:638 muse/(8309:8309): el espacio disponible en la memoria es 2720
+[INFO] 01:57:46:638 muse/(8309:8309): POR SOCKET CONECTADO
+[INFO] 01:57:46:638 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:638 muse/(8309:8309): el espacio en el ultimo segmento 14
+[INFO] 01:57:46:638 muse/(8309:8309): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:57:46:638 muse/(8309:8309): POR PROGRAMA
+[INFO] 01:57:46:638 muse/(8309:8309): PROGRAMA prog2
+[INFO] 01:57:46:638 muse/(8309:8309): Liberado acumulado: 3000
+[INFO] 01:57:46:638 muse/(8309:8309): Pedido acumulado: 5311
+[INFO] 01:57:46:638 muse/(8309:8309): Espacio reservado: 2376
+[INFO] 01:58:03:131 muse/(8337:8337): NUEVA EJECUCION
+[INFO] 01:58:03:132 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:132 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:132 muse/(8337:8337): el espacio disponible en la memoria es 4096
+[INFO] 01:58:03:132 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:132 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:132 muse/(8337:8337): el espacio en el ultimo segmento 14
+[INFO] 01:58:03:132 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:132 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:132 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:132 muse/(8337:8337): Aun no ha liberado memoria
+[INFO] 01:58:03:132 muse/(8337:8337): Pedido acumulado: 1000
+[INFO] 01:58:03:132 muse/(8337:8337): Espacio reservado: 1024
+[INFO] 01:58:03:132 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:132 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:132 muse/(8337:8337): el espacio disponible en la memoria es 3104
+[INFO] 01:58:03:132 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio en el ultimo segmento 1
+[INFO] 01:58:03:133 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:133 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): Aun no ha liberado memoria
+[INFO] 01:58:03:133 muse/(8337:8337): Pedido acumulado: 2000
+[INFO] 01:58:03:133 muse/(8337:8337): Espacio reservado: 2016
+[INFO] 01:58:03:133 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:133 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio disponible en la memoria es 2080
+[INFO] 01:58:03:133 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio en el ultimo segmento 20
+[INFO] 01:58:03:133 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:133 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): Aun no ha liberado memoria
+[INFO] 01:58:03:133 muse/(8337:8337): Pedido acumulado: 3000
+[INFO] 01:58:03:133 muse/(8337:8337): Espacio reservado: 3040
+[INFO] 01:58:03:133 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:133 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio disponible en la memoria es 32
+[INFO] 01:58:03:133 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio en el ultimo segmento 14
+[INFO] 01:58:03:133 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:133 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): Aun no ha liberado memoria
+[INFO] 01:58:03:133 muse/(8337:8337): Pedido acumulado: 5000
+[INFO] 01:58:03:133 muse/(8337:8337): Espacio reservado: 5064
+[INFO] 01:58:03:133 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:133 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio disponible en la memoria es 2720
+[INFO] 01:58:03:133 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): el espacio en el ultimo segmento 14
+[INFO] 01:58:03:133 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:133 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:133 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:133 muse/(8337:8337): Liberado acumulado: 3000
+[INFO] 01:58:03:133 muse/(8337:8337): Pedido acumulado: 5311
+[INFO] 01:58:03:133 muse/(8337:8337): Espacio reservado: 2376
+[INFO] 01:58:03:135 muse/(8337:8337): ----> METRICAS <----
+[INFO] 01:58:03:135 muse/(8337:8337): DEL SISTEMA
+[INFO] 01:58:03:135 muse/(8337:8337): el espacio disponible en la memoria es 2720
+[INFO] 01:58:03:135 muse/(8337:8337): POR SOCKET CONECTADO
+[INFO] 01:58:03:135 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:135 muse/(8337:8337): el espacio en el ultimo segmento 14
+[INFO] 01:58:03:135 muse/(8337:8337): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:58:03:135 muse/(8337:8337): POR PROGRAMA
+[INFO] 01:58:03:135 muse/(8337:8337): PROGRAMA prog2
+[INFO] 01:58:03:135 muse/(8337:8337): Liberado acumulado: 3000
+[INFO] 01:58:03:135 muse/(8337:8337): Pedido acumulado: 5311
+[INFO] 01:58:03:135 muse/(8337:8337): Espacio reservado: 2376
+[INFO] 01:59:51:429 muse/(8394:8394): NUEVA EJECUCION
+[INFO] 01:59:51:429 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:429 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio disponible en la memoria es 4096
+[INFO] 01:59:51:429 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio en el ultimo segmento 14
+[INFO] 01:59:51:429 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:429 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): Aun no ha liberado memoria
+[INFO] 01:59:51:429 muse/(8394:8394): Pedido acumulado: 1000
+[INFO] 01:59:51:429 muse/(8394:8394): Espacio reservado: 1024
+[INFO] 01:59:51:429 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:429 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio disponible en la memoria es 3104
+[INFO] 01:59:51:429 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio en el ultimo segmento 1
+[INFO] 01:59:51:429 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:429 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): Aun no ha liberado memoria
+[INFO] 01:59:51:429 muse/(8394:8394): Pedido acumulado: 2000
+[INFO] 01:59:51:429 muse/(8394:8394): Espacio reservado: 2016
+[INFO] 01:59:51:429 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:429 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio disponible en la memoria es 2080
+[INFO] 01:59:51:429 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): el espacio en el ultimo segmento 20
+[INFO] 01:59:51:429 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:429 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:429 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:429 muse/(8394:8394): Aun no ha liberado memoria
+[INFO] 01:59:51:429 muse/(8394:8394): Pedido acumulado: 3000
+[INFO] 01:59:51:429 muse/(8394:8394): Espacio reservado: 3040
+[INFO] 01:59:51:431 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:431 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio disponible en la memoria es 32
+[INFO] 01:59:51:431 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio en el ultimo segmento 14
+[INFO] 01:59:51:431 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:431 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): Aun no ha liberado memoria
+[INFO] 01:59:51:431 muse/(8394:8394): Pedido acumulado: 5000
+[INFO] 01:59:51:431 muse/(8394:8394): Espacio reservado: 5064
+[INFO] 01:59:51:431 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:431 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio disponible en la memoria es 2720
+[INFO] 01:59:51:431 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio en el ultimo segmento 14
+[INFO] 01:59:51:431 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:431 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): Liberado acumulado: 3000
+[INFO] 01:59:51:431 muse/(8394:8394): Pedido acumulado: 5311
+[INFO] 01:59:51:431 muse/(8394:8394): Espacio reservado: 2376
+[INFO] 01:59:51:431 muse/(8394:8394): ----> METRICAS <----
+[INFO] 01:59:51:431 muse/(8394:8394): DEL SISTEMA
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio disponible en la memoria es 2720
+[INFO] 01:59:51:431 muse/(8394:8394): POR SOCKET CONECTADO
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): el espacio en el ultimo segmento 14
+[INFO] 01:59:51:431 muse/(8394:8394): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 01:59:51:431 muse/(8394:8394): POR PROGRAMA
+[INFO] 01:59:51:431 muse/(8394:8394): PROGRAMA prog2
+[INFO] 01:59:51:431 muse/(8394:8394): Liberado acumulado: 3000
+[INFO] 01:59:51:431 muse/(8394:8394): Pedido acumulado: 5311
+[INFO] 01:59:51:431 muse/(8394:8394): Espacio reservado: 2376
+[INFO] 01:59:51:431 muse/(8394:8394): Cerrandose con
+[INFO] 01:59:51:431 muse/(8394:8394): Leaks: 1321
+[INFO] 17:13:25:286 muse/(8026:8026): NUEVA EJECUCION
+[INFO] 17:13:36:149 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:149 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:149 muse/(8026:8049): el espacio disponible en la memoria es 4992
+[INFO] 17:13:36:149 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:149 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:149 muse/(8026:8049): el espacio en el ultimo segmento 18
+[INFO] 17:13:36:149 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:149 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:149 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:149 muse/(8026:8049): Aun no ha liberado memoria
+[INFO] 17:13:36:149 muse/(8026:8049): Pedido acumulado: 100
+[INFO] 17:13:36:149 muse/(8026:8049): Espacio reservado: 128
+[INFO] 17:13:36:150 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:150 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:150 muse/(8026:8049): el espacio disponible en la memoria es 4896
+[INFO] 17:13:36:150 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:150 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:150 muse/(8026:8049): el espacio en el ultimo segmento 9
+[INFO] 17:13:36:150 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:150 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:150 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:150 muse/(8026:8049): Aun no ha liberado memoria
+[INFO] 17:13:36:150 muse/(8026:8049): Pedido acumulado: 200
+[INFO] 17:13:36:150 muse/(8026:8049): Espacio reservado: 224
+[INFO] 17:13:36:150 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:150 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:150 muse/(8026:8049): el espacio disponible en la memoria es 4800
+[INFO] 17:13:36:150 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:150 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:150 muse/(8026:8049): el espacio en el ultimo segmento 0
+[INFO] 17:13:36:150 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:150 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:150 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:150 muse/(8026:8049): Aun no ha liberado memoria
+[INFO] 17:13:36:150 muse/(8026:8049): Pedido acumulado: 300
+[INFO] 17:13:36:150 muse/(8026:8049): Espacio reservado: 320
+[INFO] 17:13:36:150 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:150 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio disponible en la memoria es 4672
+[INFO] 17:13:36:151 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio en el ultimo segmento 23
+[INFO] 17:13:36:151 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:151 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): Aun no ha liberado memoria
+[INFO] 17:13:36:151 muse/(8026:8049): Pedido acumulado: 400
+[INFO] 17:13:36:151 muse/(8026:8049): Espacio reservado: 448
+[INFO] 17:13:36:151 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:151 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio disponible en la memoria es 4480
+[INFO] 17:13:36:151 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio en el ultimo segmento 110
+[INFO] 17:13:36:151 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:151 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): Liberado acumulado: 100
+[INFO] 17:13:36:151 muse/(8026:8049): Pedido acumulado: 600
+[INFO] 17:13:36:151 muse/(8026:8049): Espacio reservado: 640
+[INFO] 17:13:36:151 muse/(8026:8049): ----> METRICAS <----
+[INFO] 17:13:36:151 muse/(8026:8049): -DEL SISTEMA
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio disponible en la memoria es 4480
+[INFO] 17:13:36:151 muse/(8026:8049): -POR SOCKET CONECTADO
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): el espacio en el ultimo segmento 25
+[INFO] 17:13:36:151 muse/(8026:8049): 127.0.0.1-8048 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:13:36:151 muse/(8026:8049): -POR PROGRAMA
+[INFO] 17:13:36:151 muse/(8026:8049): PROGRAMA 127.0.0.1-8048
+[INFO] 17:13:36:151 muse/(8026:8049): Liberado acumulado: 100
+[INFO] 17:13:36:151 muse/(8026:8049): Pedido acumulado: 680
+[INFO] 17:13:36:151 muse/(8026:8049): Espacio reservado: 640
+[INFO] 17:14:27:674 muse/(8099:8099): NUEVA EJECUCION
+[INFO] 17:14:30:534 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:534 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio disponible en la memoria es 4992
+[INFO] 17:14:30:534 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio en el ultimo segmento 18
+[INFO] 17:14:30:534 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:534 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): Aun no ha liberado memoria
+[INFO] 17:14:30:534 muse/(8099:8110): Pedido acumulado: 100
+[INFO] 17:14:30:534 muse/(8099:8110): Espacio reservado: 128
+[INFO] 17:14:30:534 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:534 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio disponible en la memoria es 4896
+[INFO] 17:14:30:534 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio en el ultimo segmento 9
+[INFO] 17:14:30:534 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:534 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): Aun no ha liberado memoria
+[INFO] 17:14:30:534 muse/(8099:8110): Pedido acumulado: 200
+[INFO] 17:14:30:534 muse/(8099:8110): Espacio reservado: 224
+[INFO] 17:14:30:534 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:534 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio disponible en la memoria es 4800
+[INFO] 17:14:30:534 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): el espacio en el ultimo segmento 0
+[INFO] 17:14:30:534 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:534 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:534 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:534 muse/(8099:8110): Aun no ha liberado memoria
+[INFO] 17:14:30:534 muse/(8099:8110): Pedido acumulado: 300
+[INFO] 17:14:30:534 muse/(8099:8110): Espacio reservado: 320
+[INFO] 17:14:30:536 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:536 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio disponible en la memoria es 4672
+[INFO] 17:14:30:536 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio en el ultimo segmento 23
+[INFO] 17:14:30:536 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:536 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): Aun no ha liberado memoria
+[INFO] 17:14:30:536 muse/(8099:8110): Pedido acumulado: 400
+[INFO] 17:14:30:536 muse/(8099:8110): Espacio reservado: 448
+[INFO] 17:14:30:536 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:536 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio disponible en la memoria es 4480
+[INFO] 17:14:30:536 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio en el ultimo segmento 110
+[INFO] 17:14:30:536 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:536 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): Liberado acumulado: 100
+[INFO] 17:14:30:536 muse/(8099:8110): Pedido acumulado: 600
+[INFO] 17:14:30:536 muse/(8099:8110): Espacio reservado: 640
+[INFO] 17:14:30:536 muse/(8099:8110): ----> METRICAS <----
+[INFO] 17:14:30:536 muse/(8099:8110): -DEL SISTEMA
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio disponible en la memoria es 4480
+[INFO] 17:14:30:536 muse/(8099:8110): -POR SOCKET CONECTADO
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): el espacio en el ultimo segmento 25
+[INFO] 17:14:30:536 muse/(8099:8110): 127.0.0.1-8109 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:14:30:536 muse/(8099:8110): -POR PROGRAMA
+[INFO] 17:14:30:536 muse/(8099:8110): PROGRAMA 127.0.0.1-8109
+[INFO] 17:14:30:536 muse/(8099:8110): Liberado acumulado: 100
+[INFO] 17:14:30:536 muse/(8099:8110): Pedido acumulado: 680
+[INFO] 17:14:30:536 muse/(8099:8110): Espacio reservado: 640
+[INFO] 17:22:13:160 muse/(8351:8351): NUEVA EJECUCION
+[INFO] 17:22:15:596 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:596 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:596 muse/(8351:8361): el espacio disponible en la memoria es 4992
+[INFO] 17:22:15:596 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:596 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:596 muse/(8351:8361): el espacio en el ultimo segmento 18
+[INFO] 17:22:15:596 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:596 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:596 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:596 muse/(8351:8361): Aun no ha liberado memoria
+[INFO] 17:22:15:596 muse/(8351:8361): Pedido acumulado: 100
+[INFO] 17:22:15:596 muse/(8351:8361): Espacio reservado: 128
+[INFO] 17:22:15:597 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:597 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:597 muse/(8351:8361): el espacio disponible en la memoria es 4896
+[INFO] 17:22:15:597 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:597 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:597 muse/(8351:8361): el espacio en el ultimo segmento 9
+[INFO] 17:22:15:597 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:597 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:597 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:597 muse/(8351:8361): Aun no ha liberado memoria
+[INFO] 17:22:15:597 muse/(8351:8361): Pedido acumulado: 200
+[INFO] 17:22:15:597 muse/(8351:8361): Espacio reservado: 224
+[INFO] 17:22:15:602 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:603 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:603 muse/(8351:8361): el espacio disponible en la memoria es 4800
+[INFO] 17:22:15:603 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:603 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:603 muse/(8351:8361): el espacio en el ultimo segmento 0
+[INFO] 17:22:15:603 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:603 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:603 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:603 muse/(8351:8361): Aun no ha liberado memoria
+[INFO] 17:22:15:603 muse/(8351:8361): Pedido acumulado: 300
+[INFO] 17:22:15:603 muse/(8351:8361): Espacio reservado: 320
+[INFO] 17:22:15:612 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:612 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:612 muse/(8351:8361): el espacio disponible en la memoria es 4672
+[INFO] 17:22:15:612 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:612 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:612 muse/(8351:8361): el espacio en el ultimo segmento 23
+[INFO] 17:22:15:612 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:612 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:612 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:612 muse/(8351:8361): Aun no ha liberado memoria
+[INFO] 17:22:15:612 muse/(8351:8361): Pedido acumulado: 400
+[INFO] 17:22:15:612 muse/(8351:8361): Espacio reservado: 448
+[INFO] 17:22:15:616 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:616 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:616 muse/(8351:8361): el espacio disponible en la memoria es 4480
+[INFO] 17:22:15:616 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:616 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:616 muse/(8351:8361): el espacio en el ultimo segmento 110
+[INFO] 17:22:15:616 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:616 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:616 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:616 muse/(8351:8361): Liberado acumulado: 100
+[INFO] 17:22:15:616 muse/(8351:8361): Pedido acumulado: 600
+[INFO] 17:22:15:616 muse/(8351:8361): Espacio reservado: 640
+[INFO] 17:22:15:616 muse/(8351:8361): ----> METRICAS <----
+[INFO] 17:22:15:616 muse/(8351:8361): -DEL SISTEMA
+[INFO] 17:22:15:616 muse/(8351:8361): el espacio disponible en la memoria es 4480
+[INFO] 17:22:15:616 muse/(8351:8361): -POR SOCKET CONECTADO
+[INFO] 17:22:15:616 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:616 muse/(8351:8361): el espacio en el ultimo segmento 25
+[INFO] 17:22:15:616 muse/(8351:8361): 127.0.0.1-8360 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:22:15:616 muse/(8351:8361): -POR PROGRAMA
+[INFO] 17:22:15:616 muse/(8351:8361): PROGRAMA 127.0.0.1-8360
+[INFO] 17:22:15:616 muse/(8351:8361): Liberado acumulado: 100
+[INFO] 17:22:15:616 muse/(8351:8361): Pedido acumulado: 680
+[INFO] 17:22:15:616 muse/(8351:8361): Espacio reservado: 640
+[INFO] 17:23:10:700 muse/(8419:8419): NUEVA EJECUCION
+[INFO] 17:23:12:773 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:773 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:773 muse/(8419:8429): el espacio disponible en la memoria es 4992
+[INFO] 17:23:12:773 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:773 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:773 muse/(8419:8429): el espacio en el ultimo segmento 18
+[INFO] 17:23:12:773 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:773 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:773 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:773 muse/(8419:8429): Aun no ha liberado memoria
+[INFO] 17:23:12:773 muse/(8419:8429): Pedido acumulado: 100
+[INFO] 17:23:12:773 muse/(8419:8429): Espacio reservado: 128
+[INFO] 17:23:12:774 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:774 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:774 muse/(8419:8429): el espacio disponible en la memoria es 4896
+[INFO] 17:23:12:774 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:774 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:774 muse/(8419:8429): el espacio en el ultimo segmento 9
+[INFO] 17:23:12:774 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:774 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:774 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:774 muse/(8419:8429): Aun no ha liberado memoria
+[INFO] 17:23:12:774 muse/(8419:8429): Pedido acumulado: 200
+[INFO] 17:23:12:774 muse/(8419:8429): Espacio reservado: 224
+[INFO] 17:23:12:774 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:774 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:774 muse/(8419:8429): el espacio disponible en la memoria es 4800
+[INFO] 17:23:12:774 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:774 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:774 muse/(8419:8429): el espacio en el ultimo segmento 0
+[INFO] 17:23:12:774 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:774 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:774 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:774 muse/(8419:8429): Aun no ha liberado memoria
+[INFO] 17:23:12:774 muse/(8419:8429): Pedido acumulado: 300
+[INFO] 17:23:12:774 muse/(8419:8429): Espacio reservado: 320
+[INFO] 17:23:12:775 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:775 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:775 muse/(8419:8429): el espacio disponible en la memoria es 4672
+[INFO] 17:23:12:775 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:775 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:775 muse/(8419:8429): el espacio en el ultimo segmento 23
+[INFO] 17:23:12:775 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:775 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:775 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:775 muse/(8419:8429): Aun no ha liberado memoria
+[INFO] 17:23:12:775 muse/(8419:8429): Pedido acumulado: 400
+[INFO] 17:23:12:775 muse/(8419:8429): Espacio reservado: 448
+[INFO] 17:23:12:775 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:775 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:775 muse/(8419:8429): el espacio disponible en la memoria es 4480
+[INFO] 17:23:12:775 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:775 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:775 muse/(8419:8429): el espacio en el ultimo segmento 110
+[INFO] 17:23:12:775 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:775 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:775 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:775 muse/(8419:8429): Liberado acumulado: 100
+[INFO] 17:23:12:775 muse/(8419:8429): Pedido acumulado: 600
+[INFO] 17:23:12:775 muse/(8419:8429): Espacio reservado: 640
+[INFO] 17:23:12:776 muse/(8419:8429): ----> METRICAS <----
+[INFO] 17:23:12:776 muse/(8419:8429): -DEL SISTEMA
+[INFO] 17:23:12:776 muse/(8419:8429): el espacio disponible en la memoria es 4480
+[INFO] 17:23:12:776 muse/(8419:8429): -POR SOCKET CONECTADO
+[INFO] 17:23:12:776 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:776 muse/(8419:8429): el espacio en el ultimo segmento 25
+[INFO] 17:23:12:776 muse/(8419:8429): 127.0.0.1-8428 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:23:12:776 muse/(8419:8429): -POR PROGRAMA
+[INFO] 17:23:12:776 muse/(8419:8429): PROGRAMA 127.0.0.1-8428
+[INFO] 17:23:12:776 muse/(8419:8429): Liberado acumulado: 100
+[INFO] 17:23:12:776 muse/(8419:8429): Pedido acumulado: 680
+[INFO] 17:23:12:776 muse/(8419:8429): Espacio reservado: 640
+[INFO] 17:34:25:272 muse/(8918:8918): NUEVA EJECUCION
+[INFO] 17:34:35:64 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:64 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:64 muse/(8918:8930): el espacio disponible en la memoria es 4992
+[INFO] 17:34:35:64 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:64 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:64 muse/(8918:8930): el espacio en el ultimo segmento 18
+[INFO] 17:34:35:64 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:64 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:64 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:64 muse/(8918:8930): Aun no ha liberado memoria
+[INFO] 17:34:35:64 muse/(8918:8930): Pedido acumulado: 100
+[INFO] 17:34:35:64 muse/(8918:8930): Espacio reservado: 128
+[INFO] 17:34:35:66 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:66 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:66 muse/(8918:8930): el espacio disponible en la memoria es 4896
+[INFO] 17:34:35:66 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:66 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:66 muse/(8918:8930): el espacio en el ultimo segmento 9
+[INFO] 17:34:35:66 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:66 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:66 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:66 muse/(8918:8930): Aun no ha liberado memoria
+[INFO] 17:34:35:66 muse/(8918:8930): Pedido acumulado: 200
+[INFO] 17:34:35:66 muse/(8918:8930): Espacio reservado: 224
+[INFO] 17:34:35:66 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:66 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:66 muse/(8918:8930): el espacio disponible en la memoria es 4800
+[INFO] 17:34:35:66 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:66 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:66 muse/(8918:8930): el espacio en el ultimo segmento 0
+[INFO] 17:34:35:66 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:66 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:66 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:66 muse/(8918:8930): Aun no ha liberado memoria
+[INFO] 17:34:35:66 muse/(8918:8930): Pedido acumulado: 300
+[INFO] 17:34:35:66 muse/(8918:8930): Espacio reservado: 320
+[INFO] 17:34:35:67 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:67 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:67 muse/(8918:8930): el espacio disponible en la memoria es 4672
+[INFO] 17:34:35:67 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:67 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:67 muse/(8918:8930): el espacio en el ultimo segmento 23
+[INFO] 17:34:35:67 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:67 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:67 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:67 muse/(8918:8930): Aun no ha liberado memoria
+[INFO] 17:34:35:67 muse/(8918:8930): Pedido acumulado: 400
+[INFO] 17:34:35:67 muse/(8918:8930): Espacio reservado: 448
+[INFO] 17:34:35:67 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:67 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:67 muse/(8918:8930): el espacio disponible en la memoria es 4480
+[INFO] 17:34:35:67 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:67 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:67 muse/(8918:8930): el espacio en el ultimo segmento 110
+[INFO] 17:34:35:67 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:67 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:67 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:67 muse/(8918:8930): Liberado acumulado: 100
+[INFO] 17:34:35:67 muse/(8918:8930): Pedido acumulado: 600
+[INFO] 17:34:35:67 muse/(8918:8930): Espacio reservado: 640
+[INFO] 17:34:35:68 muse/(8918:8930): ----> METRICAS <----
+[INFO] 17:34:35:68 muse/(8918:8930): -DEL SISTEMA
+[INFO] 17:34:35:68 muse/(8918:8930): el espacio disponible en la memoria es 4480
+[INFO] 17:34:35:68 muse/(8918:8930): -POR SOCKET CONECTADO
+[INFO] 17:34:35:68 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:68 muse/(8918:8930): el espacio en el ultimo segmento 25
+[INFO] 17:34:35:68 muse/(8918:8930): 127.0.0.1-8929 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:34:35:68 muse/(8918:8930): -POR PROGRAMA
+[INFO] 17:34:35:68 muse/(8918:8930): PROGRAMA 127.0.0.1-8929
+[INFO] 17:34:35:68 muse/(8918:8930): Liberado acumulado: 100
+[INFO] 17:34:35:68 muse/(8918:8930): Pedido acumulado: 680
+[INFO] 17:34:35:68 muse/(8918:8930): Espacio reservado: 640
+[INFO] 17:35:51:186 muse/(8971:8971): NUEVA EJECUCION
+[INFO] 17:35:56:89 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:89 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:89 muse/(8971:8987): el espacio disponible en la memoria es 4992
+[INFO] 17:35:56:89 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:89 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:89 muse/(8971:8987): el espacio en el ultimo segmento 18
+[INFO] 17:35:56:89 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:89 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:89 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:89 muse/(8971:8987): Aun no ha liberado memoria
+[INFO] 17:35:56:89 muse/(8971:8987): Pedido acumulado: 100
+[INFO] 17:35:56:89 muse/(8971:8987): Espacio reservado: 128
+[INFO] 17:35:56:89 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:89 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:89 muse/(8971:8987): el espacio disponible en la memoria es 4896
+[INFO] 17:35:56:89 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:89 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:89 muse/(8971:8987): el espacio en el ultimo segmento 9
+[INFO] 17:35:56:89 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:89 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:89 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:89 muse/(8971:8987): Aun no ha liberado memoria
+[INFO] 17:35:56:89 muse/(8971:8987): Pedido acumulado: 200
+[INFO] 17:35:56:89 muse/(8971:8987): Espacio reservado: 224
+[INFO] 17:35:56:90 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:90 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:90 muse/(8971:8987): el espacio disponible en la memoria es 4800
+[INFO] 17:35:56:90 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:90 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:90 muse/(8971:8987): el espacio en el ultimo segmento 0
+[INFO] 17:35:56:90 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:90 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:90 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:90 muse/(8971:8987): Aun no ha liberado memoria
+[INFO] 17:35:56:90 muse/(8971:8987): Pedido acumulado: 300
+[INFO] 17:35:56:90 muse/(8971:8987): Espacio reservado: 320
+[INFO] 17:35:56:90 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:90 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:90 muse/(8971:8987): el espacio disponible en la memoria es 4672
+[INFO] 17:35:56:90 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:90 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:90 muse/(8971:8987): el espacio en el ultimo segmento 23
+[INFO] 17:35:56:90 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:90 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:90 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:90 muse/(8971:8987): Aun no ha liberado memoria
+[INFO] 17:35:56:90 muse/(8971:8987): Pedido acumulado: 400
+[INFO] 17:35:56:90 muse/(8971:8987): Espacio reservado: 448
+[INFO] 17:35:56:94 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:94 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:95 muse/(8971:8987): el espacio disponible en la memoria es 4480
+[INFO] 17:35:56:95 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:95 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:95 muse/(8971:8987): el espacio en el ultimo segmento 110
+[INFO] 17:35:56:95 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:95 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:95 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:95 muse/(8971:8987): Liberado acumulado: 100
+[INFO] 17:35:56:95 muse/(8971:8987): Pedido acumulado: 600
+[INFO] 17:35:56:95 muse/(8971:8987): Espacio reservado: 640
+[INFO] 17:35:56:95 muse/(8971:8987): ----> METRICAS <----
+[INFO] 17:35:56:95 muse/(8971:8987): -DEL SISTEMA
+[INFO] 17:35:56:95 muse/(8971:8987): el espacio disponible en la memoria es 4480
+[INFO] 17:35:56:95 muse/(8971:8987): -POR SOCKET CONECTADO
+[INFO] 17:35:56:95 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:95 muse/(8971:8987): el espacio en el ultimo segmento 25
+[INFO] 17:35:56:95 muse/(8971:8987): 127.0.0.1-8986 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:35:56:95 muse/(8971:8987): -POR PROGRAMA
+[INFO] 17:35:56:95 muse/(8971:8987): PROGRAMA 127.0.0.1-8986
+[INFO] 17:35:56:95 muse/(8971:8987): Liberado acumulado: 100
+[INFO] 17:35:56:95 muse/(8971:8987): Pedido acumulado: 680
+[INFO] 17:35:56:95 muse/(8971:8987): Espacio reservado: 640
+[INFO] 17:41:30:266 muse/(9186:9186): NUEVA EJECUCION
+[INFO] 17:41:53:357 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:357 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:357 muse/(9186:9198): el espacio disponible en la memoria es 4992
+[INFO] 17:41:53:357 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:357 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:357 muse/(9186:9198): el espacio en el ultimo segmento 18
+[INFO] 17:41:53:357 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:357 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:357 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:357 muse/(9186:9198): Aun no ha liberado memoria
+[INFO] 17:41:53:357 muse/(9186:9198): Pedido acumulado: 100
+[INFO] 17:41:53:357 muse/(9186:9198): Espacio reservado: 128
+[INFO] 17:41:53:357 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:357 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:357 muse/(9186:9198): el espacio disponible en la memoria es 4896
+[INFO] 17:41:53:357 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:357 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:357 muse/(9186:9198): el espacio en el ultimo segmento 9
+[INFO] 17:41:53:357 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:357 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:357 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:357 muse/(9186:9198): Aun no ha liberado memoria
+[INFO] 17:41:53:357 muse/(9186:9198): Pedido acumulado: 200
+[INFO] 17:41:53:357 muse/(9186:9198): Espacio reservado: 224
+[INFO] 17:41:53:358 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:358 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:358 muse/(9186:9198): el espacio disponible en la memoria es 4800
+[INFO] 17:41:53:358 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:358 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:358 muse/(9186:9198): el espacio en el ultimo segmento 0
+[INFO] 17:41:53:358 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:358 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:358 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:358 muse/(9186:9198): Aun no ha liberado memoria
+[INFO] 17:41:53:358 muse/(9186:9198): Pedido acumulado: 300
+[INFO] 17:41:53:358 muse/(9186:9198): Espacio reservado: 320
+[INFO] 17:41:53:358 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:358 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:358 muse/(9186:9198): el espacio disponible en la memoria es 4672
+[INFO] 17:41:53:358 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:358 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:358 muse/(9186:9198): el espacio en el ultimo segmento 23
+[INFO] 17:41:53:358 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:358 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:358 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:358 muse/(9186:9198): Aun no ha liberado memoria
+[INFO] 17:41:53:358 muse/(9186:9198): Pedido acumulado: 400
+[INFO] 17:41:53:358 muse/(9186:9198): Espacio reservado: 448
+[INFO] 17:41:53:359 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:359 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:359 muse/(9186:9198): el espacio disponible en la memoria es 4480
+[INFO] 17:41:53:359 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:359 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:359 muse/(9186:9198): el espacio en el ultimo segmento 110
+[INFO] 17:41:53:359 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:359 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:359 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:359 muse/(9186:9198): Liberado acumulado: 100
+[INFO] 17:41:53:359 muse/(9186:9198): Pedido acumulado: 600
+[INFO] 17:41:53:359 muse/(9186:9198): Espacio reservado: 640
+[INFO] 17:41:53:359 muse/(9186:9198): ----> METRICAS <----
+[INFO] 17:41:53:359 muse/(9186:9198): -DEL SISTEMA
+[INFO] 17:41:53:359 muse/(9186:9198): el espacio disponible en la memoria es 4480
+[INFO] 17:41:53:359 muse/(9186:9198): -POR SOCKET CONECTADO
+[INFO] 17:41:53:359 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:359 muse/(9186:9198): el espacio en el ultimo segmento 25
+[INFO] 17:41:53:359 muse/(9186:9198): 127.0.0.1-9197 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:41:53:359 muse/(9186:9198): -POR PROGRAMA
+[INFO] 17:41:53:359 muse/(9186:9198): PROGRAMA 127.0.0.1-9197
+[INFO] 17:41:53:359 muse/(9186:9198): Liberado acumulado: 100
+[INFO] 17:41:53:359 muse/(9186:9198): Pedido acumulado: 680
+[INFO] 17:41:53:359 muse/(9186:9198): Espacio reservado: 640
+[INFO] 17:44:00:330 muse/(9263:9263): NUEVA EJECUCION
+[INFO] 17:44:02:281 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:281 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:281 muse/(9263:9273): el espacio disponible en la memoria es 4992
+[INFO] 17:44:02:281 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:281 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:281 muse/(9263:9273): el espacio en el ultimo segmento 18
+[INFO] 17:44:02:281 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:281 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:281 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:281 muse/(9263:9273): Aun no ha liberado memoria
+[INFO] 17:44:02:281 muse/(9263:9273): Pedido acumulado: 100
+[INFO] 17:44:02:281 muse/(9263:9273): Espacio reservado: 128
+[INFO] 17:44:02:282 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:282 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:282 muse/(9263:9273): el espacio disponible en la memoria es 4896
+[INFO] 17:44:02:282 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:282 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:282 muse/(9263:9273): el espacio en el ultimo segmento 9
+[INFO] 17:44:02:282 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:282 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:282 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:282 muse/(9263:9273): Aun no ha liberado memoria
+[INFO] 17:44:02:282 muse/(9263:9273): Pedido acumulado: 200
+[INFO] 17:44:02:282 muse/(9263:9273): Espacio reservado: 224
+[INFO] 17:44:02:285 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:285 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:285 muse/(9263:9273): el espacio disponible en la memoria es 4800
+[INFO] 17:44:02:285 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:285 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:285 muse/(9263:9273): el espacio en el ultimo segmento 0
+[INFO] 17:44:02:285 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:285 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:285 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:285 muse/(9263:9273): Aun no ha liberado memoria
+[INFO] 17:44:02:285 muse/(9263:9273): Pedido acumulado: 300
+[INFO] 17:44:02:285 muse/(9263:9273): Espacio reservado: 320
+[INFO] 17:44:02:285 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:285 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:285 muse/(9263:9273): el espacio disponible en la memoria es 4672
+[INFO] 17:44:02:285 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:285 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:285 muse/(9263:9273): el espacio en el ultimo segmento 23
+[INFO] 17:44:02:285 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:285 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:285 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:285 muse/(9263:9273): Aun no ha liberado memoria
+[INFO] 17:44:02:285 muse/(9263:9273): Pedido acumulado: 400
+[INFO] 17:44:02:285 muse/(9263:9273): Espacio reservado: 448
+[INFO] 17:44:02:286 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:286 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:286 muse/(9263:9273): el espacio disponible en la memoria es 4480
+[INFO] 17:44:02:286 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:286 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:286 muse/(9263:9273): el espacio en el ultimo segmento 110
+[INFO] 17:44:02:286 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:286 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:286 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:286 muse/(9263:9273): Liberado acumulado: 100
+[INFO] 17:44:02:286 muse/(9263:9273): Pedido acumulado: 600
+[INFO] 17:44:02:286 muse/(9263:9273): Espacio reservado: 640
+[INFO] 17:44:02:287 muse/(9263:9273): ----> METRICAS <----
+[INFO] 17:44:02:287 muse/(9263:9273): -DEL SISTEMA
+[INFO] 17:44:02:287 muse/(9263:9273): el espacio disponible en la memoria es 4480
+[INFO] 17:44:02:287 muse/(9263:9273): -POR SOCKET CONECTADO
+[INFO] 17:44:02:287 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:287 muse/(9263:9273): el espacio en el ultimo segmento 25
+[INFO] 17:44:02:287 muse/(9263:9273): 127.0.0.1-9272 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:44:02:287 muse/(9263:9273): -POR PROGRAMA
+[INFO] 17:44:02:287 muse/(9263:9273): PROGRAMA 127.0.0.1-9272
+[INFO] 17:44:02:287 muse/(9263:9273): Liberado acumulado: 100
+[INFO] 17:44:02:287 muse/(9263:9273): Pedido acumulado: 680
+[INFO] 17:44:02:287 muse/(9263:9273): Espacio reservado: 640
+[INFO] 17:45:41:575 muse/(9354:9354): NUEVA EJECUCION
+[INFO] 17:45:43:216 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:216 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:216 muse/(9354:9364): el espacio disponible en la memoria es 4992
+[INFO] 17:45:43:216 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:216 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:216 muse/(9354:9364): el espacio en el ultimo segmento 18
+[INFO] 17:45:43:216 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:216 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:216 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:216 muse/(9354:9364): Aun no ha liberado memoria
+[INFO] 17:45:43:216 muse/(9354:9364): Pedido acumulado: 100
+[INFO] 17:45:43:216 muse/(9354:9364): Espacio reservado: 128
+[INFO] 17:45:43:216 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:216 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:216 muse/(9354:9364): el espacio disponible en la memoria es 4896
+[INFO] 17:45:43:216 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:216 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:216 muse/(9354:9364): el espacio en el ultimo segmento 9
+[INFO] 17:45:43:216 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:216 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:216 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:216 muse/(9354:9364): Aun no ha liberado memoria
+[INFO] 17:45:43:216 muse/(9354:9364): Pedido acumulado: 200
+[INFO] 17:45:43:216 muse/(9354:9364): Espacio reservado: 224
+[INFO] 17:45:43:217 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:217 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:217 muse/(9354:9364): el espacio disponible en la memoria es 4800
+[INFO] 17:45:43:217 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:217 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:217 muse/(9354:9364): el espacio en el ultimo segmento 0
+[INFO] 17:45:43:217 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:217 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:217 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:217 muse/(9354:9364): Aun no ha liberado memoria
+[INFO] 17:45:43:217 muse/(9354:9364): Pedido acumulado: 300
+[INFO] 17:45:43:217 muse/(9354:9364): Espacio reservado: 320
+[INFO] 17:45:43:218 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:218 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:218 muse/(9354:9364): el espacio disponible en la memoria es 4672
+[INFO] 17:45:43:218 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:218 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:218 muse/(9354:9364): el espacio en el ultimo segmento 23
+[INFO] 17:45:43:218 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:218 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:218 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:218 muse/(9354:9364): Aun no ha liberado memoria
+[INFO] 17:45:43:218 muse/(9354:9364): Pedido acumulado: 400
+[INFO] 17:45:43:218 muse/(9354:9364): Espacio reservado: 448
+[INFO] 17:45:43:220 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:220 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:221 muse/(9354:9364): el espacio disponible en la memoria es 4480
+[INFO] 17:45:43:221 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:221 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:221 muse/(9354:9364): el espacio en el ultimo segmento 110
+[INFO] 17:45:43:221 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:221 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:221 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:221 muse/(9354:9364): Liberado acumulado: 100
+[INFO] 17:45:43:221 muse/(9354:9364): Pedido acumulado: 600
+[INFO] 17:45:43:221 muse/(9354:9364): Espacio reservado: 640
+[INFO] 17:45:43:221 muse/(9354:9364): ----> METRICAS <----
+[INFO] 17:45:43:221 muse/(9354:9364): -DEL SISTEMA
+[INFO] 17:45:43:221 muse/(9354:9364): el espacio disponible en la memoria es 4480
+[INFO] 17:45:43:221 muse/(9354:9364): -POR SOCKET CONECTADO
+[INFO] 17:45:43:221 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:221 muse/(9354:9364): el espacio en el ultimo segmento 25
+[INFO] 17:45:43:221 muse/(9354:9364): 127.0.0.1-9363 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:45:43:221 muse/(9354:9364): -POR PROGRAMA
+[INFO] 17:45:43:221 muse/(9354:9364): PROGRAMA 127.0.0.1-9363
+[INFO] 17:45:43:221 muse/(9354:9364): Liberado acumulado: 100
+[INFO] 17:45:43:221 muse/(9354:9364): Pedido acumulado: 680
+[INFO] 17:45:43:221 muse/(9354:9364): Espacio reservado: 640
+[INFO] 17:50:43:970 muse/(9639:9639): NUEVA EJECUCION
+[INFO] 17:50:57:38 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:38 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:38 muse/(9639:9649): el espacio disponible en la memoria es 4992
+[INFO] 17:50:57:38 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:38 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:38 muse/(9639:9649): el espacio en el ultimo segmento 18
+[INFO] 17:50:57:38 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:38 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:38 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:38 muse/(9639:9649): Aun no ha liberado memoria
+[INFO] 17:50:57:38 muse/(9639:9649): Pedido acumulado: 100
+[INFO] 17:50:57:38 muse/(9639:9649): Espacio reservado: 128
+[INFO] 17:50:57:39 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:39 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:39 muse/(9639:9649): el espacio disponible en la memoria es 4896
+[INFO] 17:50:57:39 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:39 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:39 muse/(9639:9649): el espacio en el ultimo segmento 9
+[INFO] 17:50:57:39 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:39 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:39 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:39 muse/(9639:9649): Aun no ha liberado memoria
+[INFO] 17:50:57:39 muse/(9639:9649): Pedido acumulado: 200
+[INFO] 17:50:57:39 muse/(9639:9649): Espacio reservado: 224
+[INFO] 17:50:57:39 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:39 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:39 muse/(9639:9649): el espacio disponible en la memoria es 4800
+[INFO] 17:50:57:39 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:39 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:39 muse/(9639:9649): el espacio en el ultimo segmento 0
+[INFO] 17:50:57:39 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:39 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:39 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:39 muse/(9639:9649): Aun no ha liberado memoria
+[INFO] 17:50:57:39 muse/(9639:9649): Pedido acumulado: 300
+[INFO] 17:50:57:39 muse/(9639:9649): Espacio reservado: 320
+[INFO] 17:50:57:41 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:41 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:41 muse/(9639:9649): el espacio disponible en la memoria es 4672
+[INFO] 17:50:57:41 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:41 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:41 muse/(9639:9649): el espacio en el ultimo segmento 23
+[INFO] 17:50:57:41 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:41 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:41 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:41 muse/(9639:9649): Aun no ha liberado memoria
+[INFO] 17:50:57:41 muse/(9639:9649): Pedido acumulado: 400
+[INFO] 17:50:57:41 muse/(9639:9649): Espacio reservado: 448
+[INFO] 17:50:57:44 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:44 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:44 muse/(9639:9649): el espacio disponible en la memoria es 4480
+[INFO] 17:50:57:44 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:44 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:44 muse/(9639:9649): el espacio en el ultimo segmento 110
+[INFO] 17:50:57:44 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:44 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:44 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:44 muse/(9639:9649): Liberado acumulado: 100
+[INFO] 17:50:57:44 muse/(9639:9649): Pedido acumulado: 600
+[INFO] 17:50:57:44 muse/(9639:9649): Espacio reservado: 640
+[INFO] 17:50:57:44 muse/(9639:9649): ----> METRICAS <----
+[INFO] 17:50:57:44 muse/(9639:9649): -DEL SISTEMA
+[INFO] 17:50:57:44 muse/(9639:9649): el espacio disponible en la memoria es 4480
+[INFO] 17:50:57:44 muse/(9639:9649): -POR SOCKET CONECTADO
+[INFO] 17:50:57:44 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:44 muse/(9639:9649): el espacio en el ultimo segmento 25
+[INFO] 17:50:57:44 muse/(9639:9649): 127.0.0.1-9648 tiene el 100 porciento de los segmentos pedidos
+[INFO] 17:50:57:44 muse/(9639:9649): -POR PROGRAMA
+[INFO] 17:50:57:44 muse/(9639:9649): PROGRAMA 127.0.0.1-9648
+[INFO] 17:50:57:44 muse/(9639:9649): Liberado acumulado: 100
+[INFO] 17:50:57:44 muse/(9639:9649): Pedido acumulado: 680
+[INFO] 17:50:57:44 muse/(9639:9649): Espacio reservado: 640
+[INFO] 18:12:12:584 muse/(10424:10424): NUEVA EJECUCION
+[INFO] 18:12:20:143 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:143 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:143 muse/(10424:10446): el espacio disponible en la memoria es 4992
+[INFO] 18:12:20:143 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:143 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:143 muse/(10424:10446): el espacio en el ultimo segmento 18
+[INFO] 18:12:20:143 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:143 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:143 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:143 muse/(10424:10446): Aun no ha liberado memoria
+[INFO] 18:12:20:143 muse/(10424:10446): Pedido acumulado: 100
+[INFO] 18:12:20:143 muse/(10424:10446): Espacio reservado: 128
+[INFO] 18:12:20:143 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:143 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:143 muse/(10424:10446): el espacio disponible en la memoria es 4896
+[INFO] 18:12:20:143 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:143 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:143 muse/(10424:10446): el espacio en el ultimo segmento 9
+[INFO] 18:12:20:143 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:143 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:143 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:143 muse/(10424:10446): Aun no ha liberado memoria
+[INFO] 18:12:20:143 muse/(10424:10446): Pedido acumulado: 200
+[INFO] 18:12:20:143 muse/(10424:10446): Espacio reservado: 224
+[INFO] 18:12:20:144 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:144 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:144 muse/(10424:10446): el espacio disponible en la memoria es 4800
+[INFO] 18:12:20:144 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:144 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:144 muse/(10424:10446): el espacio en el ultimo segmento 0
+[INFO] 18:12:20:144 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:144 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:144 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:144 muse/(10424:10446): Aun no ha liberado memoria
+[INFO] 18:12:20:144 muse/(10424:10446): Pedido acumulado: 300
+[INFO] 18:12:20:144 muse/(10424:10446): Espacio reservado: 320
+[INFO] 18:12:20:144 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:144 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:144 muse/(10424:10446): el espacio disponible en la memoria es 4672
+[INFO] 18:12:20:144 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:144 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:144 muse/(10424:10446): el espacio en el ultimo segmento 23
+[INFO] 18:12:20:144 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:144 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:144 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:144 muse/(10424:10446): Aun no ha liberado memoria
+[INFO] 18:12:20:144 muse/(10424:10446): Pedido acumulado: 400
+[INFO] 18:12:20:144 muse/(10424:10446): Espacio reservado: 448
+[INFO] 18:12:20:150 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:150 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:150 muse/(10424:10446): el espacio disponible en la memoria es 4480
+[INFO] 18:12:20:151 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:151 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:151 muse/(10424:10446): el espacio en el ultimo segmento 110
+[INFO] 18:12:20:151 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:151 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:151 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:151 muse/(10424:10446): Liberado acumulado: 100
+[INFO] 18:12:20:151 muse/(10424:10446): Pedido acumulado: 600
+[INFO] 18:12:20:151 muse/(10424:10446): Espacio reservado: 640
+[INFO] 18:12:20:151 muse/(10424:10446): ----> METRICAS <----
+[INFO] 18:12:20:151 muse/(10424:10446): -DEL SISTEMA
+[INFO] 18:12:20:151 muse/(10424:10446): el espacio disponible en la memoria es 4480
+[INFO] 18:12:20:151 muse/(10424:10446): -POR SOCKET CONECTADO
+[INFO] 18:12:20:151 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:151 muse/(10424:10446): el espacio en el ultimo segmento 25
+[INFO] 18:12:20:151 muse/(10424:10446): 127.0.0.1-10445 tiene el 100 porciento de los segmentos pedidos
+[INFO] 18:12:20:151 muse/(10424:10446): -POR PROGRAMA
+[INFO] 18:12:20:151 muse/(10424:10446): PROGRAMA 127.0.0.1-10445
+[INFO] 18:12:20:151 muse/(10424:10446): Liberado acumulado: 100
+[INFO] 18:12:20:151 muse/(10424:10446): Pedido acumulado: 680
+[INFO] 18:12:20:151 muse/(10424:10446): Espacio reservado: 640
+[INFO] 20:26:25:492 muse/(10613:10613): NUEVA EJECUCION
+[INFO] 20:26:29:252 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:252 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:252 muse/(10613:10628): el espacio disponible en la memoria es 4992
+[INFO] 20:26:29:252 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:252 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:252 muse/(10613:10628): el espacio en el ultimo segmento 18
+[INFO] 20:26:29:252 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:252 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:252 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:252 muse/(10613:10628): Aun no ha liberado memoria
+[INFO] 20:26:29:252 muse/(10613:10628): Pedido acumulado: 100
+[INFO] 20:26:29:252 muse/(10613:10628): Espacio reservado: 128
+[INFO] 20:26:29:253 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:253 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:253 muse/(10613:10628): el espacio disponible en la memoria es 4896
+[INFO] 20:26:29:253 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:253 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:253 muse/(10613:10628): el espacio en el ultimo segmento 9
+[INFO] 20:26:29:253 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:253 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:253 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:253 muse/(10613:10628): Aun no ha liberado memoria
+[INFO] 20:26:29:253 muse/(10613:10628): Pedido acumulado: 200
+[INFO] 20:26:29:253 muse/(10613:10628): Espacio reservado: 224
+[INFO] 20:26:29:259 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:259 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:259 muse/(10613:10628): el espacio disponible en la memoria es 4800
+[INFO] 20:26:29:259 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:259 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:259 muse/(10613:10628): el espacio en el ultimo segmento 0
+[INFO] 20:26:29:259 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:259 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:260 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:260 muse/(10613:10628): Aun no ha liberado memoria
+[INFO] 20:26:29:260 muse/(10613:10628): Pedido acumulado: 300
+[INFO] 20:26:29:260 muse/(10613:10628): Espacio reservado: 320
+[INFO] 20:26:29:268 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:268 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:268 muse/(10613:10628): el espacio disponible en la memoria es 4672
+[INFO] 20:26:29:268 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:268 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:268 muse/(10613:10628): el espacio en el ultimo segmento 23
+[INFO] 20:26:29:268 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:268 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:268 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:268 muse/(10613:10628): Aun no ha liberado memoria
+[INFO] 20:26:29:268 muse/(10613:10628): Pedido acumulado: 400
+[INFO] 20:26:29:268 muse/(10613:10628): Espacio reservado: 448
+[INFO] 20:26:29:276 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:276 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:276 muse/(10613:10628): el espacio disponible en la memoria es 4480
+[INFO] 20:26:29:276 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:276 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:276 muse/(10613:10628): el espacio en el ultimo segmento 110
+[INFO] 20:26:29:276 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:276 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:276 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:276 muse/(10613:10628): Liberado acumulado: 100
+[INFO] 20:26:29:276 muse/(10613:10628): Pedido acumulado: 600
+[INFO] 20:26:29:276 muse/(10613:10628): Espacio reservado: 640
+[INFO] 20:26:29:280 muse/(10613:10628): ----> METRICAS <----
+[INFO] 20:26:29:280 muse/(10613:10628): -DEL SISTEMA
+[INFO] 20:26:29:280 muse/(10613:10628): el espacio disponible en la memoria es 4480
+[INFO] 20:26:29:280 muse/(10613:10628): -POR SOCKET CONECTADO
+[INFO] 20:26:29:280 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:280 muse/(10613:10628): el espacio en el ultimo segmento 25
+[INFO] 20:26:29:280 muse/(10613:10628): 127.0.0.1-10627 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:26:29:280 muse/(10613:10628): -POR PROGRAMA
+[INFO] 20:26:29:280 muse/(10613:10628): PROGRAMA 127.0.0.1-10627
+[INFO] 20:26:29:280 muse/(10613:10628): Liberado acumulado: 100
+[INFO] 20:26:29:280 muse/(10613:10628): Pedido acumulado: 680
+[INFO] 20:26:29:280 muse/(10613:10628): Espacio reservado: 640
+[INFO] 20:34:32:243 muse/(10818:10818): NUEVA EJECUCION
+[INFO] 20:35:39:294 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:294 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:294 muse/(10818:10946): el espacio disponible en la memoria es 4992
+[INFO] 20:35:39:294 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:294 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:294 muse/(10818:10946): el espacio en el ultimo segmento 18
+[INFO] 20:35:39:294 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:294 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:294 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:294 muse/(10818:10946): Aun no ha liberado memoria
+[INFO] 20:35:39:295 muse/(10818:10946): Pedido acumulado: 100
+[INFO] 20:35:39:295 muse/(10818:10946): Espacio reservado: 128
+[INFO] 20:35:39:298 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:298 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:298 muse/(10818:10946): el espacio disponible en la memoria es 4896
+[INFO] 20:35:39:298 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:298 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:298 muse/(10818:10946): el espacio en el ultimo segmento 9
+[INFO] 20:35:39:298 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:298 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:298 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:298 muse/(10818:10946): Aun no ha liberado memoria
+[INFO] 20:35:39:298 muse/(10818:10946): Pedido acumulado: 200
+[INFO] 20:35:39:298 muse/(10818:10946): Espacio reservado: 224
+[INFO] 20:35:39:299 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:299 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:299 muse/(10818:10946): el espacio disponible en la memoria es 4800
+[INFO] 20:35:39:299 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:299 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:299 muse/(10818:10946): el espacio en el ultimo segmento 0
+[INFO] 20:35:39:299 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:299 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:299 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:299 muse/(10818:10946): Aun no ha liberado memoria
+[INFO] 20:35:39:299 muse/(10818:10946): Pedido acumulado: 300
+[INFO] 20:35:39:299 muse/(10818:10946): Espacio reservado: 320
+[INFO] 20:35:39:300 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:300 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:300 muse/(10818:10946): el espacio disponible en la memoria es 4672
+[INFO] 20:35:39:300 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:300 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:300 muse/(10818:10946): el espacio en el ultimo segmento 23
+[INFO] 20:35:39:300 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:300 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:300 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:300 muse/(10818:10946): Aun no ha liberado memoria
+[INFO] 20:35:39:300 muse/(10818:10946): Pedido acumulado: 400
+[INFO] 20:35:39:300 muse/(10818:10946): Espacio reservado: 448
+[INFO] 20:35:39:300 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:300 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:300 muse/(10818:10946): el espacio disponible en la memoria es 4480
+[INFO] 20:35:39:300 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:300 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:300 muse/(10818:10946): el espacio en el ultimo segmento 110
+[INFO] 20:35:39:300 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:300 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:300 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:301 muse/(10818:10946): Liberado acumulado: 100
+[INFO] 20:35:39:301 muse/(10818:10946): Pedido acumulado: 600
+[INFO] 20:35:39:301 muse/(10818:10946): Espacio reservado: 640
+[INFO] 20:35:39:302 muse/(10818:10946): ----> METRICAS <----
+[INFO] 20:35:39:302 muse/(10818:10946): -DEL SISTEMA
+[INFO] 20:35:39:302 muse/(10818:10946): el espacio disponible en la memoria es 4480
+[INFO] 20:35:39:302 muse/(10818:10946): -POR SOCKET CONECTADO
+[INFO] 20:35:39:302 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:302 muse/(10818:10946): el espacio en el ultimo segmento 25
+[INFO] 20:35:39:302 muse/(10818:10946): 127.0.0.1-10945 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:35:39:302 muse/(10818:10946): -POR PROGRAMA
+[INFO] 20:35:39:302 muse/(10818:10946): PROGRAMA 127.0.0.1-10945
+[INFO] 20:35:39:302 muse/(10818:10946): Liberado acumulado: 100
+[INFO] 20:35:39:302 muse/(10818:10946): Pedido acumulado: 680
+[INFO] 20:35:39:302 muse/(10818:10946): Espacio reservado: 640
+[INFO] 20:37:10:975 muse/(11062:11062): NUEVA EJECUCION
+[INFO] 20:37:13:472 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:472 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:472 muse/(11062:11072): el espacio disponible en la memoria es 4992
+[INFO] 20:37:13:472 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:472 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:472 muse/(11062:11072): el espacio en el ultimo segmento 18
+[INFO] 20:37:13:472 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:472 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:472 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:472 muse/(11062:11072): Aun no ha liberado memoria
+[INFO] 20:37:13:472 muse/(11062:11072): Pedido acumulado: 100
+[INFO] 20:37:13:472 muse/(11062:11072): Espacio reservado: 128
+[INFO] 20:37:13:472 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:472 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:472 muse/(11062:11072): el espacio disponible en la memoria es 4896
+[INFO] 20:37:13:472 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:472 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:472 muse/(11062:11072): el espacio en el ultimo segmento 9
+[INFO] 20:37:13:472 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:472 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:472 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:472 muse/(11062:11072): Aun no ha liberado memoria
+[INFO] 20:37:13:472 muse/(11062:11072): Pedido acumulado: 200
+[INFO] 20:37:13:472 muse/(11062:11072): Espacio reservado: 224
+[INFO] 20:37:13:474 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:474 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:474 muse/(11062:11072): el espacio disponible en la memoria es 4800
+[INFO] 20:37:13:474 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:474 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:474 muse/(11062:11072): el espacio en el ultimo segmento 0
+[INFO] 20:37:13:474 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:474 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:474 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:474 muse/(11062:11072): Aun no ha liberado memoria
+[INFO] 20:37:13:474 muse/(11062:11072): Pedido acumulado: 300
+[INFO] 20:37:13:474 muse/(11062:11072): Espacio reservado: 320
+[INFO] 20:37:13:475 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:475 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:475 muse/(11062:11072): el espacio disponible en la memoria es 4672
+[INFO] 20:37:13:475 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:475 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:475 muse/(11062:11072): el espacio en el ultimo segmento 23
+[INFO] 20:37:13:475 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:475 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:475 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:475 muse/(11062:11072): Aun no ha liberado memoria
+[INFO] 20:37:13:475 muse/(11062:11072): Pedido acumulado: 400
+[INFO] 20:37:13:475 muse/(11062:11072): Espacio reservado: 448
+[INFO] 20:37:13:480 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:480 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:480 muse/(11062:11072): el espacio disponible en la memoria es 4480
+[INFO] 20:37:13:480 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:480 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:480 muse/(11062:11072): el espacio en el ultimo segmento 110
+[INFO] 20:37:13:480 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:480 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:480 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:480 muse/(11062:11072): Liberado acumulado: 100
+[INFO] 20:37:13:480 muse/(11062:11072): Pedido acumulado: 600
+[INFO] 20:37:13:480 muse/(11062:11072): Espacio reservado: 640
+[INFO] 20:37:13:481 muse/(11062:11072): ----> METRICAS <----
+[INFO] 20:37:13:481 muse/(11062:11072): -DEL SISTEMA
+[INFO] 20:37:13:481 muse/(11062:11072): el espacio disponible en la memoria es 4480
+[INFO] 20:37:13:481 muse/(11062:11072): -POR SOCKET CONECTADO
+[INFO] 20:37:13:481 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:481 muse/(11062:11072): el espacio en el ultimo segmento 25
+[INFO] 20:37:13:481 muse/(11062:11072): 127.0.0.1-11071 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:37:13:481 muse/(11062:11072): -POR PROGRAMA
+[INFO] 20:37:13:482 muse/(11062:11072): PROGRAMA 127.0.0.1-11071
+[INFO] 20:37:13:482 muse/(11062:11072): Liberado acumulado: 100
+[INFO] 20:37:13:482 muse/(11062:11072): Pedido acumulado: 680
+[INFO] 20:37:13:482 muse/(11062:11072): Espacio reservado: 640
+[INFO] 20:39:53:812 muse/(11175:11175): NUEVA EJECUCION
+[INFO] 20:39:55:926 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:926 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:926 muse/(11175:11188): el espacio disponible en la memoria es 4992
+[INFO] 20:39:55:926 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:926 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:926 muse/(11175:11188): el espacio en el ultimo segmento 18
+[INFO] 20:39:55:926 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:926 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:926 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:926 muse/(11175:11188): Aun no ha liberado memoria
+[INFO] 20:39:55:926 muse/(11175:11188): Pedido acumulado: 100
+[INFO] 20:39:55:926 muse/(11175:11188): Espacio reservado: 128
+[INFO] 20:39:55:927 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:927 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:927 muse/(11175:11188): el espacio disponible en la memoria es 4896
+[INFO] 20:39:55:927 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:927 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:928 muse/(11175:11188): el espacio en el ultimo segmento 9
+[INFO] 20:39:55:928 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:928 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:928 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:928 muse/(11175:11188): Aun no ha liberado memoria
+[INFO] 20:39:55:928 muse/(11175:11188): Pedido acumulado: 200
+[INFO] 20:39:55:928 muse/(11175:11188): Espacio reservado: 224
+[INFO] 20:39:55:929 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:929 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:929 muse/(11175:11188): el espacio disponible en la memoria es 4800
+[INFO] 20:39:55:929 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:929 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:929 muse/(11175:11188): el espacio en el ultimo segmento 0
+[INFO] 20:39:55:929 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:929 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:929 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:929 muse/(11175:11188): Aun no ha liberado memoria
+[INFO] 20:39:55:929 muse/(11175:11188): Pedido acumulado: 300
+[INFO] 20:39:55:929 muse/(11175:11188): Espacio reservado: 320
+[INFO] 20:39:55:933 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:933 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:933 muse/(11175:11188): el espacio disponible en la memoria es 4672
+[INFO] 20:39:55:933 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:933 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:933 muse/(11175:11188): el espacio en el ultimo segmento 23
+[INFO] 20:39:55:933 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:933 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:933 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:933 muse/(11175:11188): Aun no ha liberado memoria
+[INFO] 20:39:55:933 muse/(11175:11188): Pedido acumulado: 400
+[INFO] 20:39:55:933 muse/(11175:11188): Espacio reservado: 448
+[INFO] 20:39:55:934 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:934 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:934 muse/(11175:11188): el espacio disponible en la memoria es 4480
+[INFO] 20:39:55:934 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:934 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:935 muse/(11175:11188): el espacio en el ultimo segmento 110
+[INFO] 20:39:55:935 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:935 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:935 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:935 muse/(11175:11188): Liberado acumulado: 100
+[INFO] 20:39:55:935 muse/(11175:11188): Pedido acumulado: 600
+[INFO] 20:39:55:935 muse/(11175:11188): Espacio reservado: 640
+[INFO] 20:39:55:935 muse/(11175:11188): ----> METRICAS <----
+[INFO] 20:39:55:935 muse/(11175:11188): -DEL SISTEMA
+[INFO] 20:39:55:935 muse/(11175:11188): el espacio disponible en la memoria es 4480
+[INFO] 20:39:55:935 muse/(11175:11188): -POR SOCKET CONECTADO
+[INFO] 20:39:55:935 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:935 muse/(11175:11188): el espacio en el ultimo segmento 25
+[INFO] 20:39:55:935 muse/(11175:11188): 127.0.0.1-11187 tiene el 100 porciento de los segmentos pedidos
+[INFO] 20:39:55:935 muse/(11175:11188): -POR PROGRAMA
+[INFO] 20:39:55:935 muse/(11175:11188): PROGRAMA 127.0.0.1-11187
+[INFO] 20:39:55:935 muse/(11175:11188): Liberado acumulado: 100
+[INFO] 20:39:55:935 muse/(11175:11188): Pedido acumulado: 680
+[INFO] 20:39:55:935 muse/(11175:11188): Espacio reservado: 640
+[INFO] 14:00:16:776 muse/(5907:5907): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:00:16:785 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:785 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:785 muse/(5907:5907): el espacio disponible en la memoria es 4992
+[INFO] 14:00:16:785 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:785 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:785 muse/(5907:5907): el espacio en el ultimo segmento 18
+[INFO] 14:00:16:785 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:785 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:785 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:785 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:785 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:785 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:785 muse/(5907:5907): Pedido acumulado: 100
+[INFO] 14:00:16:785 muse/(5907:5907): Espacio reservado: 128
+[INFO] 14:00:16:785 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:785 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:785 muse/(5907:5907): Aun no ha pedido memoria
+[INFO] 14:00:16:785 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:786 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:786 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:786 muse/(5907:5907): el espacio disponible en la memoria es 4896
+[INFO] 14:00:16:786 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:786 muse/(5907:5907): el espacio en el ultimo segmento 9
+[INFO] 14:00:16:786 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:786 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:786 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Pedido acumulado: 200
+[INFO] 14:00:16:786 muse/(5907:5907): Espacio reservado: 224
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha pedido memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:786 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:786 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:786 muse/(5907:5907): el espacio disponible en la memoria es 4800
+[INFO] 14:00:16:786 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:786 muse/(5907:5907): el espacio en el ultimo segmento 0
+[INFO] 14:00:16:786 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:786 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:786 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Pedido acumulado: 300
+[INFO] 14:00:16:786 muse/(5907:5907): Espacio reservado: 320
+[INFO] 14:00:16:786 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Aun no ha pedido memoria
+[INFO] 14:00:16:786 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:787 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:787 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:787 muse/(5907:5907): el espacio disponible en la memoria es 4224
+[INFO] 14:00:16:787 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:787 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:787 muse/(5907:5907): el espacio en el ultimo segmento 18
+[INFO] 14:00:16:787 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:787 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:787 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:787 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:787 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:787 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:787 muse/(5907:5907): Pedido acumulado: 700
+[INFO] 14:00:16:787 muse/(5907:5907): Espacio reservado: 748
+[INFO] 14:00:16:787 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:787 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:787 muse/(5907:5907): Pedido acumulado: 100
+[INFO] 14:00:16:787 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:787 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:788 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:788 muse/(5907:5907): el espacio disponible en la memoria es 4096
+[INFO] 14:00:16:788 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:788 muse/(5907:5907): el espacio en el ultimo segmento 22
+[INFO] 14:00:16:788 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:788 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:788 muse/(5907:5907): Liberado acumulado: 200
+[INFO] 14:00:16:788 muse/(5907:5907): Pedido acumulado: 1011
+[INFO] 14:00:16:788 muse/(5907:5907): Espacio reservado: 876
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:788 muse/(5907:5907): Pedido acumulado: 100
+[INFO] 14:00:16:788 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:788 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:788 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:788 muse/(5907:5907): el espacio disponible en la memoria es 4096
+[INFO] 14:00:16:788 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:788 muse/(5907:5907): el espacio en el ultimo segmento 22
+[INFO] 14:00:16:788 muse/(5907:5907): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:788 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog2
+[INFO] 14:00:16:788 muse/(5907:5907): Liberado acumulado: 200
+[INFO] 14:00:16:788 muse/(5907:5907): Pedido acumulado: 1011
+[INFO] 14:00:16:788 muse/(5907:5907): Espacio reservado: 876
+[INFO] 14:00:16:788 muse/(5907:5907): Cerrandose con
+[INFO] 14:00:16:788 muse/(5907:5907): Leaks: 826
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:788 muse/(5907:5907): Pedido acumulado: 100
+[INFO] 14:00:16:788 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:788 muse/(5907:5907): ----> METRICAS <----
+[INFO] 14:00:16:788 muse/(5907:5907): -DEL SISTEMA
+[INFO] 14:00:16:788 muse/(5907:5907): el espacio disponible en la memoria es 4096
+[INFO] 14:00:16:788 muse/(5907:5907): -POR SOCKET CONECTADO
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): No tiene segmentos
+[INFO] 14:00:16:788 muse/(5907:5907): -POR PROGRAMA
+[INFO] 14:00:16:788 muse/(5907:5907): PROGRAMA prog
+[INFO] 14:00:16:788 muse/(5907:5907): Aun no ha liberado memoria
+[INFO] 14:00:16:788 muse/(5907:5907): Pedido acumulado: 100
+[INFO] 14:00:16:788 muse/(5907:5907): Espacio reservado: 0
+[INFO] 14:00:16:788 muse/(5907:5907): Cerrandose con
+[INFO] 14:00:16:788 muse/(5907:5907): Leaks: 0
+[INFO] 14:01:57:964 muse/(5967:5967): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:01:57:964 muse/(5967:5967): ----> METRICAS <----
+[INFO] 14:01:57:964 muse/(5967:5967): -DEL SISTEMA
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio disponible en la memoria es 4992
+[INFO] 14:01:57:964 muse/(5967:5967): -POR SOCKET CONECTADO
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio en el ultimo segmento 18
+[INFO] 14:01:57:964 muse/(5967:5967): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:964 muse/(5967:5967): No tiene segmentos
+[INFO] 14:01:57:964 muse/(5967:5967): -POR PROGRAMA
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Pedido acumulado: 100
+[INFO] 14:01:57:964 muse/(5967:5967): Espacio reservado: 128
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha pedido memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Espacio reservado: 0
+[INFO] 14:01:57:964 muse/(5967:5967): ----> METRICAS <----
+[INFO] 14:01:57:964 muse/(5967:5967): -DEL SISTEMA
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio disponible en la memoria es 4896
+[INFO] 14:01:57:964 muse/(5967:5967): -POR SOCKET CONECTADO
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio en el ultimo segmento 9
+[INFO] 14:01:57:964 muse/(5967:5967): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:964 muse/(5967:5967): No tiene segmentos
+[INFO] 14:01:57:964 muse/(5967:5967): -POR PROGRAMA
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Pedido acumulado: 200
+[INFO] 14:01:57:964 muse/(5967:5967): Espacio reservado: 224
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Aun no ha pedido memoria
+[INFO] 14:01:57:964 muse/(5967:5967): Espacio reservado: 0
+[INFO] 14:01:57:964 muse/(5967:5967): ----> METRICAS <----
+[INFO] 14:01:57:964 muse/(5967:5967): -DEL SISTEMA
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio disponible en la memoria es 4800
+[INFO] 14:01:57:964 muse/(5967:5967): -POR SOCKET CONECTADO
+[INFO] 14:01:57:964 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:964 muse/(5967:5967): el espacio en el ultimo segmento 0
+[INFO] 14:01:57:965 muse/(5967:5967): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:01:57:965 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:965 muse/(5967:5967): No tiene segmentos
+[INFO] 14:01:57:965 muse/(5967:5967): -POR PROGRAMA
+[INFO] 14:01:57:965 muse/(5967:5967): PROGRAMA prog2
+[INFO] 14:01:57:965 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:965 muse/(5967:5967): Pedido acumulado: 300
+[INFO] 14:01:57:965 muse/(5967:5967): Espacio reservado: 320
+[INFO] 14:01:57:965 muse/(5967:5967): PROGRAMA prog
+[INFO] 14:01:57:965 muse/(5967:5967): Aun no ha liberado memoria
+[INFO] 14:01:57:965 muse/(5967:5967): Aun no ha pedido memoria
+[INFO] 14:01:57:965 muse/(5967:5967): Espacio reservado: 0
+[INFO] 14:02:35:975 muse/(6006:6006): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:02:35:975 muse/(6006:6006): ----> METRICAS <----
+[INFO] 14:02:35:975 muse/(6006:6006): -DEL SISTEMA
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio disponible en la memoria es 4992
+[INFO] 14:02:35:975 muse/(6006:6006): -POR SOCKET CONECTADO
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio en el ultimo segmento 18
+[INFO] 14:02:35:975 muse/(6006:6006): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): No tiene segmentos
+[INFO] 14:02:35:975 muse/(6006:6006): -POR PROGRAMA
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Pedido acumulado: 100
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 128
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha pedido memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 0
+[INFO] 14:02:35:975 muse/(6006:6006): ----> METRICAS <----
+[INFO] 14:02:35:975 muse/(6006:6006): -DEL SISTEMA
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio disponible en la memoria es 4896
+[INFO] 14:02:35:975 muse/(6006:6006): -POR SOCKET CONECTADO
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio en el ultimo segmento 9
+[INFO] 14:02:35:975 muse/(6006:6006): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): No tiene segmentos
+[INFO] 14:02:35:975 muse/(6006:6006): -POR PROGRAMA
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Pedido acumulado: 200
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 224
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha pedido memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 0
+[INFO] 14:02:35:975 muse/(6006:6006): ----> METRICAS <----
+[INFO] 14:02:35:975 muse/(6006:6006): -DEL SISTEMA
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio disponible en la memoria es 4800
+[INFO] 14:02:35:975 muse/(6006:6006): -POR SOCKET CONECTADO
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): el espacio en el ultimo segmento 0
+[INFO] 14:02:35:975 muse/(6006:6006): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): No tiene segmentos
+[INFO] 14:02:35:975 muse/(6006:6006): -POR PROGRAMA
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog2
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Pedido acumulado: 300
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 320
+[INFO] 14:02:35:975 muse/(6006:6006): PROGRAMA prog
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha liberado memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Aun no ha pedido memoria
+[INFO] 14:02:35:975 muse/(6006:6006): Espacio reservado: 0
+[INFO] 14:08:22:549 muse/(6211:6211): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:08:22:550 muse/(6211:6211): ----> METRICAS <----
+[INFO] 14:08:22:550 muse/(6211:6211): -DEL SISTEMA
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio disponible en la memoria es 4992
+[INFO] 14:08:22:550 muse/(6211:6211): -POR SOCKET CONECTADO
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio en el ultimo segmento 18
+[INFO] 14:08:22:550 muse/(6211:6211): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): No tiene segmentos
+[INFO] 14:08:22:550 muse/(6211:6211): -POR PROGRAMA
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Pedido acumulado: 100
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 128
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha pedido memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 0
+[INFO] 14:08:22:550 muse/(6211:6211): ----> METRICAS <----
+[INFO] 14:08:22:550 muse/(6211:6211): -DEL SISTEMA
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio disponible en la memoria es 4896
+[INFO] 14:08:22:550 muse/(6211:6211): -POR SOCKET CONECTADO
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio en el ultimo segmento 9
+[INFO] 14:08:22:550 muse/(6211:6211): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): No tiene segmentos
+[INFO] 14:08:22:550 muse/(6211:6211): -POR PROGRAMA
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Pedido acumulado: 200
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 224
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha pedido memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 0
+[INFO] 14:08:22:550 muse/(6211:6211): ----> METRICAS <----
+[INFO] 14:08:22:550 muse/(6211:6211): -DEL SISTEMA
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio disponible en la memoria es 4800
+[INFO] 14:08:22:550 muse/(6211:6211): -POR SOCKET CONECTADO
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): el espacio en el ultimo segmento 0
+[INFO] 14:08:22:550 muse/(6211:6211): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): No tiene segmentos
+[INFO] 14:08:22:550 muse/(6211:6211): -POR PROGRAMA
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog2
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Pedido acumulado: 300
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 320
+[INFO] 14:08:22:550 muse/(6211:6211): PROGRAMA prog
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha liberado memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Aun no ha pedido memoria
+[INFO] 14:08:22:550 muse/(6211:6211): Espacio reservado: 0
+[INFO] 14:30:27:687 muse/(6791:6791): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:30:27:687 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:687 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:687 muse/(6791:6791): el espacio disponible en la memoria es 4992
+[INFO] 14:30:27:687 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:687 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:687 muse/(6791:6791): el espacio en el ultimo segmento 18
+[INFO] 14:30:27:687 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:687 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:688 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Pedido acumulado: 100
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 128
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha pedido memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:688 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:688 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:688 muse/(6791:6791): el espacio disponible en la memoria es 4896
+[INFO] 14:30:27:688 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:688 muse/(6791:6791): el espacio en el ultimo segmento 9
+[INFO] 14:30:27:688 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:688 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Pedido acumulado: 200
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 224
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha pedido memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:688 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:688 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:688 muse/(6791:6791): el espacio disponible en la memoria es 4800
+[INFO] 14:30:27:688 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:688 muse/(6791:6791): el espacio en el ultimo segmento 0
+[INFO] 14:30:27:688 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:688 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Pedido acumulado: 300
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 320
+[INFO] 14:30:27:688 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Aun no ha pedido memoria
+[INFO] 14:30:27:688 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:689 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:689 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:689 muse/(6791:6791): el espacio disponible en la memoria es 4224
+[INFO] 14:30:27:689 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:689 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:689 muse/(6791:6791): el espacio en el ultimo segmento 18
+[INFO] 14:30:27:689 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:689 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:689 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:689 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:689 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:689 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:689 muse/(6791:6791): Pedido acumulado: 700
+[INFO] 14:30:27:689 muse/(6791:6791): Espacio reservado: 748
+[INFO] 14:30:27:689 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:689 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:689 muse/(6791:6791): Pedido acumulado: 100
+[INFO] 14:30:27:689 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:690 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:690 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:690 muse/(6791:6791): el espacio disponible en la memoria es 4096
+[INFO] 14:30:27:690 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:690 muse/(6791:6791): el espacio en el ultimo segmento 22
+[INFO] 14:30:27:690 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:690 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:690 muse/(6791:6791): Liberado acumulado: 200
+[INFO] 14:30:27:690 muse/(6791:6791): Pedido acumulado: 1011
+[INFO] 14:30:27:690 muse/(6791:6791): Espacio reservado: 876
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:690 muse/(6791:6791): Pedido acumulado: 100
+[INFO] 14:30:27:690 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:690 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:690 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:690 muse/(6791:6791): el espacio disponible en la memoria es 4096
+[INFO] 14:30:27:690 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:690 muse/(6791:6791): el espacio en el ultimo segmento 22
+[INFO] 14:30:27:690 muse/(6791:6791): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:690 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog2
+[INFO] 14:30:27:690 muse/(6791:6791): Liberado acumulado: 200
+[INFO] 14:30:27:690 muse/(6791:6791): Pedido acumulado: 1011
+[INFO] 14:30:27:690 muse/(6791:6791): Espacio reservado: 876
+[INFO] 14:30:27:690 muse/(6791:6791): Cerrandose con
+[INFO] 14:30:27:690 muse/(6791:6791): Leaks: 826
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:690 muse/(6791:6791): Pedido acumulado: 100
+[INFO] 14:30:27:690 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:690 muse/(6791:6791): ----> METRICAS <----
+[INFO] 14:30:27:690 muse/(6791:6791): -DEL SISTEMA
+[INFO] 14:30:27:690 muse/(6791:6791): el espacio disponible en la memoria es 4096
+[INFO] 14:30:27:690 muse/(6791:6791): -POR SOCKET CONECTADO
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): No tiene segmentos
+[INFO] 14:30:27:690 muse/(6791:6791): -POR PROGRAMA
+[INFO] 14:30:27:690 muse/(6791:6791): PROGRAMA prog
+[INFO] 14:30:27:690 muse/(6791:6791): Aun no ha liberado memoria
+[INFO] 14:30:27:690 muse/(6791:6791): Pedido acumulado: 100
+[INFO] 14:30:27:690 muse/(6791:6791): Espacio reservado: 0
+[INFO] 14:30:27:690 muse/(6791:6791): Cerrandose con
+[INFO] 14:30:27:690 muse/(6791:6791): Leaks: 0
+[INFO] 14:49:35:112 muse/(7111:7111): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:49:35:112 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:112 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:112 muse/(7111:7111): el espacio disponible en la memoria es 4992
+[INFO] 14:49:35:112 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:112 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:112 muse/(7111:7111): el espacio en el ultimo segmento 18
+[INFO] 14:49:35:112 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:112 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:112 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:112 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:112 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:112 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:112 muse/(7111:7111): Pedido acumulado: 100
+[INFO] 14:49:35:112 muse/(7111:7111): Espacio reservado: 128
+[INFO] 14:49:35:112 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:112 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:112 muse/(7111:7111): Aun no ha pedido memoria
+[INFO] 14:49:35:112 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:113 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:113 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:113 muse/(7111:7111): el espacio disponible en la memoria es 4896
+[INFO] 14:49:35:113 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:113 muse/(7111:7111): el espacio en el ultimo segmento 9
+[INFO] 14:49:35:113 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:113 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:113 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Pedido acumulado: 200
+[INFO] 14:49:35:113 muse/(7111:7111): Espacio reservado: 224
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha pedido memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:113 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:113 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:113 muse/(7111:7111): el espacio disponible en la memoria es 4800
+[INFO] 14:49:35:113 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:113 muse/(7111:7111): el espacio en el ultimo segmento 0
+[INFO] 14:49:35:113 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:113 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:113 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Pedido acumulado: 300
+[INFO] 14:49:35:113 muse/(7111:7111): Espacio reservado: 320
+[INFO] 14:49:35:113 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Aun no ha pedido memoria
+[INFO] 14:49:35:113 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:119 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:119 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:119 muse/(7111:7111): el espacio disponible en la memoria es 4224
+[INFO] 14:49:35:119 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:119 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:120 muse/(7111:7111): el espacio en el ultimo segmento 18
+[INFO] 14:49:35:120 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:120 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:120 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:120 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:120 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:120 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:120 muse/(7111:7111): Pedido acumulado: 700
+[INFO] 14:49:35:120 muse/(7111:7111): Espacio reservado: 748
+[INFO] 14:49:35:120 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:120 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:120 muse/(7111:7111): Pedido acumulado: 100
+[INFO] 14:49:35:120 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:123 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:123 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:123 muse/(7111:7111): el espacio disponible en la memoria es 4096
+[INFO] 14:49:35:123 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:123 muse/(7111:7111): el espacio en el ultimo segmento 22
+[INFO] 14:49:35:123 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:123 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:123 muse/(7111:7111): Liberado acumulado: 200
+[INFO] 14:49:35:123 muse/(7111:7111): Pedido acumulado: 1011
+[INFO] 14:49:35:123 muse/(7111:7111): Espacio reservado: 876
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:123 muse/(7111:7111): Pedido acumulado: 100
+[INFO] 14:49:35:123 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:123 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:123 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:123 muse/(7111:7111): el espacio disponible en la memoria es 4096
+[INFO] 14:49:35:123 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:123 muse/(7111:7111): el espacio en el ultimo segmento 22
+[INFO] 14:49:35:123 muse/(7111:7111): prog2 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:123 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog2
+[INFO] 14:49:35:123 muse/(7111:7111): Liberado acumulado: 200
+[INFO] 14:49:35:123 muse/(7111:7111): Pedido acumulado: 1011
+[INFO] 14:49:35:123 muse/(7111:7111): Espacio reservado: 876
+[INFO] 14:49:35:123 muse/(7111:7111): Cerrandose con
+[INFO] 14:49:35:123 muse/(7111:7111): Leaks: 826
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:123 muse/(7111:7111): Pedido acumulado: 100
+[INFO] 14:49:35:123 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:123 muse/(7111:7111): ----> METRICAS <----
+[INFO] 14:49:35:123 muse/(7111:7111): -DEL SISTEMA
+[INFO] 14:49:35:123 muse/(7111:7111): el espacio disponible en la memoria es 4096
+[INFO] 14:49:35:123 muse/(7111:7111): -POR SOCKET CONECTADO
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): No tiene segmentos
+[INFO] 14:49:35:123 muse/(7111:7111): -POR PROGRAMA
+[INFO] 14:49:35:123 muse/(7111:7111): PROGRAMA prog
+[INFO] 14:49:35:123 muse/(7111:7111): Aun no ha liberado memoria
+[INFO] 14:49:35:123 muse/(7111:7111): Pedido acumulado: 100
+[INFO] 14:49:35:123 muse/(7111:7111): Espacio reservado: 0
+[INFO] 14:49:35:123 muse/(7111:7111): Cerrandose con
+[INFO] 14:49:35:123 muse/(7111:7111): Leaks: 0
+[INFO] 14:51:24:291 muse/(7246:7246): <<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>
+[INFO] 14:51:31:139 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:139 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:139 muse/(7246:7253): el espacio disponible en la memoria es 4992
+[INFO] 14:51:31:139 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:139 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:139 muse/(7246:7253): el espacio en el ultimo segmento 18
+[INFO] 14:51:31:139 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:139 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:139 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:139 muse/(7246:7253): Aun no ha liberado memoria
+[INFO] 14:51:31:139 muse/(7246:7253): Pedido acumulado: 100
+[INFO] 14:51:31:139 muse/(7246:7253): Espacio reservado: 128
+[INFO] 14:51:31:140 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:140 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:140 muse/(7246:7253): el espacio disponible en la memoria es 4896
+[INFO] 14:51:31:140 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:140 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:140 muse/(7246:7253): el espacio en el ultimo segmento 9
+[INFO] 14:51:31:140 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:140 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:140 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:140 muse/(7246:7253): Aun no ha liberado memoria
+[INFO] 14:51:31:140 muse/(7246:7253): Pedido acumulado: 200
+[INFO] 14:51:31:140 muse/(7246:7253): Espacio reservado: 224
+[INFO] 14:51:31:141 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:141 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:141 muse/(7246:7253): el espacio disponible en la memoria es 4800
+[INFO] 14:51:31:141 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:141 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:141 muse/(7246:7253): el espacio en el ultimo segmento 0
+[INFO] 14:51:31:141 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:141 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:141 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:141 muse/(7246:7253): Aun no ha liberado memoria
+[INFO] 14:51:31:141 muse/(7246:7253): Pedido acumulado: 300
+[INFO] 14:51:31:141 muse/(7246:7253): Espacio reservado: 320
+[INFO] 14:51:31:142 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:142 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:142 muse/(7246:7253): el espacio disponible en la memoria es 4672
+[INFO] 14:51:31:142 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:142 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:142 muse/(7246:7253): el espacio en el ultimo segmento 23
+[INFO] 14:51:31:142 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:142 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:142 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:142 muse/(7246:7253): Aun no ha liberado memoria
+[INFO] 14:51:31:142 muse/(7246:7253): Pedido acumulado: 400
+[INFO] 14:51:31:142 muse/(7246:7253): Espacio reservado: 448
+[INFO] 14:51:31:143 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:143 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:143 muse/(7246:7253): el espacio disponible en la memoria es 4480
+[INFO] 14:51:31:143 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:143 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:143 muse/(7246:7253): el espacio en el ultimo segmento 110
+[INFO] 14:51:31:143 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:143 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:143 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:143 muse/(7246:7253): Liberado acumulado: 100
+[INFO] 14:51:31:143 muse/(7246:7253): Pedido acumulado: 600
+[INFO] 14:51:31:143 muse/(7246:7253): Espacio reservado: 640
+[INFO] 14:51:31:143 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:143 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:143 muse/(7246:7253): el espacio disponible en la memoria es 4480
+[INFO] 14:51:31:143 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:143 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:143 muse/(7246:7253): el espacio en el ultimo segmento 25
+[INFO] 14:51:31:143 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:143 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:143 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:143 muse/(7246:7253): Liberado acumulado: 100
+[INFO] 14:51:31:143 muse/(7246:7253): Pedido acumulado: 680
+[INFO] 14:51:31:143 muse/(7246:7253): Espacio reservado: 640
+[INFO] 14:51:31:153 muse/(7246:7253): ----> METRICAS <----
+[INFO] 14:51:31:153 muse/(7246:7253): -DEL SISTEMA
+[INFO] 14:51:31:153 muse/(7246:7253): el espacio disponible en la memoria es 4352
+[INFO] 14:51:31:154 muse/(7246:7253): -POR SOCKET CONECTADO
+[INFO] 14:51:31:154 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:154 muse/(7246:7253): el espacio en el ultimo segmento 125
+[INFO] 14:51:31:154 muse/(7246:7253): 127.0.0.1-7252 tiene el 100 porciento de los segmentos pedidos
+[INFO] 14:51:31:154 muse/(7246:7253): -POR PROGRAMA
+[INFO] 14:51:31:154 muse/(7246:7253): PROGRAMA 127.0.0.1-7252
+[INFO] 14:51:31:154 muse/(7246:7253): Liberado acumulado: 200
+[INFO] 14:51:31:154 muse/(7246:7253): Pedido acumulado: 780
+[INFO] 14:51:31:154 muse/(7246:7253): Espacio reservado: 640
+[INFO] 14:51:31:154 muse/(7246:7253): Cerrandose con
+[INFO] 14:51:31:154 muse/(7246:7253): Leaks: 500

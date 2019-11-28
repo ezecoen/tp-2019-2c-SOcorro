@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
 	muse_get_t* mgt = crear_muse_get(string_length(blah),"prog2",25);
 	void* algo = muse_get(mgt);
-	//log_info(logg,"%s",(char*)algo);
+	log_info(logg,"%s",(char*)algo);
 
 	muse_cpy_t* mcp2 = crear_muse_cpy(15,"prog2",25,"heystrregdtahsye");
 	muse_cpy(mcp2);
@@ -222,8 +222,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 	pthread_mutex_unlock(&mutex_lugar_disponible);
 	//busco si ya tengo algun segmento
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
-	if(tabla_de_segmentos==NULL)
-	{
+	if(tabla_de_segmentos==NULL){
 		log_info(logg,"%s no tiene tabla de segmentos",datos->id);
 		return -1;
 	}
@@ -663,13 +662,11 @@ segmento* buscar_segmento_con_paginas_liberadas(int tamanio, t_list* tabla_segme
 	//tengo que mirar las paginas liberadas de cada segmento y fijarme si
 	//tamanio entra ahi
 	_Bool buscar_segmento_con_tamanio(segmento* seg){
-		if(seg->mmapeado)
-		{
+		if(seg->mmapeado){
 			return false;
 		}
 		//cambio
-		if(list_is_empty(seg->info_heaps))
-		{
+		if(list_is_empty(seg->info_heaps)){
 			// si esta vacio, como que tengo que armarlo de vuelta ...
 			pthread_mutex_lock(&mutex_lugar_disponible);
 			if(lugar_disponible>=configuracion->tam_pag){
@@ -930,8 +927,7 @@ void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_met
 // inicializar tam _ mapeos !!
 int muse_free(muse_free_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
-	if(tabla_de_segmentos==NULL)
-	{
+	if(tabla_de_segmentos==NULL){
 		log_info(logg,"no se encontro la tabla de segmentos de %s",datos->id);
 		return -1;
 	}
@@ -1060,15 +1056,15 @@ int muse_free(muse_free_t* datos){
 void* muse_get(muse_get_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
 	if(tabla_de_segmentos==NULL){
-			//no existe el segmento buscado o se paso del segmento
-			log_info(logg,"no se encontro tabla de segmentos de %s",datos->id);
-			return -1;
-		}
+		//no existe el segmento buscado o se paso del segmento
+		log_info(logg,"no se encontro tabla de segmentos de %s",datos->id);
+		return NULL;
+	}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
 		log_info(logg,"no se encontro segmento de %s",datos->id);
-		return -1;
+		return NULL;
 	}
 	int direccion_al_segmento = datos->direccion-segmento_buscado->base_logica;
 	void* resultado_get = NULL;
@@ -1166,7 +1162,6 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 					//si es la ultima hay que agregar el padding
 					memcpy(puntero_a_marco,buffer+puntero,configuracion->tam_pag-padding);
 					memcpy(puntero_a_marco+configuracion->tam_pag-padding,void_padding,padding);
-					int a = 0;
 					//padding => se llena de \0 al final
 
 				}
@@ -1185,7 +1180,7 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 		//no existe el segmento buscado o se paso del segmento
 		log_info(logg,"no se encontro la tabla de segmentos de %s",datos->id);
 		return -1;
-		}
+	}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
 	if(segmento_buscado==NULL){
 		//no existe el segmento buscado o se paso del segmento
@@ -1264,7 +1259,8 @@ int muse_cpy(muse_cpy_t* datos){ //datos->direccion es destino, datos->src void*
 				memcpy(marco,datos->paquete+cuanto_puedo_pegar,configuracion->tam_pag);
 				cuanto_puedo_pegar+=configuracion->tam_pag;
 				nro_pagina++;
-			} else if(cuanto_me_falta>0){
+			}
+			else if(cuanto_me_falta>0){
 				//si me falta menos de una pagina, pego lo que tengo
 				pagina* pag = list_get(segmento_buscado->paginas,nro_pagina);
 				void* marco = obtener_puntero_a_marco(pag);
@@ -1341,9 +1337,8 @@ int muse_map(muse_map_t* datos){
 		lugar_disponible-= tamanio_paginas;
 		pthread_mutex_unlock(&mutex_lugar_disponible);
 		t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
-		if(tabla_de_segmentos==NULL)
-		{
-			log_info("no se encontro tabla de segmentos para %s",datos->id);
+		if(tabla_de_segmentos==NULL){
+			log_info(logg,"no se encontro tabla de segmentos para %s",datos->id);
 			return -1;
 		}
 		segmento* segmento_nuevo = malloc(sizeof(segmento));
@@ -1438,20 +1433,18 @@ void* generar_padding(int padding){
 */
 int muse_sync(muse_sync_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
-	if(tabla_de_segmentos == NULL)
-	{
+	if(tabla_de_segmentos == NULL){
 		log_info(logg,"No hay tabla de segmentos para el id: &s ", datos->id);
 		return -1;
 	}
-	if(list_is_empty(tabla_de_segmentos))
-	{
+	if(list_is_empty(tabla_de_segmentos)){
 		log_info(logg,"La tabla de segmentos para el id &s esta vacia", datos->id);
 		return -1;
 	}
 
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
-	int direccion_al_segmento = datos->direccion - segmento_buscado->base_logica;
 	if(segmento_buscado != NULL){
+		int direccion_al_segmento = datos->direccion - segmento_buscado->base_logica;
 		if(segmento_buscado->mmapeado){
 			int numero_pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
 			int numero_pagina_final = (direccion_al_segmento+datos->tamanio)/configuracion->tam_pag;
@@ -1493,9 +1486,8 @@ int muse_sync(muse_sync_t* datos){
 */
 int muse_unmap(muse_unmap_t* datos){
 	t_list* tabla_de_segmentos = traer_tabla_de_segmentos(datos->id);
-	if(tabla_de_segmentos==NULL)
-	{
-		log_info("no se encontro tabla de segmentos de %s", datos->id);
+	if(tabla_de_segmentos==NULL){
+		log_info(logg,"no se encontro tabla de segmentos de %s", datos->id);
 		return -1;
 	}
 	segmento* segmento_buscado = traer_segmento_de_direccion(tabla_de_segmentos,datos->direccion);
