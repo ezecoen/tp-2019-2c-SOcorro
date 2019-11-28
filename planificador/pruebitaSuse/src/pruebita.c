@@ -12,7 +12,7 @@ void *test1(void *arg) {
     for (i = 0; i < 5; i++) {
         tid = hilolay_get_tid();
         printf("Soy el ult %d mostrando el numero %d \n", tid, i);
-        usleep(5000 * i * tid); /* Randomizes the sleep, so it gets larger after a few iterations */
+        usleep(50 * 100000); /* Randomizes the sleep, so it gets larger after a few iterations */
 
         recursiva(i);
 
@@ -29,7 +29,7 @@ void *test2(void *arg) {
     for (i = 0; i < 3; i++) {
         tid = hilolay_get_tid();
         printf("Soy el ult %d mostrando el numero %d \n", tid, i);
-        usleep(2000 * i * tid); /* Randomizes the sleep, so it gets larger after a few iterations */
+        usleep(50 * 100000); /* Randomizes the sleep, so it gets larger after a few iterations */
         recursiva(i);
         hilolay_yield();
     }
@@ -43,7 +43,7 @@ void *test3(){
 	for (i = 0; i < 3; i++) {
 		tid = hilolay_get_tid();
 		printf("Soy el ult %d mostrando el numero %d \n", tid, i);
-		usleep(2000 * i * tid); /* Randomizes the sleep, so it gets larger after a few iterations */
+		usleep(50 * 100000); /* Randomizes the sleep, so it gets larger after a few iterations */
 		recursiva(i);
 		hilolay_yield();
 	}
@@ -133,8 +133,11 @@ int correrPrueba3(){
 	hilolay_sem_t* semNE = hilolay_sem_open("C");
 
 	hilolay_signal(sem1);
+	usleep(50*100000);
 	hilolay_wait(sem2);
+	usleep(50*100000);
 	hilolay_wait(semNE);
+	usleep(50*100000);
 
 	printf("Puedo printear esto\n");
 
@@ -155,9 +158,9 @@ int main() {
 
 //	correrPrueba1();
 
-//	correrPrueba2();
+	correrPrueba2();
 
-	correrPrueba3();
+//	correrPrueba3();
 
 	return 0;
 

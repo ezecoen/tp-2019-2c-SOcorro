@@ -139,6 +139,8 @@ sem_t mut_numeroDePrograma;
 sem_t mut_listaDeSemaforos;
 sem_t mut_blocked;
 sem_t mut_exit;
+sem_t mut_mostrarMetricas;
+sem_t cont_multiprogramacion;
 
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/
