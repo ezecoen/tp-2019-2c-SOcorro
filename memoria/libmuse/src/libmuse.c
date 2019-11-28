@@ -66,7 +66,7 @@ uint32_t muse_alloc(uint32_t tam){
 		printf("Direccion recibida en libmuse: %d\n",direccion);
 	}
 	else{
-		direccion = (int)NULL;
+		return NULL;
 		//probar si se manda el null
 	}
 	free(magic);
@@ -186,18 +186,14 @@ uint32_t muse_map(char *path, size_t length, int flags){
 	int op;
 	recv(socket_muse,&op,4,0);
 	if(op == MUSE_INT){
-		if(recv(socket_muse,&posicion_memoria_mapeada,4,0)==-1){
-			printf("error en map para : %s\n",path);
-			perror("Error: ");
-			return posicion_memoria_mapeada = 0; // ??
-		}
+		recv(socket_muse,&posicion_memoria_mapeada,4,0);
+		printf("map hecho para : %s\n",path);
+		return posicion_memoria_mapeada;
 	}
 	else{
 		printf("error en map para : %s\n",path);
-		perror("Error: ");
+		return NULL;
 	}
-	printf("map hecho para : %s\n",path);
-	return posicion_memoria_mapeada;
 }
 /**
  * Descarga una cantidad `len` de bytes y lo escribe en el archivo en el FileSystem.
