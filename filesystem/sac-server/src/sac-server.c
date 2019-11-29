@@ -5,8 +5,8 @@ int main(int argc,char* argv[]) {
 	diccionario_de_path = dictionary_create();
 	es_virgen = 0;
 	init_semaforos();
-	if(argc != 2){
-		perror("falta el archivo del fileSystem");
+	if(argc != 3){
+		perror("falta el archivo");
 		return -1;
 	}
 	logger = log_create("loger","sac-server",1,LOG_LEVEL_TRACE);
@@ -23,14 +23,16 @@ int main(int argc,char* argv[]) {
 //
 //	_write(w1);
 //	_write(w2);
-
+	config = config_create(argv[2]);
+	puerto = config_get_int_value(config,"PUERTO");
 	int _servidor = crear_servidor(8080);
 	while(1){
-//		esperar_conexion(_servidor);
-		int cliente = aceptar_cliente(_servidor);
-		atender_cliente(cliente);
+		esperar_conexion(_servidor);
+//		int cliente = aceptar_cliente(_servidor);
+//		atender_cliente(cliente);
 	}
 	destroy_semaforos();
+	config_destroy(config);
 
 	return 0;
 }
