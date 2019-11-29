@@ -141,13 +141,13 @@ void iniciar_memoria_virtual(char* path_swap){
 	log_info(logg,"path swap: %s",path_swap);
 	free(aux);
 
-	int fd = open(path_swap,O_RDWR|O_CREAT,0777);
+	int fd = open(path_swap,O_RDWR);
 	if(fd<0){
 		log_info(logg,"no se pudo abrir el archivo de swap");
 	}
-	ftruncate(fd,configuracion->tam_swap);
+	//ftruncate(fd,configuracion->tam_swap);
 	//creo que si funciona!!
-	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, fd, 0);
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
