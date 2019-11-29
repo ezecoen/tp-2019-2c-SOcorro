@@ -216,6 +216,7 @@ pthread_mutex_t mutex_tabla_de_mapeo;
 //FUNCIONES
 void init_estructuras();
 void iniciar_memoria_virtual(char* path);
+void printear_memoria();
 void init_semaforos();
 int log_2(double d);
 void iniciar_log(char* path);

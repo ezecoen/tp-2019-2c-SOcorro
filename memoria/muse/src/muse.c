@@ -8,30 +8,30 @@ int main(int argc, char **argv) {
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
 	log_info(log_metricas,"<<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>");
-/*
+
 	programa_t* programa2 = malloc(sizeof(programa_t));
 	programa2->tabla_de_segmentos = list_create();
 	programa2->id_programa = string_new();
 	string_append(&programa2->id_programa,"prog2");
 	list_add(tabla_de_programas,programa2);
 
-	programa_t* programa = malloc(sizeof(programa_t));
-	programa->tabla_de_segmentos = list_create();
-	programa->id_programa = string_new();
-	string_append(&programa->id_programa,"prog");
-	list_add(tabla_de_programas,programa);
-*/
+//	programa_t* programa = malloc(sizeof(programa_t));
+//	programa->tabla_de_segmentos = list_create();
+//	programa->id_programa = string_new();
+//	string_append(&programa->id_programa,"prog");
+//	list_add(tabla_de_programas,programa);
+
 //	muse_cpy_t* mcp = crear_muse_cpy(15,"prog2",10,"uertyehdejroi2u");
 //	muse_cpy(mcp);
 //
-//	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
-//	int resu = muse_alloc(mat);
-//	log_info(logg,"Direccion virtual del mat: %d",resu);
-//
-//	char* blah = "habia una vez 11111111111111111111112222222222222222333333";
-//	muse_cpy_t* mcp1 = crear_muse_cpy(string_length(blah),"prog2",10,blah);
-//	muse_cpy(mcp1);
-//
+	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
+	int resu = muse_alloc(mat);
+	log_info(logg,"Direccion virtual del mat: %d",resu);
+
+	char* blah = "habia una vez 11111111111111111111112222222222222222333333";
+	muse_cpy_t* mcp1 = crear_muse_cpy(string_length(blah),"prog2",10,blah);
+	muse_cpy(mcp1);
+
 //	muse_get_t* mgt = crear_muse_get(string_length(blah),"prog2",25);
 //	void* algo = muse_get(mgt);
 //	log_info(logg,"%s",(char*)algo);
@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 //	metricas();
 ////
 //return 0;
+	printear_memoria();
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -113,6 +114,15 @@ void init_estructuras(char* path){
 	init_semaforos();
 	init_bitarray();
 	posicion_puntero_clock = 0;
+}
+void printear_memoria(){
+	for(int i = 0;i<configuracion->tam_mem;i++){
+		if(*(char*)(upcm+i)!='\0'){
+			printf("%c",*(char*)(upcm+i));
+		}
+	}
+	printf("\n");
+	fflush(stdout);
 }
 void iniciar_memoria_virtual(char* path_swap){
 	int i =strlen(path_swap);
