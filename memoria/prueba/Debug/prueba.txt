@@ -1,0 +1,148 @@
+==4668== Memcheck, a memory error detector
+==4668== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==4668== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==4668== Command: ./prueba
+==4668== Parent PID: 3277
+==4668== 
+--4668-- 
+--4668-- Valgrind options:
+--4668--    --show-leak-kinds=all
+--4668--    --leak-check=full
+--4668--    -v
+--4668--    --log-file=prueba.txt
+--4668-- Contents of /proc/version:
+--4668--   Linux version 4.4.0-116-generic (buildd@lgw01-amd64-023) (gcc version 5.4.0 20160609 (Ubuntu 5.4.0-6ubuntu1~16.04.9) ) #140-Ubuntu SMP Mon Feb 12 21:22:43 UTC 2018
+--4668-- 
+--4668-- Arch and hwcaps: X86, LittleEndian, x86-mmxext-sse1-sse2-sse3-lzcnt
+--4668-- Page sizes: currently 4096, max supported 4096
+--4668-- Valgrind library directory: /usr/lib/valgrind
+--4668-- Reading syms from /lib/i386-linux-gnu/ld-2.23.so
+--4668--   Considering /lib/i386-linux-gnu/ld-2.23.so ..
+--4668--   .. CRC mismatch (computed 596cb2b8 wanted 417b32cc)
+--4668--   Considering /usr/lib/debug/lib/i386-linux-gnu/ld-2.23.so ..
+--4668--   .. CRC is valid
+--4668-- Reading syms from /home/utnso/tp-2019-2c-SOcorro/memoria/prueba/Debug/prueba
+--4668-- Reading syms from /usr/lib/valgrind/memcheck-x86-linux
+--4668--   Considering /usr/lib/valgrind/memcheck-x86-linux ..
+--4668--   .. CRC mismatch (computed 6036da3f wanted 652e483f)
+--4668--    object doesn't have a symbol table
+--4668--    object doesn't have a dynamic symbol table
+--4668-- Scheduler: using generic scheduler lock implementation.
+--4668-- Reading suppressions file: /usr/lib/valgrind/default.supp
+==4668== embedded gdbserver: reading from /tmp/vgdb-pipe-from-vgdb-to-4668-by-utnso-on-???
+==4668== embedded gdbserver: writing to   /tmp/vgdb-pipe-to-vgdb-from-4668-by-utnso-on-???
+==4668== embedded gdbserver: shared mem   /tmp/vgdb-pipe-shared-mem-vgdb-4668-by-utnso-on-???
+==4668== 
+==4668== TO CONTROL THIS PROCESS USING vgdb (which you probably
+==4668== don't want to do, unless you know exactly what you're doing,
+==4668== or are doing some strange experiment):
+==4668==   /usr/lib/valgrind/../../bin/vgdb --pid=4668 ...command...
+==4668== 
+==4668== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==4668==   /path/to/gdb ./prueba
+==4668== and then give GDB the following command
+==4668==   target remote | /usr/lib/valgrind/../../bin/vgdb --pid=4668
+==4668== --pid is optional if only one valgrind process is running
+==4668== 
+--4668-- REDIR: 0x4018eb0 (ld-linux.so.2:strlen) redirected to 0x380490f2 (???)
+--4668-- REDIR: 0x4018c70 (ld-linux.so.2:index) redirected to 0x380490cd (???)
+--4668-- Reading syms from /usr/lib/valgrind/vgpreload_core-x86-linux.so
+--4668--   Considering /usr/lib/valgrind/vgpreload_core-x86-linux.so ..
+--4668--   .. CRC mismatch (computed 5b95c0c4 wanted 39e79efa)
+--4668--    object doesn't have a symbol table
+--4668-- Reading syms from /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so
+--4668--   Considering /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so ..
+--4668--   .. CRC mismatch (computed 4d5a1526 wanted 33571d5b)
+--4668--    object doesn't have a symbol table
+==4668== WARNING: new redirection conflicts with existing -- ignoring it
+--4668--     old: 0x04018eb0 (strlen              ) R-> (0000.0) 0x380490f2 ???
+--4668--     new: 0x04018eb0 (strlen              ) R-> (2007.0) 0x0402f410 strlen
+--4668-- Reading syms from /home/utnso/tp-2019-2c-SOcorro/memoria/libmuse/Debug/liblibmuse.so
+--4668-- Reading syms from /usr/lib/libcommons.so
+--4668-- Reading syms from /lib/i386-linux-gnu/libc-2.23.so
+--4668--   Considering /lib/i386-linux-gnu/libc-2.23.so ..
+--4668--   .. CRC mismatch (computed af9c0474 wanted a5de3f2a)
+--4668--   Considering /usr/lib/debug/lib/i386-linux-gnu/libc-2.23.so ..
+--4668--   .. CRC is valid
+--4668-- REDIR: 0x40d84b0 (libc.so.6:strncasecmp) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x40df140 (libc.so.6:memrchr) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x40f1b20 (libc.so.6:wcslen) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x40d67e0 (libc.so.6:__GI_strrchr) redirected to 0x402ee00 (__GI_strrchr)
+--4668-- REDIR: 0x40d65c0 (libc.so.6:__GI_strlen) redirected to 0x402f390 (__GI_strlen)
+--4668-- REDIR: 0x40d1f00 (libc.so.6:malloc) redirected to 0x402c110 (malloc)
+--4668-- REDIR: 0x40d8680 (libc.so.6:__GI_memcpy) redirected to 0x4030fb0 (__GI_memcpy)
+--4668-- REDIR: 0x40d6580 (libc.so.6:strlen) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x40df440 (libc.so.6:__strlen_sse2_bsf) redirected to 0x402f370 (strlen)
+--4668-- REDIR: 0x40d2520 (libc.so.6:realloc) redirected to 0x402e250 (realloc)
+--4668-- REDIR: 0x40d5ae0 (libc.so.6:strcat) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x40eab30 (libc.so.6:__strcat_ssse3) redirected to 0x402f030 (strcat)
+--4668-- REDIR: 0x40d7350 (libc.so.6:strstr) redirected to 0x4033700 (strstr)
+--4668-- REDIR: 0x40d2470 (libc.so.6:free) redirected to 0x402d2f0 (free)
+--4668-- REDIR: 0x40d2810 (libc.so.6:calloc) redirected to 0x402e010 (calloc)
+--4668-- REDIR: 0x40d6700 (libc.so.6:strncmp) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x41965c0 (libc.so.6:__strncmp_ssse3) redirected to 0x402fab0 (strncmp)
+--4668-- REDIR: 0x40da280 (libc.so.6:strchrnul) redirected to 0x40330b0 (strchrnul)
+--4668-- REDIR: 0x40d7c10 (libc.so.6:__GI_memcmp) redirected to 0x4031ef0 (__GI_memcmp)
+--4668-- REDIR: 0x40da1b0 (libc.so.6:__GI___rawmemchr) redirected to 0x4033110 (__GI___rawmemchr)
+--4668-- REDIR: 0x40d80d0 (libc.so.6:__GI_mempcpy) redirected to 0x40332c0 (__GI_mempcpy)
+--4668-- REDIR: 0x40d8610 (libc.so.6:memcpy) redirected to 0x4026560 (_vgnU_ifunc_wrapper)
+--4668-- REDIR: 0x4188b70 (libc.so.6:__memcpy_ssse3) redirected to 0x4030cc0 (memcpy)
+==4668== 
+==4668== HEAP SUMMARY:
+==4668==     in use at exit: 403 bytes in 6 blocks
+==4668==   total heap usage: 117 allocs, 111 frees, 16,942 bytes allocated
+==4668== 
+==4668== Searching for pointers to 6 not-freed blocks
+==4668== Checked 63,272 bytes
+==4668== 
+==4668== 7 bytes in 1 blocks are still reachable in loss record 1 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x40D62C5: strdup (strdup.c:42)
+==4668==    by 0x405A09A: string_duplicate (in /usr/lib/libcommons.so)
+==4668==    by 0x4059C49: log_create (in /usr/lib/libcommons.so)
+==4668==    by 0x8048B11: iniciar_log (prueba.c:34)
+==4668==    by 0x80489D2: main (prueba.c:12)
+==4668== 
+==4668== 10 bytes in 1 blocks are still reachable in loss record 2 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x40D62C5: strdup (strdup.c:42)
+==4668==    by 0x405A09A: string_duplicate (in /usr/lib/libcommons.so)
+==4668==    by 0x8048B8F: leer_config (prueba.c:41)
+==4668==    by 0x80489D7: main (prueba.c:13)
+==4668== 
+==4668== 10 bytes in 1 blocks are still reachable in loss record 3 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x40D62C5: strdup (strdup.c:42)
+==4668==    by 0x405A09A: string_duplicate (in /usr/lib/libcommons.so)
+==4668==    by 0x8048BD7: leer_config (prueba.c:44)
+==4668==    by 0x80489D7: main (prueba.c:13)
+==4668== 
+==4668== 12 bytes in 1 blocks are still reachable in loss record 4 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x8048B62: leer_config (prueba.c:39)
+==4668==    by 0x80489D7: main (prueba.c:13)
+==4668== 
+==4668== 20 bytes in 1 blocks are still reachable in loss record 5 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x4059BA3: log_create (in /usr/lib/libcommons.so)
+==4668==    by 0x8048B11: iniciar_log (prueba.c:34)
+==4668==    by 0x80489D2: main (prueba.c:12)
+==4668== 
+==4668== 344 bytes in 1 blocks are still reachable in loss record 6 of 6
+==4668==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==4668==    by 0x40BF359: __fopen_internal (iofopen.c:69)
+==4668==    by 0x40BF41D: fopen@@GLIBC_2.1 (iofopen.c:97)
+==4668==    by 0x4059ADA: txt_open_for_append (in /usr/lib/libcommons.so)
+==4668==    by 0x4059BE3: log_create (in /usr/lib/libcommons.so)
+==4668==    by 0x8048B11: iniciar_log (prueba.c:34)
+==4668==    by 0x80489D2: main (prueba.c:12)
+==4668== 
+==4668== LEAK SUMMARY:
+==4668==    definitely lost: 0 bytes in 0 blocks
+==4668==    indirectly lost: 0 bytes in 0 blocks
+==4668==      possibly lost: 0 bytes in 0 blocks
+==4668==    still reachable: 403 bytes in 6 blocks
+==4668==         suppressed: 0 bytes in 0 blocks
+==4668== 
+==4668== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
+==4668== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
