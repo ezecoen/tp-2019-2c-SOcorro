@@ -9,11 +9,11 @@ int main(int argc, char **argv) {
 	init_estructuras(path_swap);
 	log_info(log_metricas,"<<<<<<<<<<<<NUEVA EJECUCION>>>>>>>>>>>");
 
-	programa_t* programa2 = malloc(sizeof(programa_t));
-	programa2->tabla_de_segmentos = list_create();
-	programa2->id_programa = string_new();
-	string_append(&programa2->id_programa,"prog2");
-	list_add(tabla_de_programas,programa2);
+//	programa_t* programa2 = malloc(sizeof(programa_t));
+//	programa2->tabla_de_segmentos = list_create();
+//	programa2->id_programa = string_new();
+//	string_append(&programa2->id_programa,"prog2");
+//	list_add(tabla_de_programas,programa2);
 
 //	programa_t* programa = malloc(sizeof(programa_t));
 //	programa->tabla_de_segmentos = list_create();
@@ -24,14 +24,14 @@ int main(int argc, char **argv) {
 //	muse_cpy_t* mcp = crear_muse_cpy(15,"prog2",10,"uertyehdejroi2u");
 //	muse_cpy(mcp);
 //
-	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
-	int resu = muse_alloc(mat);
-	log_info(logg,"Direccion virtual del mat: %d",resu);
-
-	char* blah = "habia una vez 11111111111111111111112222222222222222333333";
-	muse_cpy_t* mcp1 = crear_muse_cpy(string_length(blah),"prog2",10,blah);
-	muse_cpy(mcp1);
-
+//	muse_alloc_t* mat = crear_muse_alloc(100,"prog2");
+//	int resu = muse_alloc(mat);
+//	log_info(logg,"Direccion virtual del mat: %d",resu);
+//
+//	char* blah = "habia una vez 11111111111111111111112222222222222222333333";
+//	muse_cpy_t* mcp1 = crear_muse_cpy(string_length(blah),"prog2",10,blah);
+//	muse_cpy(mcp1);
+//
 //	muse_get_t* mgt = crear_muse_get(string_length(blah),"prog2",25);
 //	void* algo = muse_get(mgt);
 //	log_info(logg,"%s",(char*)algo);
@@ -87,11 +87,11 @@ int main(int argc, char **argv) {
 //
 //	muse_close("prog2");
 //	muse_close("prog");
-//
+
 //	metricas();
 ////
 //return 0;
-	printear_memoria();
+//	printear_memoria();
 //	SERVIDOR
 	uint32_t servidor = crear_servidor(configuracion->puerto);
 	while(true){
@@ -286,8 +286,16 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				pagina* pag = malloc(sizeof(pagina));
 				pag->num_pagina = i;
 				pag->presencia = true;
-				pag->bit_marco = asignar_marco_nuevo();
-				pag->bit_swap = NULL;
+				if(i <= configuracion->tam_mem / configuracion->tam_pag){
+					pag->bit_marco = asignar_marco_nuevo();
+					pag->bit_marco->bit_uso = true;
+					pag->bit_marco->bit_modificado = true;
+					pag->bit_swap = NULL;
+				}
+				else{
+					pag->bit_marco = NULL;
+					pag->bit_swap = bit_libre_memoria_virtual();
+				}
 				if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 					heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 					heap_nuevo->is_free = false;
@@ -428,8 +436,16 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						pagina* pagina_nueva = malloc(sizeof(pagina));
 						pagina_nueva->num_pagina = numero_proxima_pagina+i;
 						pagina_nueva->presencia = true;
-						pagina_nueva->bit_marco = asignar_marco_nuevo(tabla_de_segmentos);
-						pagina_nueva->bit_swap = NULL;
+						if(i <= configuracion->tam_mem / configuracion->tam_pag){
+							pagina_nueva->bit_marco = asignar_marco_nuevo();
+							pagina_nueva->bit_marco->bit_uso = true;
+							pagina_nueva->bit_marco->bit_modificado = true;
+							pagina_nueva->bit_swap = NULL;
+						}
+						else{
+							pagina_nueva->bit_marco = NULL;
+							pagina_nueva->bit_swap = bit_libre_memoria_virtual();
+						}
 						list_add(seg->paginas,pagina_nueva);
 					}
 					seg->paginas_liberadas-=paginas_necesarias;
@@ -499,8 +515,16 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							pagina* pagina_nueva = malloc(sizeof(pagina));
 							pagina_nueva->num_pagina = ultima_pagina->num_pagina+1+i;
 							pagina_nueva->presencia = true;
-							pagina_nueva->bit_marco = asignar_marco_nuevo(tabla_de_segmentos);
-							pagina_nueva->bit_swap = NULL;
+							if(i <= configuracion->tam_mem / configuracion->tam_pag){
+								pagina_nueva->bit_marco = asignar_marco_nuevo();
+								pagina_nueva->bit_marco->bit_uso = true;
+								pagina_nueva->bit_marco->bit_modificado = true;
+								pagina_nueva->bit_swap = NULL;
+							}
+							else{
+								pagina_nueva->bit_marco = NULL;
+								pagina_nueva->bit_swap = bit_libre_memoria_virtual();
+							}
 							list_add(ultimo_segmento->paginas,pagina_nueva);
 
 						} //termina el for
@@ -612,8 +636,16 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							pagina* pag = malloc(sizeof(pagina));
 							pag->num_pagina = i;
 							pag->presencia = true;
-							pag->bit_marco = asignar_marco_nuevo(tabla_de_segmentos);
-							pag->bit_swap = NULL;
+							if(i <= configuracion->tam_mem / configuracion->tam_pag){
+								pag->bit_marco = asignar_marco_nuevo();
+								pag->bit_marco->bit_uso = true;
+								pag->bit_marco->bit_modificado = true;
+								pag->bit_swap = NULL;
+							}
+							else{
+								pag->bit_marco = NULL;
+								pag->bit_swap = bit_libre_memoria_virtual();
+							}
 							if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 								heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
 								heap_nuevo->is_free = false;
@@ -768,7 +800,6 @@ uint32_t paginas_necesarias_para_tamanio(uint32_t tamanio){
 }
 void* obtener_puntero_a_marco(pagina* pag){
 	//fijarse si esta en memoria o en swap
-	pthread_mutex_lock(&mutex_bitarray);
 	if(pag->presencia == false){
 		if(pag->bit_swap!=NULL){
 			void* pagina_a_sacar = malloc(configuracion->tam_pag);
@@ -776,7 +807,7 @@ void* obtener_puntero_a_marco(pagina* pag){
 			//copio lo que esta en swap a un puntero temporal
 			pag->bit_swap->ocupado = false;//saco el bit del bitmap_memoria_virutal
 			pag->bit_swap = NULL;
-			t_bit_memoria* _bit = ejecutar_clock_modificado();
+			t_bit_memoria* _bit = asignar_marco_nuevo();
 			pag->bit_marco = _bit;
 			pag->presencia = true;
 			//ahora tengo q pegar la pagina en memoria
@@ -787,7 +818,6 @@ void* obtener_puntero_a_marco(pagina* pag){
 			//si llega aca estamos en las malas
 		}
 	}
-	pthread_mutex_unlock(&mutex_bitarray);
 	pag->bit_marco->bit_uso = true;
 	return upcm + pag->bit_marco->posicion * configuracion->tam_pag;
 }
@@ -828,8 +858,9 @@ t_bit_memoria* ejecutar_clock_modificado(){
 		bit_return->bit_uso = true;
 	}
 	else{
-		log_error(logg, "se quiere sacar de memoria una pagina q todavia no esta en la tabla de paginas >:(");
+		log_error(logg,"Se quiere sacar una pag q no se encuentra en la tabla de pags");
 	}
+
 	return bit_return;
 }
 pagina* buscar_pagina_por_bit(t_bit_memoria* bit){
@@ -1168,9 +1199,17 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 			pagina* pag = list_get(segmento_buscado->paginas,i);
 			if(pag->bit_marco==NULL && pag->bit_swap == NULL){
 				//hay q traerla a memoria
-				pag->bit_marco = asignar_marco_nuevo();
+				if(i <= configuracion->tam_mem / configuracion->tam_pag){
+					pag->bit_marco = asignar_marco_nuevo();
+					pag->bit_marco->bit_uso = true;
+					pag->bit_marco->bit_modificado = true;
+					pag->bit_swap = NULL;
+				}
+				else{
+					pag->bit_marco = NULL;
+					pag->bit_swap = bit_libre_memoria_virtual();
+				}
 				pag->presencia = true;
-				pag->bit_marco->bit_uso = true;
 				void* puntero_a_marco = obtener_puntero_a_marco(pag);
 
 				if(pag->num_pagina == ultima_pagina_de_la_lista){
@@ -1886,7 +1925,7 @@ t_bit_memoria* bit_libre_memoria(){
 	t_bit_memoria* bit_asignado = list_find(bitarray->bitarray_memoria,(void*)bit_libre);
 	if(bit_asignado!=NULL){
 		bit_asignado->ocupado = true;
-		bit_asignado->bit_modificado = false;
+		bit_asignado->bit_modificado = true;
 		bit_asignado->bit_uso = true;
 	}
 	return bit_asignado;
