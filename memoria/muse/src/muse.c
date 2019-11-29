@@ -825,13 +825,11 @@ void* obtener_puntero_a_marco(pagina* pag){
 t_bit_memoria* asignar_marco_nuevo(){
 //	retorno un marco nuevo en memoria
 //	esto va a tener q estar mutexeado
-	pthread_mutex_lock(&mutex_bitarray);
 	t_bit_memoria* bit_libre = bit_libre_memoria();
 	if(bit_libre == NULL){
 		//no se encontro=>ejecutar algoritmo clock
 		bit_libre = ejecutar_clock_modificado();
 	}
-	pthread_mutex_unlock(&mutex_bitarray);
 	return bit_libre;
 }
 t_bit_memoria* ejecutar_clock_modificado(){
@@ -891,6 +889,7 @@ t_bit_memoria* ejecutar_clock_modificado_2vuelta(){
 	return bit_return;
 }
 t_bit_memoria* buscar_0_0(){
+	pthread_mutex_lock(&mutex_bitarray);
 	int puntero_al_iniciar = posicion_puntero_clock;
 	t_bit_memoria* bit_nulo = NULL;
 	//busco en la primera mitad
@@ -898,6 +897,7 @@ t_bit_memoria* buscar_0_0(){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(!_bit->bit_modificado && !_bit->bit_uso){
 			posicion_puntero_clock ++;
+			pthread_mutex_unlock(&mutex_bitarray);
 			return _bit;
 		}
 		posicion_puntero_clock ++;
@@ -905,13 +905,16 @@ t_bit_memoria* buscar_0_0(){
 	for(posicion_puntero_clock = 0; posicion_puntero_clock < puntero_al_iniciar;posicion_puntero_clock++){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(!_bit->bit_modificado && !_bit->bit_uso){
+			pthread_mutex_unlock(&mutex_bitarray);
 			return _bit;
 		}
 	}
 	posicion_puntero_clock = puntero_al_iniciar;
+	pthread_mutex_unlock(&mutex_bitarray);
 	return bit_nulo;
 }
 t_bit_memoria* buscar_0_1(){
+	pthread_mutex_lock(&mutex_bitarray);
 	int puntero_al_iniciar = posicion_puntero_clock;
 	t_bit_memoria* bit_nulo = NULL;
 	//busco en la primera mitad
@@ -919,6 +922,7 @@ t_bit_memoria* buscar_0_1(){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(_bit->bit_modificado && !_bit->bit_uso){
 			posicion_puntero_clock ++;
+			pthread_mutex_unlock(&mutex_bitarray);
 			return _bit;
 		}
 		if(_bit->bit_uso){
@@ -929,6 +933,7 @@ t_bit_memoria* buscar_0_1(){
 	for(posicion_puntero_clock = 0; posicion_puntero_clock < puntero_al_iniciar;posicion_puntero_clock++){
 		t_bit_memoria* _bit = list_get(bitarray->bitarray_memoria,posicion_puntero_clock);
 		if(_bit->bit_modificado && !_bit->bit_uso){
+			pthread_mutex_unlock(&mutex_bitarray);
 			return _bit;
 		}
 		if(_bit->bit_uso){
@@ -936,6 +941,7 @@ t_bit_memoria* buscar_0_1(){
 		}
 	}
 	posicion_puntero_clock = puntero_al_iniciar;
+	pthread_mutex_unlock(&mutex_bitarray);
 	return bit_nulo;
 }
 t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit){
@@ -1912,12 +1918,15 @@ void destroy_bitarray(){
 	free(bitarray);
 }
 t_bit_swap* bit_libre_memoria_virtual(){
+	pthread_mutex_lock(&mutex_bitarray);
 	_Bool bit_libre(t_bit_swap* bit){
 		return !bit->ocupado;
 	}
+	pthread_mutex_unlock(&mutex_bitarray);
 	return list_find(bitarray->bitarray_memoria_virtual,(void*)bit_libre);
 }
 t_bit_memoria* bit_libre_memoria(){
+	pthread_mutex_lock(&mutex_bitarray);
 	//si encuentro uno, ya le pongo como que esta usado
 	_Bool bit_libre(t_bit_memoria* bit){
 		return !bit->ocupado;
@@ -1928,6 +1937,7 @@ t_bit_memoria* bit_libre_memoria(){
 		bit_asignado->bit_modificado = true;
 		bit_asignado->bit_uso = true;
 	}
+	pthread_mutex_unlock(&mutex_bitarray);
 	return bit_asignado;
 }
 
