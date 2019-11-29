@@ -126,7 +126,8 @@ nodo** tabla_de_nodos;
 t_dictionary* diccionario_de_path;
 char* path_generator;
 char* path_intermedio;
-
+t_config* config;
+int puerto;
 /*==	Semaforos	==*/
 sem_t s_bitarray;
 sem_t s_tabla_de_nodos;

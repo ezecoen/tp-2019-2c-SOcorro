@@ -21,5 +21,7 @@ t_config* g_config;
 t_log* logg;
 
 void iniciar_log();
+void test_pulenta();
+void test_izi();
 s_config* leer_config();
 #endif /* PRUEBA_H_ */
