@@ -260,10 +260,20 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						actualizarEstimacion(exec,timestamp());
 						break;
 					}else{
-						log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
-						int mensaje = 0;
-						send(cliente,&mensaje,4,0);
-						break;
+						_Bool buscarAlgunTCB(tcb* _tcb){
+							return _tcb->p_id == pid;
+						}
+						if(!list_is_empty(estadoNew)){
+							exec = list_find(estadoNew, (void*)buscarAlgunTCB);
+							sacarDeNew(exec);
+							int i = exec->t_id;
+							send(cliente,&i,4,0);
+						}else{
+							log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
+							int mensaje = 0;
+							send(cliente,&mensaje,4,0);
+							break;
+						}
 					}
 				}
 				//traigo el proximo a ejecutar
@@ -287,6 +297,35 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				break;
 			case JOIN:;
+				while(exec == NULL){
+					_Bool buscarTCBporPID(tcb* _tcb){
+						return _tcb->p_id == pid;
+					}
+					_Bool elMenorTID(tcb*_tcb1, tcb* _tcb2){
+						return _tcb1->t_id < _tcb2->t_id;
+					}
+					void moverTCBaReady(tcb* _tcb){
+						if(configuracion->MAX_MULTIPROG > 0){
+							list_add(colaDeReady, _tcb);
+							sem_wait(&mut_multiprogramacion);
+								configuracion->MAX_MULTIPROG--;
+							sem_post(&mut_multiprogramacion);
+						}
+					}
+					if(configuracion->MAX_MULTIPROG > 0){
+						list_sort(estadoNew, (void*)elMenorTID);
+						tcb* tcbParaReady = list_find(estadoNew, (void*)buscarTCBporPID);
+						sacarDeNew(tcbParaReady);
+						list_add(colaDeReady, tcbParaReady);
+						sacarDeReady(tcbParaReady, colaDeReady);
+						exec = tcbParaReady;
+						sem_wait(&mut_multiprogramacion);
+							configuracion->MAX_MULTIPROG--;
+						sem_post(&mut_multiprogramacion);
+						list_iterate(estadoNew, (void*)moverTCBaReady);
+					}
+					usleep(20*100000);
+				}//Este while es nuevo, probar
 				int tid_para_join;
 				_Bool buscarTid(tcb* _tcb){
 					return _tcb->t_id == tid_para_join;
