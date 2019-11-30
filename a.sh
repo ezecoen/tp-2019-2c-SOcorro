@@ -18,6 +18,11 @@ sudo make
 sudo make install
 cd ..
 
+cd tp-2019-2c-SOcorro/planificador/Hilolay/Debug
+sudo make && make all
+
+cd
+
 cd 8b5902a3f2b4a5630926ab5261a490b7
 cp Makefile ../linuse-tests-programs
 cd ..
