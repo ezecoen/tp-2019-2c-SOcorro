@@ -960,7 +960,7 @@ t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit){
 		puntero_a_swap[i] = puntero_a_marco[i];
 	}
 	msync(swap,configuracion->tam_swap,MS_SYNC);
-	sleep(1);
+	//sleep(1);
 	printf(">>>>>>>>>>>>mando algo a swap");
 	fflush(stdout);
 	bit_swap->ocupado = true;
@@ -1138,15 +1138,14 @@ void* muse_get(muse_get_t* datos){
 	void* resultado_get = NULL;
 	//si copia demas tira segm fault en libmuse
 	int pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
+	int pagina_final = redondear_double_arriba((double)(direccion_al_segmento+datos->tamanio) / configuracion->tam_pag)-1;
 	int offset_inicial = direccion_al_segmento % configuracion->tam_pag;
 	if(segmento_buscado != NULL && segmento_buscado->tamanio-direccion_al_segmento >= datos->tamanio
 			&& pagina_inicial*configuracion->tam_pag+offset_inicial+datos->tamanio
 			<= segmento_buscado->tamanio){
 		//encontro un segmento, hay que buscar la direccion ahi adentro
-		int direccion_final = direccion_al_segmento+datos->tamanio;
-		int offset_final = direccion_final % configuracion->tam_pag;
-		int tamanio_de_todas_las_paginas = datos->tamanio + offset_inicial + configuracion->tam_pag-offset_final;
-		int cantidad_de_paginas = tamanio_de_todas_las_paginas / configuracion->tam_pag;
+		int cantidad_de_paginas = pagina_final-pagina_inicial+1;
+		int tamanio_de_todas_las_paginas = cantidad_de_paginas*configuracion->tam_pag;
 		resultado_get = malloc(datos->tamanio);
 		void* super_void = malloc(tamanio_de_todas_las_paginas);
 		int puntero = 0;
@@ -1189,7 +1188,7 @@ pagina* buscar_pagina_por_numero(t_list* lista, int numero_de_pag) {
 void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_buscado){
 	int pagina_inicial = direccion / configuracion->tam_pag;
 	int offset_inicial = direccion % configuracion->tam_pag;
-	int pagina_final = (direccion+tamanio) / configuracion->tam_pag;
+	int pagina_final = redondear_double_arriba((double)(direccion+tamanio) / configuracion->tam_pag)-1;
 
 	_Bool ver_si_hay_pags_no_cargadas(pagina* _pag){
 		if(_pag->num_pagina >= pagina_inicial && _pag->num_pagina <= pagina_final){
@@ -1520,7 +1519,7 @@ int muse_sync(muse_sync_t* datos){
 		int direccion_al_segmento = datos->direccion - segmento_buscado->base_logica;
 		if(segmento_buscado->mmapeado){
 			int numero_pagina_inicial = direccion_al_segmento / configuracion->tam_pag;
-			int numero_pagina_final = (direccion_al_segmento+datos->tamanio)/configuracion->tam_pag;
+			int numero_pagina_final = redondear_double_arriba((double)(direccion_al_segmento+datos->tamanio) / configuracion->tam_pag)-1;
 			int cantidad_de_paginas = numero_pagina_final - numero_pagina_inicial + 1;
 			int tam_a_copiar = cantidad_de_paginas * configuracion->tam_pag;
 			void* super_void_con_datos = malloc(tam_a_copiar);
@@ -1735,13 +1734,6 @@ void ocupate_de_este(int socket){
 				recv(socket,vmat,tam,0);
 				muse_alloc_t* datos = deserializar_muse_alloc(vmat);
 				log_info(logg,"-ALLOC de %d bytes",datos->tamanio);
-				if(datos->tamanio > configuracion->tam_mem){
-					respuesta = malloc(4);
-					operacion_respuesta = MUSE_ERROR;
-					memcpy(respuesta,&operacion_respuesta,4);
-					send(socket,respuesta,4,0);
-					log_info(logg,"No se puede pedir de una mas del tamaño de la memoria");
-				}
 				resultado = muse_alloc(datos);
 				if(resultado>=0){
 					respuesta = malloc(8);
