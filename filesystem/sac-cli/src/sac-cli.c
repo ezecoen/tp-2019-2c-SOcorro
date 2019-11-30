@@ -492,11 +492,7 @@ int main(int argc, char *argv[]) {
 //	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
-	if(argc != 2){
-		perror("falta el archivo");
-		return -1;
-	}
-	t_config* config = config_create(argv[1]);
+	t_config* config = config_create(argv[2]);
 	char* ip = config_get_string_value(config,"IP");
 	int puerto = config_get_string_value(config,"PUERTO");
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
