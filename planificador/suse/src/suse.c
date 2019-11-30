@@ -38,10 +38,16 @@ void mostrarMetricasDelSistema(){
 		sem_wait(&mut_mostrarMetricas);
 			log_info(metricas, "*********************MOSTRANDO METRICAS DEL SISTEMA*********************\n");
 			void mostrarValorDelSemaforo(semaforo_t* sem){
-				log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
+				sem_wait(&mut_miSemaforo);
+					log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
+				sem_post(&mut_miSemaforo);
 			}
-			list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
-			log_info(metricas, "Grado de multiprogramacion: %d\n", configuracion->MAX_MULTIPROG);
+			sem_wait(&mut_listaDeSemaforos);
+				list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
+			sem_post(&mut_listaDeSemaforos);
+			sem_wait(&mut_multiprogramacion);
+				log_info(metricas, "Grado de multiprogramacion: %d\n", configuracion->MAX_MULTIPROG);
+			sem_post(&mut_multiprogramacion);
 
 			usleep(configuracion->METRICS_TIMER*2*100000);
 		sem_post(&mut_mostrarMetricas);
@@ -72,6 +78,7 @@ p_config* leer_config(char* path){
 		semaforo->colaDeBloqueo = list_create();
 		semaforo->idNumerico = k;
 		semaforo->id_semaforo = string_duplicate(aux_sem_ids[k]);
+		sem_init(&semaforo->mut_proteccion,0,1);
 		list_add(listaDeSemaforos, semaforo);
 		k++;
 	}
@@ -120,6 +127,8 @@ void inicializarSemaforos(){
 	sem_init(&mut_blocked,0,1);
 	sem_init(&mut_exit,0,1);
 	sem_init(&mut_mostrarMetricas, 0, 1);
+	sem_init(&mut_miSemaforo,0,1);
+	sem_init(&mut_listaDeProgramas,0,1);
 	sem_init(&cont_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
 
 }
@@ -227,21 +236,22 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				recv(cliente,&tid,4,0);
 				log_info(logg, "Recibi un create del cliente %d (PID %d)", cliente, pid);
 				tcb* _tcb = crearTCB(pid,tid);
-				if(configuracion->MAX_MULTIPROG > 0){
-					sem_wait(&mut_multiprogramacion);
-						configuracion->MAX_MULTIPROG--;
-					sem_post(&mut_multiprogramacion);
-					//pongo en ready y saco de new
-					list_add(colaDeReady,_tcb);
-					//me fijo si no hay nadie en exec, si esta vacia, me meto
-					sacarDeNew(_tcb);
-					if(exec == NULL){
-						exec = _tcb;
-						sacarDeReady(_tcb,colaDeReady);
+				sem_wait(&mut_multiprogramacion);
+					if(configuracion->MAX_MULTIPROG > 0){
+							configuracion->MAX_MULTIPROG--;
+						sem_post(&mut_multiprogramacion);
+						//pongo en ready y saco de new
+						list_add(colaDeReady,_tcb);
+						//me fijo si no hay nadie en exec, si esta vacia, me meto
+						sacarDeNew(_tcb);
+						if(exec == NULL){
+							exec = _tcb;
+							sacarDeReady(_tcb,colaDeReady);
+						}
+					}else{
+						sem_post(&mut_multiprogramacion);
+						log_info(logg, "El thread %d no se pudo mandar a ready porque la multiprogramacion no lo permite, quedo en New", tid);
 					}
-				}else{
-					log_info(logg, "El thread %d no se pudo mandar a ready porque la multiprogramacion no lo permite, quedo en New", tid);
-				}
 
 				resultado = 0;
 
@@ -260,20 +270,22 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 						actualizarEstimacion(exec,timestamp());
 						break;
 					}else{
-						_Bool buscarAlgunTCB(tcb* _tcb){
-							return _tcb->p_id == pid;
-						}
-						if(!list_is_empty(estadoNew)){
-							exec = list_find(estadoNew, (void*)buscarAlgunTCB);
-							sacarDeNew(exec);
-							int i = exec->t_id;
-							send(cliente,&i,4,0);
-						}else{
+//						_Bool buscarAlgunTCB(tcb* _tcb){
+//							return _tcb->p_id == pid;
+//						}
+//						if(!list_is_empty(estadoNew)){
+//							sem_wait(&mut_new);
+//								exec = list_find(estadoNew, (void*)buscarAlgunTCB);
+//							sem_post(&mut_new);
+//							sacarDeNew(exec);
+//							int i = exec->t_id;
+//							send(cliente,&i,4,0);
+//						}else{
 							log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
 							int mensaje = 0;
 							send(cliente,&mensaje,4,0);
 							break;
-						}
+//						}
 					}
 				}
 				//traigo el proximo a ejecutar
@@ -336,12 +348,15 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				recv(cliente,&tid_para_join,4,0);
 				//tid actual se bloquea esperando a que termine tid exec->tid
 				//hay que buscar a tid_para_join y ponerle en su lista el tid actual
-
-				tcb* tcb_para_join = list_find(estadoNew,(void*)buscarTid);
+				sem_wait(&mut_new);
+					tcb* tcb_para_join = list_find(estadoNew,(void*)buscarTid);
+				sem_post(&mut_new);
 				if(tcb_para_join == NULL){
 					tcb_para_join = list_find(colaDeReady,(void*)buscarTid);
 					if(tcb_para_join == NULL){
-						tcb_para_join = list_find(estadoBlocked,(void*)buscarTid);
+						sem_wait(&mut_blocked);
+							tcb_para_join = list_find(estadoBlocked,(void*)buscarTid);
+						sem_post(&mut_blocked);
 						if(tcb_para_join == NULL){
 							//no hay que bloquear al tid actual
 							int resultado = 0;
@@ -354,7 +369,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				//tengo que agregarle a tcb_para_join->lista de tid esperandolo, el tid actual
 				list_add(tcb_para_join->tidsEsperando,(void*)exec->t_id);
 				//bloqueo al tid actual
-				list_add(estadoBlocked,exec);
+				sem_wait(&mut_blocked);
+					list_add(estadoBlocked,exec);
+				sem_post(&mut_blocked);
 				//actualizo la estimacion
 				actualizarEstimacion(exec,timestamp());
 				exec = NULL;
@@ -399,12 +416,16 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					sem_post(&mut_multiprogramacion);
 
 					//Si en la lista de New hay algun hilo del proceso
-					if(!list_is_empty(estadoNew)){
+					sem_wait(&mut_new);
+					_Bool a = !list_is_empty(estadoNew);
+					sem_post(&mut_new);
+					if(a){
 						_Bool hayAlgunTCBdelProceso(tcb* _tcb){
 							return _tcb->p_id == pid;
 						}
-
-						tcb* tcbAReady = list_remove_by_condition(estadoNew, (void*)hayAlgunTCBdelProceso);
+						sem_wait(&mut_new);
+							tcb* tcbAReady = list_remove_by_condition(estadoNew, (void*)hayAlgunTCBdelProceso);
+						sem_post(&mut_new);
 						if(tcbAReady != NULL){
 							list_add(colaDeReady, tcbAReady);
 							sem_wait(&mut_multiprogramacion);
@@ -435,30 +456,48 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					return strcmp(sem->id_semaforo, wait->id_semaforo) == 0;
 				}
 
-				semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+				sem_wait(&mut_listaDeSemaforos);
+					semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
+				sem_post(&mut_listaDeSemaforos);
+
+				sem_wait(&semWait->mut_proteccion);
 
 				if(semWait != NULL){
-					if(semWait->valorInicial <= 0){
+
+					int a = semWait->valorInicial;
+					if(a <= 0){
 						sem_wait(&mut_blocked);
 							list_add(estadoBlocked, exec);
 						sem_post(&mut_blocked);
 						list_add(semWait->colaDeBloqueo, exec);
 						log_info(logg, "Le resto 1 al semaforo %s y bloqueo el thread %d del proceso %d", semWait->id_semaforo, tid, pid);
-						semWait->valorInicial--;
+
+							semWait->valorInicial--;
+
 						//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
 						exec = NULL;
 						//Si en la cola de Ready del proceso no hay ningun hilo significa que este hilo se quedo solo y esta en deadlock
-						while(semWait->valorInicial < 0){
-							//Aca se queda esperando a que el valor del semaforo sea
-							usleep(50*100000);
-						}
+
+							int b = semWait->valorInicial;
+
+//						while(b < 0){
+//							//Aca se queda esperando a que el valor del semaforo sea
+//							usleep(2*1000);
+//							sem_wait(&mut_miSemaforo);
+//							b = semWait->valorInicial;
+//							sem_post(&mut_miSemaforo);
+//						}
 					}else{
 						log_info(logg, "Le resto 1 al semaforo %s", semWait->id_semaforo);
-						semWait->valorInicial--;
+
+							semWait->valorInicial--;
+
 					}
 				}else{
 					log_info(logg, "No existe el semaforo con id %s", wait->id_semaforo);
 				}
+
+				sem_post(&semWait->mut_proteccion);
 
 				resultado = 0;
 				send(cliente,&resultado,4,0);
@@ -478,17 +517,27 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					return strcmp(sem->id_semaforo, signal->id_semaforo) == 0;
 				}
 
-				semaforo_t* semSignal = list_find(listaDeSemaforos, (void*)buscarSemaforoPorIdSignal);
+				sem_wait(&mut_listaDeSemaforos);
+					semaforo_t* semSignal = list_find(listaDeSemaforos, (void*)buscarSemaforoPorIdSignal);
+				sem_post(&mut_listaDeSemaforos);
 
+				sem_wait(&semSignal->mut_proteccion);
 				if(semSignal != NULL){
-					if(semSignal->valorInicial > 0){
+
+						int a = semSignal->valorInicial;
+
+					if(a >= 0){
 						if(semSignal->valorInicial < semSignal->valorMaximo){
 							log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
-							semSignal->valorInicial++;
+
+								semSignal->valorInicial++;
+
 						}
 					}else{
 						log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
-						semSignal->valorInicial++;
+
+							semSignal->valorInicial++;
+
 
 						//Aca me fijo si algunos tcbs estaban bloqueados por este semaforo
 						if(!list_is_empty(semSignal->colaDeBloqueo)){
@@ -515,6 +564,7 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				} else {
 					log_info(logg, "No existe el semaforo con id %c", signal->id_semaforo);
 				}
+				sem_post(&semSignal->mut_proteccion);
 				int res = 0;
 				send(cliente,&res,4,0);
 				break;
@@ -552,7 +602,9 @@ pcb* crearPCB(int pid){//Esto es mas para gestion interna, no tiene mucho que ve
 	_pcb->p_id = pid;
 	_pcb->ults = list_create();//Lista de ults de este proceso
 
-	list_add(listaDeProgramas, _pcb);
+	sem_wait(&mut_listaDeProgramas);
+		list_add(listaDeProgramas, _pcb);
+	sem_post(&mut_listaDeProgramas);
 	return _pcb;
 }
 
@@ -571,8 +623,9 @@ tcb* crearTCB(uint32_t pid, uint32_t tid){//Esto tiene que devolver un int, pero
 	list_add(procesoPadre->ults, _tcb);
 
 	//pasa a cola de new
-	list_add(estadoNew,_tcb);
-
+	sem_wait(&mut_new);
+		list_add(estadoNew,_tcb);
+	sem_post(&mut_new);
 	return _tcb;
 }
 

@@ -67,6 +67,7 @@ typedef struct{
 	int valorInicial;//Este es el valor que voy a restar/sumar cuando haga un
 	uint32_t valorMaximo;
 	t_list* colaDeBloqueo;//Es una lista que sirve para ver que procesos se bloquearon por querer waiter este semaforo
+	sem_t mut_proteccion;
 }semaforo_t;
 
 typedef enum operaciones_t{
@@ -141,7 +142,8 @@ sem_t mut_blocked;
 sem_t mut_exit;
 sem_t mut_mostrarMetricas;
 sem_t cont_multiprogramacion;
-
+sem_t mut_miSemaforo;
+sem_t mut_listaDeProgramas;
 
 /* COSAS PARA EL PLANIFICADOR -------------------------------------------------------------------------------------*/
 t_list* estadoNew;
