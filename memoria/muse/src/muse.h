@@ -203,7 +203,8 @@ s_config* configuracion;
 t_config* g_config;
 t_log* logg;
 t_log* log_metricas;
-
+int fd;
+char* path_swap;
 //SEMAFOROS
 pthread_mutex_t mutex_bitarray;
 pthread_mutex_t mutex_tabla_de_memoria;

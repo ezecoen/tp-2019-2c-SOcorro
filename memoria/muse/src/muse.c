@@ -3,7 +3,7 @@
 int main(int argc, char **argv) {
 //	INICIANDO
 	char* path_de_config = string_duplicate(argv[1]);
-	char* path_swap = string_duplicate(argv[0]);
+	path_swap = string_duplicate(argv[0]);
 	iniciar_log(path_de_config);
 	leer_config(path_de_config);
 	init_estructuras(path_swap);
@@ -142,15 +142,18 @@ void iniciar_memoria_virtual(char* path_swap){
 	free(aux);
 
 
-	int fd = open(path_swap,O_RDWR);
+	fd = open(path_swap,O_RDWR|O_CREAT,0777);
 	if(fd<0){
 		log_info(logg,"no se pudo abrir el archivo de swap");
 	}
+	ftruncate(fd,0);
+	ftruncate(fd,configuracion->tam_swap);
 	//creo que si funciona!!
-	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_PRIVATE, fd, 0);
+	swap = mmap(NULL, configuracion->tam_swap, PROT_READ|PROT_WRITE, MAP_FILE|MAP_SHARED, fd, 0);
 	if(swap == MAP_FAILED || swap == NULL){
 		perror("error: ");
 	}
+	
 }
 void init_semaforos(){
 	pthread_mutex_init(&mutex_lugar_disponible,NULL);
@@ -945,11 +948,20 @@ t_bit_memoria* buscar_0_1(){
 	return bit_nulo;
 }
 t_bit_swap* pasar_marco_a_swap(t_bit_memoria* bit){
-	void* puntero_a_marco = upcm + bit->posicion * configuracion->tam_pag;
+	char* puntero_a_marco = upcm + bit->posicion * configuracion->tam_pag;
 	t_bit_swap* bit_swap = bit_libre_memoria_virtual();
-	void* puntero_a_swap = swap + bit_swap->posicion * configuracion->tam_pag;
-	memcpy(puntero_a_swap,puntero_a_marco,configuracion->tam_pag);
+	char* puntero_a_swap = swap + bit_swap->posicion * configuracion->tam_pag;
+//	memcpy(puntero_a_swap,puntero_a_marco,configuracion->tam_pag);
+	for(int i=0;i<configuracion->tam_pag;i++){
+		puntero_a_swap[i] = puntero_a_marco[i];
+	}
+	msync(swap,configuracion->tam_swap,MS_SYNC);
+	sleep(1);
+	printf(">>>>>>>>>>>>mando algo a swap");
+	fflush(stdout);
 	bit_swap->ocupado = true;
+	//close(fd);
+	//fd = open(path_swap,O_RDWR|O_CREAT,0777);
 	return bit_swap;
 }
 void reemplazar_heap_en_memoria(heap_lista* heap_de_lista,segmento* seg,heap_metadata* nuevo_heap_metadata){
