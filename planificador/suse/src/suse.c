@@ -38,9 +38,9 @@ void mostrarMetricasDelSistema(){
 		sem_wait(&mut_mostrarMetricas);
 			log_info(metricas, "*********************MOSTRANDO METRICAS DEL SISTEMA*********************\n");
 			void mostrarValorDelSemaforo(semaforo_t* sem){
-				sem_wait(&mut_miSemaforo);
+//				sem_wait(&mut_miSemaforo);
 					log_info(metricas, "Valor actual del semaforo %s: %d", sem->id_semaforo, sem->valorInicial);
-				sem_post(&mut_miSemaforo);
+//				sem_post(&mut_miSemaforo);
 			}
 			sem_wait(&mut_listaDeSemaforos);
 				list_iterate(listaDeSemaforos,(void*)mostrarValorDelSemaforo);
@@ -127,7 +127,7 @@ void inicializarSemaforos(){
 	sem_init(&mut_blocked,0,1);
 	sem_init(&mut_exit,0,1);
 	sem_init(&mut_mostrarMetricas, 0, 1);
-	sem_init(&mut_miSemaforo,0,1);
+//	sem_init(&mut_miSemaforo,0,1);
 	sem_init(&mut_listaDeProgramas,0,1);
 	sem_init(&cont_multiprogramacion, 0, configuracion->MAX_MULTIPROG);
 
@@ -192,6 +192,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 	tcb* exec = NULL;
 	int resultado;
 	uint32_t tamanioPaquete;
+	sem_t mut_miSemaforo;
+	sem_init(&mut_miSemaforo, 0, 1);
 
 	void mostrarMetricasDelProceso(){
 
@@ -268,6 +270,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					if(exec != NULL){
 						send(cliente,&exec->t_id,4,0);
 						actualizarEstimacion(exec,timestamp());
+						sem_post(&mut_miSemaforo);
+						log_info(logg,"exe es distinto null");
 						break;
 					}else{
 //						_Bool buscarAlgunTCB(tcb* _tcb){
@@ -282,15 +286,18 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 //							send(cliente,&i,4,0);
 //						}else{
 							log_info(logg, "No hay ningun hilo en la cola de ready del proceso %d y tampoco hay un hilo en execute\n", pid);
-							int mensaje = 0;
+							int mensaje = -1;
 							send(cliente,&mensaje,4,0);
+							sem_post(&mut_miSemaforo);
 							break;
 //						}
 					}
 				}
 				//traigo el proximo a ejecutar
+				log_info(logg,"list sort");
 				list_sort(colaDeReady,(void*)ordenamientoSjf);
 				tcb* tcbAEjecutar = list_get(colaDeReady,0);
+				log_info(logg,"tcb elegico %d",tcbAEjecutar->t_id);
 				tcb* tcbAux = exec;
 				uint64_t tiempoAux;
 				//pongo al nuevo en exec y lo saco de ready
@@ -306,6 +313,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					actualizarEstimacion(tcbAux,tiempoAux);
 				}
 				//se actualiza el estimador del que salio de exec
+
+				sem_post(&mut_miSemaforo);
 
 				break;
 			case JOIN:;
@@ -444,9 +453,8 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 
 				break;
 			case WAIT:;
-
+				sem_wait(&mut_miSemaforo);
 				log_info(logg, "Recibi un wait del cliente %d (PID %d)", cliente, pid);
-
 				recv(cliente, &tamanioPaquete, 4, MSG_WAITALL);
 				tamanioPaquete -= 8;
 				void* paquete = malloc(tamanioPaquete);
@@ -460,9 +468,9 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 					semaforo_t* semWait = list_find(listaDeSemaforos, (void*)buscarSemaforoPorId);
 				sem_post(&mut_listaDeSemaforos);
 
-				sem_wait(&semWait->mut_proteccion);
-
 				if(semWait != NULL){
+
+					sem_wait(&semWait->mut_proteccion);
 
 					int a = semWait->valorInicial;
 					if(a <= 0){
@@ -470,15 +478,15 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 							list_add(estadoBlocked, exec);
 						sem_post(&mut_blocked);
 						list_add(semWait->colaDeBloqueo, exec);
-						log_info(logg, "Le resto 1 al semaforo %s y bloqueo el thread %d del proceso %d", semWait->id_semaforo, tid, pid);
+						log_info(logg, "Le resto 1 al semaforo %s y bloqueo el thread %d del proceso %d", semWait->id_semaforo, exec->t_id, exec->p_id);
 
 							semWait->valorInicial--;
 
-						//aca tengo que llamar a actualizarEstimacion(tcb, timestamp);
+						actualizarEstimacion(exec, timestamp());
 						exec = NULL;
 						//Si en la cola de Ready del proceso no hay ningun hilo significa que este hilo se quedo solo y esta en deadlock
 
-							int b = semWait->valorInicial;
+//							int b = semWait->valorInicial;
 
 //						while(b < 0){
 //							//Aca se queda esperando a que el valor del semaforo sea
@@ -487,23 +495,26 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 //							b = semWait->valorInicial;
 //							sem_post(&mut_miSemaforo);
 //						}
+						sem_post(&semWait->mut_proteccion);
 					}else{
 						log_info(logg, "Le resto 1 al semaforo %s", semWait->id_semaforo);
-
 							semWait->valorInicial--;
-
+						sem_post(&semWait->mut_proteccion);
 					}
 				}else{
 					log_info(logg, "No existe el semaforo con id %s", wait->id_semaforo);
 				}
 
-				sem_post(&semWait->mut_proteccion);
+//				sem_post(&semWait->mut_proteccion);
 
 				resultado = 0;
 				send(cliente,&resultado,4,0);
+				sem_post(&mut_miSemaforo);
 				break;
 
 			case SIGNAL:
+
+				sem_wait(&mut_miSemaforo);
 
 				log_info(logg, "Recibi un signal del cliente %d (PID %d)", cliente, pid);
 
@@ -516,22 +527,23 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 				_Bool buscarSemaforoPorIdSignal(semaforo_t* sem){
 					return strcmp(sem->id_semaforo, signal->id_semaforo) == 0;
 				}
-
+//				sem_wait(&mut_miSemaforo);
 				sem_wait(&mut_listaDeSemaforos);
 					semaforo_t* semSignal = list_find(listaDeSemaforos, (void*)buscarSemaforoPorIdSignal);
 				sem_post(&mut_listaDeSemaforos);
 
-				sem_wait(&semSignal->mut_proteccion);
+
 				if(semSignal != NULL){
+					sem_wait(&semSignal->mut_proteccion);
 
 						int a = semSignal->valorInicial;
 
-					if(a >= 0){
+					if(a > 0){
 						if(semSignal->valorInicial < semSignal->valorMaximo){
 							log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
 
 								semSignal->valorInicial++;
-
+								sem_post(&semSignal->mut_proteccion);
 						}
 					}else{
 						log_info(logg, "Le sumo 1 al semaforo %s", semSignal->id_semaforo);
@@ -556,17 +568,19 @@ void ocupateDeEste(uint32_t cliente){//Con esta funcion identifico lo que me pid
 								sem_wait(&mut_blocked);
 									list_remove_by_condition(estadoBlocked,(void*)buscar_tcb);
 								sem_post(&mut_blocked);
+								list_remove_by_condition(semSignal->colaDeBloqueo,(void*)buscar_tcb);
 								list_add(colaDeReady, ultParaMover);
 
 							}
 						}
+						sem_post(&semSignal->mut_proteccion);
 					}
 				} else {
 					log_info(logg, "No existe el semaforo con id %c", signal->id_semaforo);
 				}
-				sem_post(&semSignal->mut_proteccion);
 				int res = 0;
 				send(cliente,&res,4,0);
+//				sem_post(&mut_miSemaforo);
 				break;
 		}
 	}
