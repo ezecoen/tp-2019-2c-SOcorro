@@ -298,6 +298,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 				else{
 					pag->bit_marco = NULL;
 					pag->bit_swap = bit_libre_memoria_virtual();
+					pag->presencia = false;
 				}
 				if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 					heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
@@ -448,6 +449,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 						else{
 							pagina_nueva->bit_marco = NULL;
 							pagina_nueva->bit_swap = bit_libre_memoria_virtual();
+							pagina_nueva->presencia = false;
 						}
 						list_add(seg->paginas,pagina_nueva);
 					}
@@ -527,6 +529,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							else{
 								pagina_nueva->bit_marco = NULL;
 								pagina_nueva->bit_swap = bit_libre_memoria_virtual();
+								pagina_nueva->presencia = false;
 							}
 							list_add(ultimo_segmento->paginas,pagina_nueva);
 
@@ -648,6 +651,7 @@ if(lugar_disponible >= datos->tamanio+sizeof(heap_metadata)){
 							else{
 								pag->bit_marco = NULL;
 								pag->bit_swap = bit_libre_memoria_virtual();
+								pag->presencia = false;
 							}
 							if(i == 0){//si es la 1ra => hay que agregar el heap al inicio
 								heap_metadata* heap_nuevo = malloc(sizeof(heap_metadata));
@@ -1217,16 +1221,10 @@ void paginas_de_map_en_memoria(int direccion,int tamanio,segmento* segmento_busc
 			pagina* pag = list_get(segmento_buscado->paginas,i);
 			if(pag->bit_marco==NULL && pag->bit_swap == NULL){
 				//hay q traerla a memoria
-				if(i <= configuracion->tam_mem / configuracion->tam_pag){
-					pag->bit_marco = asignar_marco_nuevo();
-					pag->bit_marco->bit_uso = true;
-					pag->bit_marco->bit_modificado = true;
-					pag->bit_swap = NULL;
-				}
-				else{
-					pag->bit_marco = NULL;
-					pag->bit_swap = bit_libre_memoria_virtual();
-				}
+				pag->bit_marco = asignar_marco_nuevo();
+				pag->bit_marco->bit_uso = true;
+				pag->bit_marco->bit_modificado = true;
+				pag->bit_swap = NULL;
 				pag->presencia = true;
 				void* puntero_a_marco = obtener_puntero_a_marco(pag);
 
