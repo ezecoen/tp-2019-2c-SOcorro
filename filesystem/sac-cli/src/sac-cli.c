@@ -492,12 +492,19 @@ int main(int argc, char *argv[]) {
 //	system("fusermount -u fs");
 
 	/*==	Init Socket		==*/
-
+	if(argc != 2){
+		perror("falta el archivo");
+		return -1;
+	}
+	t_config* config = config_create(argv[1]);
+	char* ip = config_get_string_value(config,"IP");
+	int puerto = config_get_string_value(config,"PUERTO");
 //	Aca habria que hacer el handshake con el srv mandandole la operacion INIT_CLI
-	_socket = conectar_socket_a("127.0.0.1", 8080);
+	_socket = conectar_socket_a(ip, puerto);
 	int cod = INIT_CLI;
 	send(_socket,&cod, 4,0);
-
+	free(ip);
+	config_destroy(config);
 	struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
 
 	// Limpio la estructura que va a contener los parametros
